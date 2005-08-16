@@ -1,4 +1,4 @@
-// Microsoft Visual C++ generated resource script.
+//Microsoft Developer Studio generated resource script.
 //
 #include "resource.h"
 
@@ -26,7 +26,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 // Menu
 //
 
-MENU_MAIN MENU 
+MENU_MAIN MENU DISCARDABLE 
 BEGIN
     POPUP "File"
     BEGIN
@@ -40,6 +40,63 @@ BEGIN
     BEGIN
         MENUITEM "About OTItemEditor...",       ID_HELP_ABOUT
     END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+DLG_MAIN DIALOG DISCARDABLE  0, 0, 314, 192
+STYLE DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "OTItemEditor"
+MENU MENU_MAIN
+FONT 8, "MS Shell Dlg"
+BEGIN
+    GROUPBOX        "Settings",IDC_STATIC,139,70,97,104
+    COMBOBOX        IDC_ITEMTYPE,139,31,97,30,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_EDITOR_TREE,"SysTreeView32",WS_BORDER | 
+                    WS_TABSTOP,7,31,119,143
+    CONTROL         "",IDC_ITEM_PIC,"Static",SS_BLACKFRAME,243,31,64,64
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    DLG_MAIN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 307
+        VERTGUIDE, 139
+        VERTGUIDE, 216
+        VERTGUIDE, 236
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 185
+        HORZGUIDE, 31
+        HORZGUIDE, 174
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+DLG_MAIN DLGINIT
+BEGIN
+    IDC_ITEMTYPE, 0x403, 7, 0
+0x7247, 0x756f, 0x646e, "\000" 
+    0
 END
 
 #endif    // Neutral resources
@@ -61,18 +118,18 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE 
+1 TEXTINCLUDE MOVEABLE PURE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE 
+2 TEXTINCLUDE MOVEABLE PURE 
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE 
+3 TEXTINCLUDE MOVEABLE PURE 
 BEGIN
     "\r\n"
     "\0"
@@ -81,75 +138,6 @@ END
 #endif    // APSTUDIO_INVOKED
 
 #endif    // English (U.S.) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// Swedish resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_SVE)
-#ifdef _WIN32
-LANGUAGE LANG_SWEDISH, SUBLANG_DEFAULT
-#pragma code_page(1252)
-#endif //_WIN32
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
-DLG_MAIN DIALOGEX 0, 0, 255, 183
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
-    WS_SYSMENU
-CAPTION "OTItemEditor"
-MENU MENU_MAIN
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    GROUPBOX        "Settings",IDC_STATIC,139,65,97,104
-    COMBOBOX        IDC_ITEMTYPE,139,42,97,30,CBS_DROPDOWN | CBS_SORT | 
-                    WS_VSCROLL | WS_TABSTOP
-    CONTROL         "",IDC_EDITOR_TREE,"SysTreeView32",TVS_NOSCROLL | 
-                    WS_BORDER | WS_TABSTOP,7,43,119,126
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
-BEGIN
-    DLG_MAIN, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 248
-        VERTGUIDE, 139
-        VERTGUIDE, 216
-        VERTGUIDE, 236
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 176
-        HORZGUIDE, 43
-        HORZGUIDE, 169
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog Info
-//
-
-DLG_MAIN DLGINIT
-BEGIN
-    IDC_ITEMTYPE, 0x403, 7, 0
-0x7247, 0x756f, 0x646e, "\000" 
-    0
-END
-
-#endif    // Swedish resources
 /////////////////////////////////////////////////////////////////////////////
 
 

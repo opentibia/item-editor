@@ -30,19 +30,6 @@ enum itemgroup_t{
 	ITEM_GROUP_SPLASH
 };
 
-typedef void* InternalSprite;
-
-class Sprite
-{
-public:
-	Sprite();
-	~Sprite(){}
-
-	unsigned short id;
-	unsigned char *dump;
-	unsigned short size;
-	InternalSprite internal;
-};
 
 class ItemType
 {
@@ -61,53 +48,8 @@ public:
 	bool pickupable;
 	bool fluidcontainer;
 	bool creature;
-	
-	unsigned char height;
-	unsigned char width;
-	unsigned char blendframes;
-	unsigned char xdiv;
-	unsigned char ydiv;
-	unsigned char animcount;
-	int numsprites;
-	
-	unsigned short *imageID;
+
 };
-
-class Items
-{
-public:
-	Items();
-	~Items(){}
-	
-	bool loadFromDat(const char *filename);
-	bool loadFromSpr(const char *filename);
-	void unloadSpr();
-	void unloadDat();
-	
-	unsigned short getSpriteDump(unsigned short id, char *dump);
-	unsigned short getSpriteMapSize() { return sprite.size();}
-	unsigned short getItemMapSize() { return item.size();}
-	unsigned short getItemSpriteID(unsigned short item_id, unsigned short frame );
-	
-	InternalSprite getSpriteInternalFormat(unsigned short item_id, unsigned short frame);
-
-	const ItemType& operator[](int id);
-
-protected:
-	bool datLoaded;
-	bool sprLoaded;
-	
-	typedef std::map<unsigned short, ItemType*> ItemMap;
-	ItemMap item;
-	
-	typedef std::map<unsigned short, Sprite*> SpriteMap;
-	SpriteMap sprite;
-
-	ItemType m_dummy;
-	
-};
-
-
 
 
 #endif 

@@ -22,10 +22,11 @@
 #include "definitions.hpp"
 
 #include "item_type.hpp"
+#include "item_sprite.hpp"
 #include "gui.hpp"
 
 GUI *g_gui = NULL;
-Items *g_items = NULL;
+ItemsSprites *g_itemsSprites = NULL;
 
 #if defined WIN32 || defined __WINDOWS__
 //windows 
@@ -53,9 +54,9 @@ bool OtItemEditorApp::OnInit()
 	ASSERT( g_gui != NULL )
 	
 	//load sprites/items
-	g_items = new Items();
-	g_items->loadFromDat("tibia.dat");
-	g_items->loadFromSpr("tibia.spr");
+	g_itemsSprites = new ItemsSprites();
+	g_itemsSprites->loadFromDat("tibia.dat");
+	g_itemsSprites->loadFromSpr("tibia.spr");
 
 	if(g_gui)
 	{
@@ -69,8 +70,8 @@ bool OtItemEditorApp::OnInit()
 	*/
 #if defined WIN32 || defined __WINDOWS__
 	//unloading sprites/items
-	g_items->unloadDat();
-	g_items->unloadSpr();
+	g_itemsSprites->unloadDat();
+	g_itemsSprites->unloadSpr();
 	
 	return 0;
 #else
@@ -82,8 +83,8 @@ bool OtItemEditorApp::OnInit()
 int OtItemEditorApp::OnExit() 
 { 
 	//unloading sprites/items
-	g_items->unloadDat();
-	g_items->unloadSpr();
+	g_itemsSprites->unloadDat();
+	g_itemsSprites->unloadSpr();
 	
 	return 0;
 }

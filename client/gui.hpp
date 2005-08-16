@@ -22,6 +22,7 @@
 #define __OTITEMEDITOR_GUI_H__
 
 #include "item_type.hpp"
+#include "item_sprite.hpp"
 
 class GUI{
 protected:

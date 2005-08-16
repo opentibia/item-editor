@@ -33,7 +33,9 @@ typedef INT* INT_PTR;
 #include "commctrl.h"
 #include "../client/gui.hpp"
 #include "../client/item_type.hpp"
+#include "../client/item_sprite.hpp"
 
+class GUIDraw;
 
 class GUIWin: public GUI {
 public:
@@ -55,7 +57,32 @@ protected:
 	static HTREEITEM insterTreeItem(HWND h, char* name, HTREEITEM parent, long size, long entryID);
 	static bool onTreeCustomDraw(HWND h, NMTVCUSTOMDRAW* lParam);
 
+	static GUIDraw* drawEngine;
+
 private:
+};
+
+
+typedef std::map<unsigned long, HBITMAP> BitmapMap;
+
+class GUIDraw{
+public:
+	GUIDraw();
+	~GUIDraw();
+	bool drawSprite(HDC desthdc, long x, long y, long maxx, long maxy, unsigned long itemid, bool drawFrame = false);
+	HBITMAP getBitmap(const InternalSprite sprite);
+	void releaseBitmaps();
+
+private:
+	
+	//gdi objects
+	static HDC m_auxHDC;
+	static HBITMAP m_oldauxBMP;
+	static HBITMAP m_auxBMP;
+
+	static BitmapMap m_bitmaps;
+
+	friend GUIWin;
 };
 
 #endif

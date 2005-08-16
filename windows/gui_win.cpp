@@ -29,13 +29,17 @@
 #include "gui_win.hpp"
 
 extern HINSTANCE g_instance;
-extern Items *g_items;
+extern ItemsSprites *g_itemsSprites;
 
 #ifdef __OLDINCLUDE__
 extern "C" WINGDIAPI BOOL  WINAPI TransparentBlt(IN HDC,IN int,IN int,IN int,IN int,IN HDC,IN int,IN int,IN int,IN int,IN UINT);
 #endif
+
+GUIDraw* GUIWin::drawEngine = NULL;
+
 GUIWin::GUIWin()
 {
+	drawEngine = new GUIDraw();
 };
 
 void GUIWin::initGUI()
@@ -147,6 +151,14 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 	case WM_CLOSE:
 		EndDialog(h,NULL);
 		break;
+	case WM_PAINT:
+		//HDC desthdc, long x, long y, long maxx, long maxy, unsigned long itemid, bool drawFrame /*= false*/
+		HDC tmp;
+		tmp = GetDC(GetDlgItem(h,IDC_ITEM_PIC));
+		drawEngine->drawSprite(tmp, 34, 34, 64, 64, 1988);
+		ReleaseDC(GetDlgItem(h,IDC_ITEM_PIC),tmp);
+		return FALSE;
+		break;
 	case WM_SIZE:
 		//return onMainSize(h,wParam,lParam);
 		return TRUE;
@@ -208,3 +220,126 @@ bool GUIWin::onTreeCustomDraw(HWND h, NMTVCUSTOMDRAW* pCD)
 }
 
 
+BitmapMap GUIDraw::m_bitmaps;
+HDC GUIDraw::m_auxHDC = 0;
+HBITMAP GUIDraw::m_oldauxBMP = 0;
+HBITMAP GUIDraw::m_auxBMP = 0;
+
+GUIDraw::GUIDraw()
+{
+	HDC tmp = GetDC(NULL);
+	m_auxHDC = CreateCompatibleDC(tmp);
+	ReleaseDC(NULL,tmp);
+
+
+	m_auxBMP = CreateCompatibleBitmap(m_auxHDC,1,1);
+	m_oldauxBMP = (HBITMAP)SelectObject(m_auxHDC, m_auxBMP);
+}
+
+
+GUIDraw::~GUIDraw(){
+	releaseBitmaps();
+	SelectObject(m_auxHDC, m_oldauxBMP);
+	DeleteObject(m_auxBMP);
+	DeleteDC(m_auxHDC);
+}
+
+bool GUIDraw::drawSprite(HDC desthdc, long x, long y, long maxx, long maxy, unsigned long itemid, bool drawFrame /*= false*/)
+{
+
+	const SpriteType& it = (*g_itemsSprites)[itemid];
+
+	unsigned long spriteBase;
+	unsigned long spriteSize;
+
+	spriteSize = it.width*it.height*it.blendframes;
+	spriteBase = 0;
+	
+	//draw sprite
+	for(long frame = 0; frame < it.blendframes; frame++) {
+		for(long cy = 0; cy < it.height; cy++) {
+			for(long cx = 0; cx < it.width; cx++) {
+				unsigned long frameindex = spriteBase + cx + cy*it.width + frame*it.width*it.height;
+				InternalSprite sprite = g_itemsSprites->getSpriteInternalFormat(itemid,frameindex);
+				HBITMAP itembmp = getBitmap(sprite);
+				if(sprite){
+					SelectObject(m_auxHDC,itembmp);
+					if(x - cx*32 >= 0 && y - cy*32 >= 0){
+						long x_draw = max(x - cx*32,0);
+						long y_draw = max(y - cy*32,0);
+						long w_draw = min(32 ,maxx - x + cx*32);
+						long h_draw = min(32 ,maxy - y + cy*32);
+						TransparentBlt(desthdc,x_draw,y_draw,w_draw, h_draw, m_auxHDC,0,0,w_draw,h_draw,0x111111);
+					}
+				}
+			}
+		}
+	}
+	if(drawFrame){
+		RECT rect;
+		rect.top = y;
+		rect.bottom = y + 32;
+		rect.left =  x;
+		rect.right = x + 32;
+		HBRUSH white_brush = (HBRUSH)GetStockObject(WHITE_BRUSH);
+		FrameRect(desthdc, &rect, white_brush);
+	}
+	SelectObject(m_auxHDC, m_auxBMP);
+	return true;
+}
+
+
+HBITMAP GUIDraw::getBitmap(const InternalSprite sprite)
+{
+	BITMAPINFO binfo;
+	HDC hdc;
+	void * dest;
+
+	BitmapMap::iterator it = m_bitmaps.find((unsigned long)sprite);
+	
+	if(it != m_bitmaps.end())
+	{
+		return it->second;
+	}
+	else 
+	{
+		hdc = CreateCompatibleDC(NULL);
+
+		memset(&binfo,0,sizeof(BITMAPINFO));
+		binfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+		binfo.bmiHeader.biWidth = 32;
+		binfo.bmiHeader.biHeight = 32;
+		binfo.bmiHeader.biPlanes = 1;
+		binfo.bmiHeader.biBitCount = 32;
+		binfo.bmiHeader.biSizeImage = 32*32*4;
+		binfo.bmiHeader.biCompression = BI_RGB;
+	
+
+		HBITMAP bitmap = CreateDIBSection(hdc, &binfo, DIB_RGB_COLORS, &dest, NULL,0);
+
+		ASSERT(dest != NULL && bitmap != 0);
+		if(dest){
+			if(sprite){
+				memcpy(dest, sprite, 32*32*4);
+			}
+			else{
+				memset(dest, 0, 32*32*4);
+			}
+		}
+
+		DeleteDC(hdc);
+		m_bitmaps[(unsigned long)sprite] = bitmap;
+		return bitmap;
+	}
+}
+
+void GUIDraw::releaseBitmaps()
+{
+	BitmapMap::iterator it;
+	for(it = m_bitmaps.begin(); it != m_bitmaps.end();)
+	{
+		DeleteObject(it->second);
+		it = m_bitmaps.erase(it);
+	}
+
+}
