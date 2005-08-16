@@ -26,7 +26,6 @@
 #include "gui.hpp"
 #include <iostream>
 
-
 extern GUI *g_gui;
 
 Sprite::Sprite()

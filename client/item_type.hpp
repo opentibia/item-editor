@@ -23,6 +23,13 @@
 
 #include <map>
 
+enum itemgroup_t{
+	ITEM_GROUP_NONE,
+	ITEM_GROUP_GROUND,
+	ITEM_GROUP_CONTAINER,
+	ITEM_GROUP_SPLASH
+};
+
 typedef void* InternalSprite;
 
 class Sprite

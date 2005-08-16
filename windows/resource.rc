@@ -13,6 +13,40 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
+// Neutral resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
+#ifdef _WIN32
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+MENU_MAIN MENU 
+BEGIN
+    POPUP "File"
+    BEGIN
+        MENUITEM "Import .xml",                 ID_FILE_IMPORTXML
+        MENUITEM "Import .dat",                 ID_FILE_IMPORTDAT
+        MENUITEM "Save as...",                  ID_FILE_SAVEAS
+        MENUITEM SEPARATOR
+        MENUITEM "Exit",                        ID_FILE_EXIT
+    END
+    POPUP "Help"
+    BEGIN
+        MENUITEM "About OTItemEditor...",       ID_HELP_ABOUT
+    END
+END
+
+#endif    // Neutral resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
 // English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
@@ -64,14 +98,18 @@ LANGUAGE LANG_SWEDISH, SUBLANG_DEFAULT
 // Dialog
 //
 
-DLG_MAIN DIALOGEX 0, 0, 290, 199
+DLG_MAIN DIALOGEX 0, 0, 255, 183
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "OTItemEditor"
+MENU MENU_MAIN
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,233,7,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,233,24,50,14
+    GROUPBOX        "Settings",IDC_STATIC,139,65,97,104
+    COMBOBOX        IDC_ITEMTYPE,139,42,97,30,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_EDITOR_TREE,"SysTreeView32",TVS_NOSCROLL | 
+                    WS_BORDER | WS_TABSTOP,7,43,119,126
 END
 
 
@@ -86,12 +124,30 @@ BEGIN
     DLG_MAIN, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 283
+        RIGHTMARGIN, 248
+        VERTGUIDE, 139
+        VERTGUIDE, 216
+        VERTGUIDE, 236
         TOPMARGIN, 7
-        BOTTOMMARGIN, 192
+        BOTTOMMARGIN, 176
+        HORZGUIDE, 43
+        HORZGUIDE, 169
     END
 END
 #endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+DLG_MAIN DLGINIT
+BEGIN
+    IDC_ITEMTYPE, 0x403, 7, 0
+0x7247, 0x756f, 0x646e, "\000" 
+    0
+END
 
 #endif    // Swedish resources
 /////////////////////////////////////////////////////////////////////////////

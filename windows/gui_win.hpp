@@ -32,6 +32,7 @@ typedef INT* INT_PTR;
 
 #include "commctrl.h"
 #include "../client/gui.hpp"
+#include "../client/item_type.hpp"
 
 
 class GUIWin: public GUI {
@@ -45,6 +46,14 @@ public:
 
 protected:
 	static LRESULT CALLBACK DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lParam);
+	
+	//static bool drawSprite(HDC desthdc, long x, long y, long maxx, long maxy, unsigned long itemid, unsigned long count, bool drawFrame /*= false*/, bool animation /*=false*/);
+	//static bool drawItem(HDC desthdc, long x, long y, long maxx, long maxy, ItemBase* item, bool drawFrame /*=false*/,bool animation /*=false*/);
+
+	//treeview
+	static void createEditorTree(HWND htree);
+	static HTREEITEM insterTreeItem(HWND h, char* name, HTREEITEM parent, long size, long entryID);
+	static bool onTreeCustomDraw(HWND h, NMTVCUSTOMDRAW* lParam);
 
 private:
 };

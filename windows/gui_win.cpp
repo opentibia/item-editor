@@ -46,14 +46,7 @@ void GUIWin::initGUI()
 	InitCommonControlsEx(&icc);
 
 	//InitCommonControls();
-	INT_PTR val =DialogBoxParam(g_instance,MAKEINTRESOURCE(DLG_MAIN),NULL,reinterpret_cast<DLGPROC>(GUIWin::DlgProcMain),NULL);
-	if(val == -1) {
-		DWORD err = GetLastError();
-		if(err == -1)
-			return;
-	}
-
-	return;
+	DialogBoxParam(g_instance,MAKEINTRESOURCE(DLG_MAIN),NULL,reinterpret_cast<DLGPROC>(GUIWin::DlgProcMain),NULL);
 }
 
 bool GUIWin::loadSpriteInternal(const unsigned char *dump, const unsigned long size, InternalSprite *sprite)
@@ -126,6 +119,7 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 	switch (Msg)
 	{
 	case WM_INITDIALOG:
+		createEditorTree(GetDlgItem(h, IDC_EDITOR_TREE));
 		return TRUE;
 		break;
 	case WM_MOUSEMOVE:
@@ -136,6 +130,18 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 		//return onMainMouseLDown(h,wParam,lParam);
 		break;
 	case WM_NOTIFY:
+		if(LOWORD(wParam) == IDC_EDITOR_TREE){
+			switch(((NMHDR*)lParam)->code){
+			case NM_CUSTOMDRAW:
+				return onTreeCustomDraw(h, (NMTVCUSTOMDRAW*)lParam);
+			case TVN_SELCHANGING:
+				//return onTreeSelChange(h, (NMTREEVIEW*)lParam);
+				break;
+			case TVN_ITEMEXPANDED:
+				//return onTreeExpand(h, (NMTREEVIEW*)lParam);
+				break;
+			}
+		}
 		return TRUE;
 		break;
 	case WM_CLOSE:
@@ -148,4 +154,57 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 	}
 	return FALSE;
 }
+
+void GUIWin::createEditorTree(HWND htree)
+{
+	long item_height;
+	long entry_size;
+	HTREEITEM root;
+
+	item_height = SendMessage(htree, TVM_GETITEMHEIGHT, 0, 0);
+	entry_size = 32/item_height+1;
+
+	root = insterTreeItem(htree, "Ground", NULL, 1, ITEM_GROUP_GROUND);
+	root = insterTreeItem(htree, "Container", NULL, 1, ITEM_GROUP_CONTAINER);
+	root = insterTreeItem(htree, "Splash", NULL, 1, ITEM_GROUP_SPLASH);
+	root = insterTreeItem(htree, "Other", NULL, 1, ITEM_GROUP_NONE);
+}
+
+HTREEITEM GUIWin::insterTreeItem(HWND h, char* name, HTREEITEM parent, long size, long entryID)
+{
+	TVINSERTSTRUCT itemstruct;
+	itemstruct.hParent = parent;
+	itemstruct.hInsertAfter = TVI_LAST;
+	itemstruct.itemex.mask = TVIF_TEXT | TVIF_INTEGRAL | TVIF_PARAM;
+	itemstruct.itemex.pszText = name;
+	itemstruct.itemex.iIntegral = size;
+	itemstruct.itemex.lParam = entryID;
+	itemstruct.itemex.cchTextMax = strlen(name);
+	return (HTREEITEM)SendMessage(h, TVM_INSERTITEM, 0, (long)&itemstruct); 
+}
+
+bool GUIWin::onTreeCustomDraw(HWND h, NMTVCUSTOMDRAW* pCD)
+{
+	if(pCD->nmcd.dwDrawStage == CDDS_PREPAINT){
+		SetWindowLong(h, DWL_MSGRESULT, CDRF_NOTIFYITEMDRAW );
+		return TRUE;
+	}
+	else if(pCD->nmcd.dwDrawStage == CDDS_ITEMPREPAINT){
+		SetWindowLong(h, DWL_MSGRESULT, CDRF_NOTIFYPOSTPAINT );
+		return TRUE;
+	}
+	else if(pCD->nmcd.dwDrawStage == CDDS_ITEMPOSTPAINT){
+		/*
+		if(pCD->nmcd.lItemlParam > ITEM_GROUP_GROUND_LAST ){
+			//paint item
+			long center_y = (pCD->nmcd.rc.bottom + pCD->nmcd.rc.top - 32)/2;
+			long center_x = pCD->nmcd.rc.right - 32 - 16;
+			//drawItem(pCD->nmcd.hdc, center_x, center_y , pCD->nmcd.rc.right, pCD->nmcd.rc.bottom, (ItemBase*)pCD->nmcd.lItemlParam);
+		}
+		*/
+		return TRUE;
+	}
+	return FALSE;
+}
+
 
