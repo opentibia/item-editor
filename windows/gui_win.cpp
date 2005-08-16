@@ -156,6 +156,7 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 		HDC tmp;
 		tmp = GetDC(GetDlgItem(h,IDC_ITEM_PIC));
 		drawEngine->drawSprite(tmp, 34, 34, 64, 64, 1988);
+		drawEngine->releaseBitmaps();
 		ReleaseDC(GetDlgItem(h,IDC_ITEM_PIC),tmp);
 		return FALSE;
 		break;
