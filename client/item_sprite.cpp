@@ -410,6 +410,3 @@ const SpriteType& ItemsSprites::operator[](int id)
 	   
 	return m_dummy;
 }
-
-
-

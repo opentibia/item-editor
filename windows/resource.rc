@@ -1,4 +1,4 @@
-//Microsoft Developer Studio generated resource script.
+// Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
 
@@ -26,7 +26,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 // Menu
 //
 
-MENU_MAIN MENU DISCARDABLE 
+MENU_MAIN MENU 
 BEGIN
     POPUP "File"
     BEGIN
@@ -48,18 +48,28 @@ END
 // Dialog
 //
 
-DLG_MAIN DIALOG DISCARDABLE  0, 0, 314, 192
-STYLE DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+DLG_MAIN DIALOGEX 0, 0, 332, 191
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
 CAPTION "OTItemEditor"
 MENU MENU_MAIN
-FONT 8, "MS Shell Dlg"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "Settings",IDC_STATIC,139,70,97,104
-    COMBOBOX        IDC_ITEMTYPE,139,31,97,30,CBS_DROPDOWN | CBS_SORT | 
-                    WS_VSCROLL | WS_TABSTOP
     CONTROL         "",IDC_EDITOR_TREE,"SysTreeView32",WS_BORDER | 
-                    WS_TABSTOP,7,31,119,143
-    CONTROL         "",IDC_ITEM_PIC,"Static",SS_BLACKFRAME,243,31,64,64
+                    WS_TABSTOP,7,14,119,160
+    GROUPBOX        "Settings",IDC_STATIC,138,14,187,160
+    CONTROL         "",IDC_ITEM_PIC,"Static",SS_BLACKFRAME,145,26,50,42
+    LTEXT           "Name:",IDC_STATIC,204,28,22,8
+    EDITTEXT        IDC_EDITNAME,204,40,113,14,ES_AUTOHSCROLL
+    LTEXT           "Description:",IDC_STATIC,204,56,39,8
+    LTEXT           "sid:",IDC_STATIC,144,70,12,8
+    LTEXT           "10000",IDC_SID,159,70,21,8
+    EDITTEXT        IDC_EDITDESCR,204,68,113,14,ES_AUTOHSCROLL
+    LTEXT           "cid:",IDC_STATIC,144,84,12,8
+    EDITTEXT        IDC_EDITCID,159,82,36,14,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "",IDC_SPINCID,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_AUTOBUDDY | UDS_ARROWKEYS,184,82,11,14
+    GROUPBOX        "Options:",IDC_STATIC,144,105,173,59
 END
 
 
@@ -69,35 +79,31 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE 
+GUIDELINES DESIGNINFO 
 BEGIN
     DLG_MAIN, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 307
-        VERTGUIDE, 139
-        VERTGUIDE, 216
-        VERTGUIDE, 236
+        RIGHTMARGIN, 325
+        VERTGUIDE, 144
+        VERTGUIDE, 159
+        VERTGUIDE, 195
+        VERTGUIDE, 204
+        VERTGUIDE, 317
         TOPMARGIN, 7
-        BOTTOMMARGIN, 185
-        HORZGUIDE, 31
+        BOTTOMMARGIN, 184
+        HORZGUIDE, 26
+        HORZGUIDE, 40
+        HORZGUIDE, 54
+        HORZGUIDE, 68
+        HORZGUIDE, 82
+        HORZGUIDE, 96
+        HORZGUIDE, 105
+        HORZGUIDE, 164
         HORZGUIDE, 174
     END
 END
 #endif    // APSTUDIO_INVOKED
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog Info
-//
-
-DLG_MAIN DLGINIT
-BEGIN
-    IDC_ITEMTYPE, 0x403, 7, 0
-0x7247, 0x756f, 0x646e, "\000" 
-    0
-END
 
 #endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
@@ -118,18 +124,18 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE MOVEABLE PURE 
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE MOVEABLE PURE 
+2 TEXTINCLUDE 
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE MOVEABLE PURE 
+3 TEXTINCLUDE 
 BEGIN
     "\r\n"
     "\0"

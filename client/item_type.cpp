@@ -39,4 +39,3 @@ ItemType::ItemType()
 	creature	= false;
 	
 }
-

@@ -155,8 +155,20 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 		//HDC desthdc, long x, long y, long maxx, long maxy, unsigned long itemid, bool drawFrame /*= false*/
 		HDC tmp;
 		tmp = GetDC(GetDlgItem(h,IDC_ITEM_PIC));
-		drawEngine->drawSprite(tmp, 34, 34, 64, 64, 1988);
+
+		HWND hwnd;
+		hwnd = GetDlgItem(h, IDC_ITEM_PIC);
+		RECT rect;
+		GetWindowRect(hwnd, &rect);
+
+		POINT p;
+		p.x = rect.left;
+		p.y = rect.top;
+		ScreenToClient(hwnd, &p);
+
+		drawEngine->drawSprite(tmp, p.x, p.y, p.x + 64, p.y + 64, 1988);
 		drawEngine->releaseBitmaps();
+
 		ReleaseDC(GetDlgItem(h,IDC_ITEM_PIC),tmp);
 		return FALSE;
 		break;
