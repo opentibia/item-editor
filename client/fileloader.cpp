@@ -23,9 +23,9 @@
 FileLoader::FileLoader()
 {
 	m_file = NULL;
-	buffer = new unsigned char[1024];
-	buffer_size = 1024;
-	lastError = ERROR_NONE;
+	m_buffer = new unsigned char[1024];
+	m_buffer_size = 1024;
+	m_lastError = ERROR_NONE;
 }
 
 
@@ -36,7 +36,7 @@ FileLoader::~FileLoader()
 		m_file = NULL;
 	}
 
-	delete[] buffer;
+	delete[] m_buffer;
 }
 
 
@@ -48,7 +48,7 @@ bool FileLoader::openFile(const char* filename)
 		fread(&version, sizeof(unsigned long), 1, m_file);
 		if(version > 0){
 			fclose(m_file);
-			lastError = ERROR_INVALID_FILE_VERSION;
+			m_lastError = ERROR_INVALID_FILE_VERSION;
 			return false;
 		}
 		else{
@@ -56,7 +56,7 @@ bool FileLoader::openFile(const char* filename)
 		}
 	}
 	else{
-		lastError = ERROR_CAN_NOT_OPEN;
+		m_lastError = ERROR_CAN_NOT_OPEN;
 		return false;
 	}
 }
@@ -75,7 +75,7 @@ const unsigned char* FileLoader::getProps(const NODE node, unsigned long &size)
 		return NULL;
 
 	if(byte != NODE_START){
-		lastError = ERROR_INVALID_FORMAT;
+		m_lastError = ERROR_INVALID_FORMAT;
 		return NULL;
 	}
 	//read node type
@@ -93,19 +93,19 @@ const unsigned char* FileLoader::getProps(const NODE node, unsigned long &size)
 			if(!readByte(byte))
 				return NULL;
 		}
-		if(position >= buffer_size){
-			unsigned char *tmp = new unsigned char[buffer_size+1024];
-			memcpy(tmp, buffer, buffer_size);
-			buffer_size = buffer_size + 1024;
-			delete buffer;
-			buffer = tmp;
+		if(position >= m_buffer_size){
+			unsigned char *tmp = new unsigned char[m_buffer_size+1024];
+			memcpy(tmp, m_buffer, m_buffer_size);
+			m_buffer_size = m_buffer_size + 1024;
+			delete m_buffer;
+			m_buffer = tmp;
 		}
-		buffer[position] = byte;
+		m_buffer[position] = byte;
 		position++;
 	}
 	size = position;
 
-	return buffer;
+	return m_buffer;
 }
 
 const NODE FileLoader::getChildNode(const NODE parent, unsigned long &type)
@@ -130,7 +130,7 @@ const NODE FileLoader::getChildNode(const NODE parent, unsigned long &type)
 		return NO_NODE;
 
 	if(byte != NODE_START){
-		lastError = ERROR_INVALID_FORMAT;
+		m_lastError = ERROR_INVALID_FORMAT;
 		return NO_NODE;
 	}
 
@@ -194,7 +194,7 @@ const NODE FileLoader::getNextNode(const NODE prev, unsigned long &type)
 		return NO_NODE;
 
 	if(byte != NODE_START){
-		lastError = ERROR_INVALID_FORMAT;
+		m_lastError = ERROR_INVALID_FORMAT;
 		return NO_NODE;
 	}
 	if(!readByte(byte))
@@ -213,7 +213,7 @@ const NODE FileLoader::getNextNode(const NODE prev, unsigned long &type)
 					return NO_NODE;
 				
 				if(byte != NODE_START){
-					lastError = ERROR_INVALID_FORMAT;
+					m_lastError = ERROR_INVALID_FORMAT;
 					return NO_NODE;
 				}
 				else{
@@ -246,7 +246,7 @@ inline bool FileLoader::readByte(int &value)
 {
 	value = fgetc(m_file);
 	if(value == EOF){
-		lastError = ERROR_EOF;
+		m_lastError = ERROR_EOF;
 		return false;
 	}
 	else
@@ -256,11 +256,11 @@ inline bool FileLoader::readByte(int &value)
 inline bool FileLoader::checks(const NODE node)
 {
 	if(!m_file){
-		lastError = ERROR_NOT_OPEN;
+		m_lastError = ERROR_NOT_OPEN;
 		return false;
 	}
 	if(!node){
-		lastError = ERROR_INVALID_NODE;
+		m_lastError = ERROR_INVALID_NODE;
 		return false;
 	}
 
@@ -270,7 +270,7 @@ inline bool FileLoader::checks(const NODE node)
 inline bool FileLoader::safeSeek(unsigned long pos){
 
 	if(fseek(m_file, pos, SEEK_SET)){
-		lastError = ERROR_SEEK_ERROR;
+		m_lastError = ERROR_SEEK_ERROR;
 		return false;
 	}
 	return true;
@@ -282,7 +282,7 @@ inline bool FileLoader::safeTell(long &pos){
 
 	pos = ftell(m_file);
 	if(pos == -1){
-		lastError = ERROR_TELL_ERROR;
+		m_lastError = ERROR_TELL_ERROR;
 		return false;
 	}
 	else{

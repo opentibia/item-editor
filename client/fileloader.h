@@ -28,7 +28,7 @@ typedef unsigned long NODE;
 
 #define NO_NODE NULL;
 
-enum t_FILELOADER_ERRORS{
+enum FILELOADER_ERRORS{
 	ERROR_NONE,
 	ERROR_INVALID_FILE_VERSION,
 	ERROR_CAN_NOT_OPEN,
@@ -52,23 +52,24 @@ public:
 	const NODE getChildNode(const NODE parent, unsigned long &type);
 	const NODE getNextNode(const NODE prev, unsigned long &type);
 
-	int getError(){return lastError;}
-	void clearError(){lastError = ERROR_NONE;}
+	int getError(){return m_lastError;}
+	void clearError(){m_lastError = ERROR_NONE;}
 
 private:
-	enum t_SPECIAL_BYTES{
+	enum SPECIAL_BYTES{
 		NODE_START = 0xFE,
 		NODE_END = 0xFF,
 		ESCAPE_CHAR = 0xFD,
 	};
+
 	inline bool readByte(int &value);
 	inline bool checks(const NODE node);
 	inline bool safeSeek(unsigned long pos);
 	inline bool safeTell(long &pos);
 	FILE *m_file;
-	t_FILELOADER_ERRORS lastError;
-	unsigned long buffer_size;
-	unsigned char *buffer;
+	FILELOADER_ERRORS m_lastError;
+	unsigned long m_buffer_size;
+	unsigned char *m_buffer;
 };
 
 #endif
