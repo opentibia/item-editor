@@ -37,6 +37,10 @@ extern "C" WINGDIAPI BOOL  WINAPI TransparentBlt(IN HDC,IN int,IN int,IN int,IN 
 
 GUIDraw* GUIWin::drawEngine = NULL;
 long GUIWin::curItemClientId = 0;
+long GUIWin::curItemServerId = 0;
+bool GUIWin::m_dragging = false;
+HWND GUIWin::m_hwndTree = 0;
+HTREEITEM GUIWin::m_dragItem = NULL;
 
 GUIWin::GUIWin()
 {
@@ -148,29 +152,27 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 	case WM_INITDIALOG:
 		return onInitDialog(h);
 		break;
-	case WM_MOUSEMOVE:
-		//return onMainMouseMove(h,wParam,lParam);
-		return TRUE;
-		break;
-	case WM_LBUTTONDOWN:
-		//return onMainMouseLDown(h,wParam,lParam);
-		break;
 	case WM_NOTIFY:
 		if(LOWORD(wParam) == IDC_EDITOR_TREE){
 			switch(((NMHDR*)lParam)->code){
-			case NM_CUSTOMDRAW:
-				//return onTreeCustomDraw(h, (NMTVCUSTOMDRAW*)lParam);
 			case TVN_SELCHANGING:
-				//return onTreeSelChange(h, (NMTREEVIEW*)lParam);
+				return onTreeSelChange(h, (NMTREEVIEW*)lParam);
 				break;
-			case TVN_ITEMEXPANDED:
-				//return onTreeExpand(h, (NMTREEVIEW*)lParam);
+			case TVN_BEGINDRAG:
+				return onDragBegin(h, (NMTREEVIEW*)lParam);
 				break;
 			}
 		}
-		return TRUE;
 		break;
-	case WM_COMMAND:
+	case WM_MOUSEMOVE:
+		if(m_dragging){
+			return onDragMove(h, lParam);
+		}
+		break;
+	case WM_LBUTTONUP:
+		if(m_dragging){
+			return onDragEnd();
+		}
 		break;
 	case WM_VSCROLL:
 		return onSpinScroll(h, (HWND)lParam);
@@ -194,33 +196,199 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 		ReleaseDC(GetDlgItem(h,IDC_ITEM_PIC),tmp);
 		return FALSE;
 		break;
-	case WM_SIZE:
-		//return onMainSize(h,wParam,lParam);
-		return TRUE;
+	case WM_COMMAND:
+		if((wParam & 0xFFFF0000 >> 16) == IDC_EDITCID){
+			if((wParam & 0xFFFF0000) >> 16 == EN_CHANGE){
+				return onClientIdChange(h, (HWND)lParam);
+			}
+		}
 		break;
 	}
 	return FALSE;
 }
 
-
-bool GUIWin::onInitDialog(HWND h)
+bool GUIWin::onDragBegin(HWND h, NMTREEVIEW* nmTree)
 {
-	createItemsTree(GetDlgItem(h, IDC_EDITOR_TREE));
-
-	SendMessage(GetDlgItem(h, IDC_SPINCID),UDM_SETRANGE,0,MAKELONG((short) SpriteType::maxClientId, (short)SpriteType::minClientId));
-
-	char *a = "test 1";
-	SendMessage(GetDlgItem(h, IDC_COMBO_FLOOR),CB_ADDSTRING, 0, (long)a);
-	char *b = "test 2";
-	SendMessage(GetDlgItem(h, IDC_COMBO_FLOOR),CB_ADDSTRING, 0, (long)b);
-	SendMessage(GetDlgItem(h, IDC_COMBO_FLOOR),CB_ADDSTRING, 0, (long)b);
-
-	//EnableWindow(GetDlgItem(h, IDC_SPINCID),false);
-	//EnableWindow(GetDlgItem(h, IDC_EDITCID),false);
+	long id = nmTree->itemNew.lParam;
+	if(id > 100){
+		m_dragItem = nmTree->itemNew.hItem;
+		m_dragging = true;
+		SetCapture(h);
+	}
 	return TRUE;
 }
 
-void GUIWin::createItemsTree(HWND htree)
+bool GUIWin::onDragMove(HWND h, LPARAM lParam)
+{
+	HTREEITEM hitTarget;
+	TVHITTESTINFO tvht;
+	TV_ITEM itemInfo;
+	tvht.pt.x = lParam & 0xFFFF; 
+	tvht.pt.y = (lParam & 0xFFFF0000) >> 16;
+	tvht.flags = TVHT_ONITEM;
+	ClientToScreen(h, &tvht.pt);
+	ScreenToClient(m_hwndTree, &tvht.pt);
+	if((hitTarget = TreeView_HitTest(m_hwndTree, &tvht)) != NULL){
+		itemInfo.mask = TVIF_HANDLE;
+		itemInfo.hItem = hitTarget;
+		TreeView_GetItem(m_hwndTree, &itemInfo);
+		if(itemInfo.lParam < 100)
+			TreeView_SelectDropTarget(m_hwndTree, hitTarget);
+	} 
+	return TRUE;
+}
+
+bool GUIWin::onDragEnd()
+{
+	TV_ITEM itemInfo;
+	char *buffer;
+	long id;
+	HTREEITEM hitTarget = TreeView_GetDropHilight(m_hwndTree);
+	if(hitTarget){
+		TreeView_SelectDropTarget(m_hwndTree, NULL);
+		//change parent
+		itemInfo.mask = TVIF_TEXT | TVIF_PARAM;
+		itemInfo.hItem = m_dragItem;
+		buffer = new char[128];
+		itemInfo.pszText = buffer;
+		itemInfo.cchTextMax = 128;
+		TreeView_GetItem(m_hwndTree, &itemInfo);
+		id = itemInfo.lParam;
+		insterTreeItem(m_hwndTree, itemInfo.pszText, hitTarget, itemInfo.lParam);
+		TreeView_DeleteItem(m_hwndTree, m_dragItem);
+		TreeView_SortChildren(m_hwndTree, hitTarget, 0);
+		delete buffer;
+		//update type
+		itemInfo.mask = TVIF_PARAM;
+		itemInfo.hItem = hitTarget;
+		TreeView_GetItem(m_hwndTree, &itemInfo);
+		//updateType(id, itemInfo.lParam);
+		if(id == curItemServerId){
+			saveCurrentItem();
+			loadItem();
+			updateControls();
+		}
+	}
+	m_dragging = false;
+	m_dragItem = NULL;
+	ReleaseCapture();
+	return TRUE;
+}
+
+bool GUIWin::onTreeSelChange(HWND h, NMTREEVIEW* nmTree)
+{
+	saveCurrentItem();
+
+	if(nmTree->itemNew.lParam >= 100){
+		curItemServerId = nmTree->itemNew.lParam;
+	}
+	else{
+		curItemServerId = 0;
+	}
+
+	loadItem();
+	updateControls();
+
+	return true;
+}
+
+bool GUIWin::onClientIdChange(HWND h, HWND hEdit)
+{
+	char *tmp;
+	long new_id;
+	long len = SendMessage(hEdit, WM_GETTEXTLENGTH, 0, 0);
+	tmp = new char[len+1];
+	SendMessage(hEdit, WM_GETTEXT , len, (LPARAM)tmp);
+	if(sscanf(tmp, "%d", &new_id) == 1){
+		if(new_id <= SpriteType::maxClientId && new_id >= SpriteType::minClientId){
+			curItemClientId = new_id;
+		}
+		else{
+			curItemClientId = 0;
+		}
+		invalidateSprite(h);
+	}
+	delete tmp;
+	return true;
+}
+
+
+bool GUIWin::onInitDialog(HWND h)
+{
+
+	m_hwndTree = GetDlgItem(h, IDC_EDITOR_TREE);
+	createGroupsTree(m_hwndTree);
+
+	SendMessage(GetDlgItem(h, IDC_SPINCID),UDM_SETRANGE,0,MAKELONG((short) SpriteType::maxClientId, (short)SpriteType::minClientId));
+
+	//floor change
+	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "No change", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Down", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up North", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up South", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up East", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up West", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up NE", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up NW", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up SW", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up SE", 0);
+
+	//slot
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Default", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Head", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Body", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Legs", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Backpack", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "weapon", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Wwo hand", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Boots", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Amulet", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Ring", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Hand", 0);
+
+	//skills
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "Sword", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "Club", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "Axe", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "Shield", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "Distance", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "Magic", 0);
+
+	//amu
+	createItemCombo(GetDlgItem(h, IDC_COMBO_AMU), "None", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_AMU), "Bolt", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_AMU), "Arrow", 0);
+
+	//shoot
+	SendMessage(GetDlgItem(h, IDC_COMBO_SHOOT), CB_SETDROPPEDWIDTH, 96, 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "None", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Throwing Star", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Throwing Knife", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Small Stone", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Sudden Death", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Large Rock", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Snowball", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Spear", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Fire", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Energy", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Bolt", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Power Bolt", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Arrow", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Poison Arrow", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Burst Arrow", 0);
+
+	updateControls();
+	
+	return TRUE;
+}
+
+void GUIWin::createItemCombo(HWND hcombo, char* name, long value)
+{
+	long index = SendMessage(hcombo,CB_ADDSTRING, 0, (long)name);
+	SendMessage(hcombo, CB_SETITEMDATA, index, value);
+}
+
+void GUIWin::createGroupsTree(HWND htree)
 {
 	long item_height;
 	long entry_size;
@@ -229,20 +397,21 @@ void GUIWin::createItemsTree(HWND htree)
 	item_height = SendMessage(htree, TVM_GETITEMHEIGHT, 0, 0);
 	entry_size = 32/item_height+1;
 
-	root = insterTreeItem(htree, "Ground", NULL, 1, ITEM_GROUP_GROUND);
-	root = insterTreeItem(htree, "Container", NULL, 1, ITEM_GROUP_CONTAINER);
-	root = insterTreeItem(htree, "Splash", NULL, 1, ITEM_GROUP_SPLASH);
-	root = insterTreeItem(htree, "Other", NULL, 1, ITEM_GROUP_NONE);
+	root = insterTreeItem(htree, "Ground", NULL, ITEM_GROUP_GROUND);
+	insterTreeItem(htree, "Container 1", root, 1988);
+	insterTreeItem(htree, "Container 2", root,  1987);
+	root = insterTreeItem(htree, "Container", NULL,  ITEM_GROUP_CONTAINER);
+	root = insterTreeItem(htree, "Splash", NULL, ITEM_GROUP_SPLASH);
+	root = insterTreeItem(htree, "Other", NULL, ITEM_GROUP_NONE);
 }
 
-HTREEITEM GUIWin::insterTreeItem(HWND h, char* name, HTREEITEM parent, long size, long entryID)
+HTREEITEM GUIWin::insterTreeItem(HWND h, char* name, HTREEITEM parent, long entryID)
 {
 	TVINSERTSTRUCT itemstruct;
 	itemstruct.hParent = parent;
 	itemstruct.hInsertAfter = TVI_LAST;
-	itemstruct.itemex.mask = TVIF_TEXT | TVIF_INTEGRAL | TVIF_PARAM;
+	itemstruct.itemex.mask = TVIF_TEXT | TVIF_PARAM;
 	itemstruct.itemex.pszText = name;
-	itemstruct.itemex.iIntegral = size;
 	itemstruct.itemex.lParam = entryID;
 	itemstruct.itemex.cchTextMax = strlen(name);
 	return (HTREEITEM)SendMessage(h, TVM_INSERTITEM, 0, (long)&itemstruct); 
@@ -252,6 +421,11 @@ bool GUIWin::onSpinScroll(HWND h, HWND spin)
 {
 	long pos = SendMessage(spin,UDM_GETPOS, 0,0);
 	curItemClientId = pos;
+	return true;
+}
+
+void GUIWin::invalidateSprite(HWND h)
+{
 	HWND hwnd = GetDlgItem(h, IDC_ITEM_PIC);
 	RECT rect;
 	GetWindowRect(hwnd, &rect);
@@ -261,7 +435,6 @@ bool GUIWin::onSpinScroll(HWND h, HWND spin)
 	ScreenToClient(h, &pt);
 	rect.right = pt.x;
 	rect.bottom = pt.y;
-	
 	pt.x = rect.left;
 	pt.y = rect.top;
 	ScreenToClient(h, &pt);
@@ -269,35 +442,43 @@ bool GUIWin::onSpinScroll(HWND h, HWND spin)
 	rect.top = pt.y;
 
 	InvalidateRect(h, &rect, false);
-	return true;
 }
 
-/*
-bool GUIWin::onTreeCustomDraw(HWND h, NMTVCUSTOMDRAW* pCD)
+void GUIWin::saveCurrentItem()
 {
-	if(pCD->nmcd.dwDrawStage == CDDS_PREPAINT){
-		SetWindowLong(h, DWL_MSGRESULT, CDRF_NOTIFYITEMDRAW );
-		return TRUE;
-	}
-	else if(pCD->nmcd.dwDrawStage == CDDS_ITEMPREPAINT){
-		SetWindowLong(h, DWL_MSGRESULT, CDRF_NOTIFYPOSTPAINT );
-		return TRUE;
-	}
-	else if(pCD->nmcd.dwDrawStage == CDDS_ITEMPOSTPAINT){
-		/*
-		if(pCD->nmcd.lItemlParam > ITEM_GROUP_GROUND_LAST ){
-			//paint item
-			long center_y = (pCD->nmcd.rc.bottom + pCD->nmcd.rc.top - 32)/2;
-			long center_x = pCD->nmcd.rc.right - 32 - 16;
-			//drawItem(pCD->nmcd.hdc, center_x, center_y , pCD->nmcd.rc.right, pCD->nmcd.rc.bottom, (ItemBase*)pCD->nmcd.lItemlParam);
-		}
-		*//*
-		return TRUE;
-	}
-	return FALSE;
-}
-*/
+	if(!curItemServerId)
+		return;
 
+	//validate and save values to itemType[curItemServerId] map
+}
+
+void GUIWin::loadItem()
+{
+	//load ItemType[curItemServerId] options in gui
+	if(curItemServerId){
+
+	}
+	else{
+
+	}
+}
+
+void GUIWin::updateControls()
+{
+	//update controls depending on curItemServerId
+	//EnableWindow(GetDlgItem(h, IDC_SPINCID),false);
+	//EnableWindow(GetDlgItem(h, IDC_EDITCID),false);
+}
+
+void GUIWin::loadTreeItemTypes()
+{
+	//delete all items
+	//load itemType map
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// class GUIDraw
+/////////////////////////////////////////////////////////////////////////////////////////////
 BitmapMap GUIDraw::m_bitmaps;
 HDC GUIDraw::m_auxHDC = 0;
 HBITMAP GUIDraw::m_oldauxBMP = 0;

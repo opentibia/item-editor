@@ -51,19 +51,39 @@ protected:
 	static LRESULT CALLBACK DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lParam);
 
 	static bool onInitDialog(HWND h);
-
-	//treeview
-	static void createItemsTree(HWND htree);
-	static HTREEITEM insterTreeItem(HWND h, char* name, HTREEITEM parent, long size, long entryID);
-	//static bool onTreeCustomDraw(HWND h, NMTVCUSTOMDRAW* lParam);
+	static bool onTreeSelChange(HWND h, NMTREEVIEW* nmTree);
 	static bool onSpinScroll(HWND h, HWND spin);
+	static bool onDragBegin(HWND h, NMTREEVIEW* nmTree);
+	static bool onDragMove(HWND h, LPARAM lParam);
+	static bool onDragEnd();
+	static bool onClientIdChange(HWND h, HWND hEdit);
+
+	//combo
+	static void createItemCombo(HWND hcombo, char* name, long value);
+	//treeview
+	static void createGroupsTree(HWND htree);
+	static HTREEITEM insterTreeItem(HWND h, char* name, HTREEITEM parent, long entryID);
+
+	static void invalidateSprite(HWND h);
+
+	static void saveCurrentItem();
+	static void loadItem();
+	static void updateControls();
+	static void loadTreeItemTypes();
 
 	static long curItemClientId;
+	static long curItemServerId;
 	static GUIDraw* drawEngine;
+	static HWND m_hwndTree;
+
+	//dragging variables
+	static bool m_dragging;
+	static HTREEITEM m_dragItem;
 
 private:
 };
 
+//////////////////////////////////////////////////////////////////////////////////////
 
 typedef std::map<unsigned long, HBITMAP> BitmapMap;
 
