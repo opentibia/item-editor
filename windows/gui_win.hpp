@@ -50,8 +50,10 @@ public:
 protected:
 	static LRESULT CALLBACK DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lParam);
 
+	static bool onInitDialog(HWND h);
+
 	//treeview
-	static void createEditorTree(HWND htree);
+	static void createItemsTree(HWND htree);
 	static HTREEITEM insterTreeItem(HWND h, char* name, HTREEITEM parent, long size, long entryID);
 	//static bool onTreeCustomDraw(HWND h, NMTVCUSTOMDRAW* lParam);
 	static bool onSpinScroll(HWND h, HWND spin);

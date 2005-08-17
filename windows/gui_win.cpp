@@ -146,11 +146,7 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 	switch (Msg)
 	{
 	case WM_INITDIALOG:
-		createEditorTree(GetDlgItem(h, IDC_EDITOR_TREE));
-		SendMessage(GetDlgItem(h, IDC_SPINCID),UDM_SETRANGE,0,MAKELONG((short) SpriteType::maxClientId, (short)SpriteType::minClientId));
-		//EnableWindow(GetDlgItem(h, IDC_SPINCID),false);
-		//EnableWindow(GetDlgItem(h, IDC_EDITCID),false);
-		return TRUE;
+		return onInitDialog(h);
 		break;
 	case WM_MOUSEMOVE:
 		//return onMainMouseMove(h,wParam,lParam);
@@ -174,6 +170,8 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 		}
 		return TRUE;
 		break;
+	case WM_COMMAND:
+		break;
 	case WM_VSCROLL:
 		return onSpinScroll(h, (HWND)lParam);
 		break;
@@ -187,15 +185,10 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 		HWND hwnd;
 		hwnd = GetDlgItem(h, IDC_ITEM_PIC);
 		RECT rect;
-		GetWindowRect(hwnd, &rect);
-
-		POINT p;
-		p.x = rect.right;
-		p.y = rect.bottom;
-		ScreenToClient(hwnd, &p);
+		GetClientRect(hwnd, &rect);
 		
-		Rectangle(tmp, 0, 0, p.x, p.y);
-		drawEngine->drawSprite(tmp, 34, 34, 64, 64, curItemClientId);
+		Rectangle(tmp, 0, 0, rect.right, rect.bottom);
+		drawEngine->drawSprite(tmp, 34, 34, rect.right, rect.bottom, curItemClientId);
 		drawEngine->releaseBitmaps();
 
 		ReleaseDC(GetDlgItem(h,IDC_ITEM_PIC),tmp);
@@ -210,7 +203,24 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 }
 
 
-void GUIWin::createEditorTree(HWND htree)
+bool GUIWin::onInitDialog(HWND h)
+{
+	createItemsTree(GetDlgItem(h, IDC_EDITOR_TREE));
+
+	SendMessage(GetDlgItem(h, IDC_SPINCID),UDM_SETRANGE,0,MAKELONG((short) SpriteType::maxClientId, (short)SpriteType::minClientId));
+
+	char *a = "test 1";
+	SendMessage(GetDlgItem(h, IDC_COMBO_FLOOR),CB_ADDSTRING, 0, (long)a);
+	char *b = "test 2";
+	SendMessage(GetDlgItem(h, IDC_COMBO_FLOOR),CB_ADDSTRING, 0, (long)b);
+	SendMessage(GetDlgItem(h, IDC_COMBO_FLOOR),CB_ADDSTRING, 0, (long)b);
+
+	//EnableWindow(GetDlgItem(h, IDC_SPINCID),false);
+	//EnableWindow(GetDlgItem(h, IDC_EDITCID),false);
+	return TRUE;
+}
+
+void GUIWin::createItemsTree(HWND htree)
 {
 	long item_height;
 	long entry_size;
@@ -245,6 +255,19 @@ bool GUIWin::onSpinScroll(HWND h, HWND spin)
 	HWND hwnd = GetDlgItem(h, IDC_ITEM_PIC);
 	RECT rect;
 	GetWindowRect(hwnd, &rect);
+	POINT pt;
+	pt.x = rect.right;
+	pt.y = rect.bottom;
+	ScreenToClient(h, &pt);
+	rect.right = pt.x;
+	rect.bottom = pt.y;
+	
+	pt.x = rect.left;
+	pt.y = rect.top;
+	ScreenToClient(h, &pt);
+	rect.left = pt.x;
+	rect.top = pt.y;
+
 	InvalidateRect(h, &rect, false);
 	return true;
 }
