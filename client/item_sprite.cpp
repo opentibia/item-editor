@@ -38,6 +38,9 @@ Sprite::Sprite()
 }
 
 
+long SpriteType::minClientId = 0;
+long SpriteType::maxClientId = 0;
+
 SpriteType::SpriteType()
 {
 	id = 0;
@@ -189,17 +192,24 @@ bool ItemsSprites::loadFromDat(const char *filename)
 	FILE *fp;
 	long size;
 	int speed;
+	short read_short;
 	
 	fp = fopen(filename, "rb");
 	if(!fp)
 		return false;
 	
 	fseek(fp,0,SEEK_END);
-	size=ftell(fp);
+	size = ftell(fp);
+
+	//get max id
+	fseek(fp, 0x04, SEEK_SET);
+	fread(&read_short, 2, 1, fp); 
+	SpriteType::maxClientId = read_short;
+	SpriteType::minClientId = 100;
 
 	fseek(fp, 0x0C, SEEK_SET);
 	// loop throw all Items until we reach the end of file
-	while(ftell(fp) < size)
+	while(ftell(fp) < size && id <= SpriteType::maxClientId)
 	{
 		SpriteType *sType = new SpriteType();
 		sType->id = id;
@@ -212,8 +222,8 @@ bool ItemsSprites::loadFromDat(const char *filename)
 			{
 			case 0x00:
 				//is groundtile
-				speed=(int)fgetc(fp);
-				fgetc(fp);
+				fread(&read_short, 2, 1, fp); 
+				speed = read_short;
 				break;
 			case 0x01: // all OnTop
 				break;
@@ -339,13 +349,15 @@ bool ItemsSprites::loadFromDat(const char *filename)
 			// Sprite added to the SpriteMap
 			if(i < sType->width * sType->height * sType->blendframes)
 				sprite[sType->imageID[i]] = newSprite;
+			else
+				delete newSprite;
 		}
 		
 		// store the found item
 		item[id] = sType;
 		id++;
 	}
-	
+
 	fclose(fp);
 	
 	datLoaded = true;

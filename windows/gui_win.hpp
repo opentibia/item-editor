@@ -42,21 +42,21 @@ public:
 	GUIWin();
 	virtual ~GUIWin(){};
 	virtual void initGUI();
+	virtual void messageBox(const char* text, MesageBoxType_t type);
 	virtual bool loadSpriteInternal(const unsigned char *, const unsigned long, InternalSprite * );
 	virtual void loadSpriteInternalTransparent(unsigned long color,  InternalSprite *sprite);
 	virtual void unloadSpriteInternal(InternalSprite);
 
 protected:
 	static LRESULT CALLBACK DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lParam);
-	
-	//static bool drawSprite(HDC desthdc, long x, long y, long maxx, long maxy, unsigned long itemid, unsigned long count, bool drawFrame /*= false*/, bool animation /*=false*/);
-	//static bool drawItem(HDC desthdc, long x, long y, long maxx, long maxy, ItemBase* item, bool drawFrame /*=false*/,bool animation /*=false*/);
 
 	//treeview
 	static void createEditorTree(HWND htree);
 	static HTREEITEM insterTreeItem(HWND h, char* name, HTREEITEM parent, long size, long entryID);
-	static bool onTreeCustomDraw(HWND h, NMTVCUSTOMDRAW* lParam);
+	//static bool onTreeCustomDraw(HWND h, NMTVCUSTOMDRAW* lParam);
+	static bool onSpinScroll(HWND h, HWND spin);
 
+	static long curItemClientId;
 	static GUIDraw* drawEngine;
 
 private:

@@ -43,6 +43,9 @@ class SpriteType
 public:
 	SpriteType();
 	~SpriteType(){}
+
+	static long minClientId;
+	static long maxClientId;
 	
 	unsigned short id;
 	
@@ -56,6 +59,7 @@ public:
 	int numsprites;
 	
 	unsigned short *imageID;
+
 	
 };
 

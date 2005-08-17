@@ -21,8 +21,17 @@
 #ifndef __OTITEMEDITOR_GUI_H__
 #define __OTITEMEDITOR_GUI_H__
 
+#include <string>
+
 #include "item_type.hpp"
 #include "item_sprite.hpp"
+
+enum MesageBoxType_t{
+	MESSAGE_TYPE_FATAL_ERROR,
+	MESSAGE_TYPE_ERROR,
+	MESSAGE_TYPE_INFO,
+	MESSAGE_TYPE_NO_ICON,
+};
 
 class GUI{
 protected:
@@ -35,6 +44,7 @@ public:
 	virtual void hideSplash(){};
 
 	virtual void initGUI() = 0;
+	virtual void messageBox(const char* text, MesageBoxType_t type) = 0;
 	//return
 	//true. can free dump
 	//false. can not free dump

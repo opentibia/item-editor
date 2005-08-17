@@ -36,6 +36,7 @@ extern "C" WINGDIAPI BOOL  WINAPI TransparentBlt(IN HDC,IN int,IN int,IN int,IN 
 #endif
 
 GUIDraw* GUIWin::drawEngine = NULL;
+long GUIWin::curItemClientId = 0;
 
 GUIWin::GUIWin()
 {
@@ -51,6 +52,28 @@ void GUIWin::initGUI()
 
 	//InitCommonControls();
 	DialogBoxParam(g_instance,MAKEINTRESOURCE(DLG_MAIN),NULL,reinterpret_cast<DLGPROC>(GUIWin::DlgProcMain),NULL);
+}
+
+void GUIWin::messageBox(const char *text, MesageBoxType_t type)
+{
+	UINT mtype;
+	switch(type){
+	case MESSAGE_TYPE_FATAL_ERROR:
+		mtype = MB_OK | MB_ICONERROR;
+		break;
+	case MESSAGE_TYPE_ERROR:
+		mtype = MB_OK | MB_ICONEXCLAMATION;
+		break;
+	case MESSAGE_TYPE_INFO:
+		mtype = MB_OK | MB_ICONINFORMATION;
+		break;
+	case MESSAGE_TYPE_NO_ICON:
+		mtype = MB_OK;
+	default:
+		mtype = MB_OK;
+		break;
+	}
+	MessageBox(NULL, text, NULL, mtype);
 }
 
 bool GUIWin::loadSpriteInternal(const unsigned char *dump, const unsigned long size, InternalSprite *sprite)
@@ -124,6 +147,9 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 	{
 	case WM_INITDIALOG:
 		createEditorTree(GetDlgItem(h, IDC_EDITOR_TREE));
+		SendMessage(GetDlgItem(h, IDC_SPINCID),UDM_SETRANGE,0,MAKELONG((short) SpriteType::maxClientId, (short)SpriteType::minClientId));
+		//EnableWindow(GetDlgItem(h, IDC_SPINCID),false);
+		//EnableWindow(GetDlgItem(h, IDC_EDITCID),false);
 		return TRUE;
 		break;
 	case WM_MOUSEMOVE:
@@ -137,7 +163,7 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 		if(LOWORD(wParam) == IDC_EDITOR_TREE){
 			switch(((NMHDR*)lParam)->code){
 			case NM_CUSTOMDRAW:
-				return onTreeCustomDraw(h, (NMTVCUSTOMDRAW*)lParam);
+				//return onTreeCustomDraw(h, (NMTVCUSTOMDRAW*)lParam);
 			case TVN_SELCHANGING:
 				//return onTreeSelChange(h, (NMTREEVIEW*)lParam);
 				break;
@@ -148,25 +174,28 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 		}
 		return TRUE;
 		break;
+	case WM_VSCROLL:
+		return onSpinScroll(h, (HWND)lParam);
+		break;
 	case WM_CLOSE:
 		EndDialog(h,NULL);
 		break;
 	case WM_PAINT:
-		//HDC desthdc, long x, long y, long maxx, long maxy, unsigned long itemid, bool drawFrame /*= false*/
 		HDC tmp;
 		tmp = GetDC(GetDlgItem(h,IDC_ITEM_PIC));
-
+		
 		HWND hwnd;
 		hwnd = GetDlgItem(h, IDC_ITEM_PIC);
 		RECT rect;
 		GetWindowRect(hwnd, &rect);
 
 		POINT p;
-		p.x = rect.left;
-		p.y = rect.top;
+		p.x = rect.right;
+		p.y = rect.bottom;
 		ScreenToClient(hwnd, &p);
-
-		drawEngine->drawSprite(tmp, p.x, p.y, p.x + 64, p.y + 64, 1988);
+		
+		Rectangle(tmp, 0, 0, p.x, p.y);
+		drawEngine->drawSprite(tmp, 34, 34, 64, 64, curItemClientId);
 		drawEngine->releaseBitmaps();
 
 		ReleaseDC(GetDlgItem(h,IDC_ITEM_PIC),tmp);
@@ -179,6 +208,7 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 	}
 	return FALSE;
 }
+
 
 void GUIWin::createEditorTree(HWND htree)
 {
@@ -208,6 +238,18 @@ HTREEITEM GUIWin::insterTreeItem(HWND h, char* name, HTREEITEM parent, long size
 	return (HTREEITEM)SendMessage(h, TVM_INSERTITEM, 0, (long)&itemstruct); 
 }
 
+bool GUIWin::onSpinScroll(HWND h, HWND spin)
+{
+	long pos = SendMessage(spin,UDM_GETPOS, 0,0);
+	curItemClientId = pos;
+	HWND hwnd = GetDlgItem(h, IDC_ITEM_PIC);
+	RECT rect;
+	GetWindowRect(hwnd, &rect);
+	InvalidateRect(h, &rect, false);
+	return true;
+}
+
+/*
 bool GUIWin::onTreeCustomDraw(HWND h, NMTVCUSTOMDRAW* pCD)
 {
 	if(pCD->nmcd.dwDrawStage == CDDS_PREPAINT){
@@ -226,12 +268,12 @@ bool GUIWin::onTreeCustomDraw(HWND h, NMTVCUSTOMDRAW* pCD)
 			long center_x = pCD->nmcd.rc.right - 32 - 16;
 			//drawItem(pCD->nmcd.hdc, center_x, center_y , pCD->nmcd.rc.right, pCD->nmcd.rc.bottom, (ItemBase*)pCD->nmcd.lItemlParam);
 		}
-		*/
+		*//*
 		return TRUE;
 	}
 	return FALSE;
 }
-
+*/
 
 BitmapMap GUIDraw::m_bitmaps;
 HDC GUIDraw::m_auxHDC = 0;

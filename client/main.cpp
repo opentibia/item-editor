@@ -55,8 +55,12 @@ bool OtItemEditorApp::OnInit()
 	
 	//load sprites/items
 	g_itemsSprites = new ItemsSprites();
-	g_itemsSprites->loadFromDat("tibia.dat");
-	g_itemsSprites->loadFromSpr("tibia.spr");
+	if(!g_itemsSprites->loadFromDat("tibia.dat"))
+		g_gui->messageBox("Error while loading client's tibia.dat.", MESSAGE_TYPE_FATAL_ERROR);
+
+	if(!g_itemsSprites->loadFromSpr("tibia.spr"))
+		g_gui->messageBox("Error while loading client's tibia.spr.", MESSAGE_TYPE_FATAL_ERROR);
+
 
 	if(g_gui)
 	{
