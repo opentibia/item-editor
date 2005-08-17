@@ -45,6 +45,18 @@ SpriteType::SpriteType()
 {
 	id = 0;
 	
+	groundtile = false;
+	blocking = false;
+	alwaysOnTop = false;
+	container = false;
+	stackable = false;
+	useable = false;
+	notMoveable = false;
+	pickupable = false;
+	fluid = false;
+	rotable = false;
+	speed = 0;
+
 	height = 32;
 	width = 32;
 	blendframes = 0;
@@ -224,31 +236,44 @@ bool ItemsSprites::loadFromDat(const char *filename)
 				//is groundtile
 				fread(&read_short, 2, 1, fp); 
 				speed = read_short;
+				sType->speed = speed;
+				sType->groundtile = true;
+				if(speed == 0)
+					sType->blocking = true;
+
 				break;
 			case 0x01: // all OnTop
+				sType->alwaysOnTop = true;
 				break;
 			case 0x02: // can walk trough (open doors, arces, bug pen fence ??)
 				break;
 			case 0x03:
 				//is a container
+				sType->container = true;
 				break;
 			case 0x04:
 				//is stackable
+				sType->stackable = true;
 				break;
 			case 0x05:
 				//is useable
+				sType->useable = true;
 				break;
 			case 0x0A:
 				//is multitype !!! wrong definition (only water splash on floor)
+				sType->fluid = true;
 				break;
 			case 0x0B:
 				//is blocking
+				sType->blocking = true;
 				break;
 			case 0x0C:
 				//is on moveable
+				sType->notMoveable = true;
 				break;
 			case 0x0F:
 				//can be equipped
+				sType->pickupable = true;
 				break;
 			case 0x10:
 				//makes light (skip 4 bytes)
@@ -260,6 +285,7 @@ bool ItemsSprites::loadFromDat(const char *filename)
 			case 0x06: // ladder up (id 1386)   why a group for just 1 item ???   
 				break;
 			case 0x09: //can contain fluids
+				sType->fluid = true;
 				break;
 			case 0x0D: // blocks missiles (walls, magic wall etc)
 				//iType->blockingProjectile = true;
@@ -288,12 +314,8 @@ bool ItemsSprites::loadFromDat(const char *filename)
 				fgetc(fp); //always 0
 				break;
 			case 0x16: // ground, blocking items and mayby some more 
-				//unsigned char a;
-				/*a =*/ fgetc(fp); //12, 186, 210, 129 and other.. 
+				fgetc(fp); //12, 186, 210, 129 and other.. 
 				fgetc(fp); //always 0
-				//if(a == 210)
-				//printf("%d - %d %d\n", iType->id, a);
-				//iType->floorChange = true;
 				break;
 			case 0x1A: 
 				//7.4 (change no data ?? ) action that can be performed (doors-> open, hole->open, book->read) not all included ex. wall torches
@@ -307,6 +329,7 @@ bool ItemsSprites::loadFromDat(const char *filename)
 			case 0x19:  // wall items                 
 				break;    
 			case 0x17:  // seems like decorables with 4 states of turning (exception first 4 are unique statues)                 
+				sType->rotable = true;
 				break;
 			case 0x1C:  // ?? ...                 
 				break;            
@@ -337,14 +360,14 @@ bool ItemsSprites::loadFromDat(const char *filename)
 		for(int i = 0; i < sType->numsprites; ++i) {
 			fread(&sType->imageID[i], sizeof(unsigned short), 1, fp);
 			Sprite *newSprite = new Sprite();
-			if(id == 460){
+			/*if(id == 460){
 				g_gui->loadSpriteInternalTransparent(0xFF0000,&newSprite->internal);
 				sType->imageID[i] = 0xF000;
 			}
 			else if(id == 459){
 				g_gui->loadSpriteInternalTransparent(0xFFFF00,&newSprite->internal);
 				sType->imageID[i] = 0xF001;
-			}
+			}*/
 			newSprite->id = sType->imageID[i];
 			// Sprite added to the SpriteMap
 			if(i < sType->width * sType->height * sType->blendframes)

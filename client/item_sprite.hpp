@@ -49,6 +49,19 @@ public:
 	
 	unsigned short id;
 	
+	//item info
+	bool groundtile;
+	bool blocking;
+	bool alwaysOnTop;
+	bool container;
+	bool stackable;
+	bool useable;
+	bool notMoveable;
+	bool pickupable;
+	bool fluid;
+	bool rotable;
+	int speed;
+
 	//sprite info
 	unsigned char height;
 	unsigned char width;
