@@ -55,6 +55,7 @@ SpriteType::SpriteType()
 	pickupable = false;
 	fluid = false;
 	rotable = false;
+	//blockingProjectile = false;
 	speed = 0;
 
 	height = 32;
@@ -288,7 +289,7 @@ bool ItemsSprites::loadFromDat(const char *filename)
 				sType->fluid = true;
 				break;
 			case 0x0D: // blocks missiles (walls, magic wall etc)
-				//iType->blockingProjectile = true;
+				//sType->blockingProjectile = true;
 				break;
 			case 0x0E: // blocks monster movement (flowers, parcels etc)
 				break;

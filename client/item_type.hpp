@@ -36,7 +36,8 @@ enum itemgroup_t{
 	ITEM_GROUP_MAGICFIELD,
 	ITEM_GROUP_WRITEABLE,
 	ITEM_GROUP_KEY,
-	ITEM_GROUP_SPLASH
+	ITEM_GROUP_SPLASH,
+	ITEM_GROUP_LAST
 };
 
 enum slots_t {
@@ -52,7 +53,7 @@ enum slots_t {
 };
 
 enum WeaponType {
-  WEAPON_NONE   = 0,
+	WEAPON_NONE   = 0,
 	WEAPON_SWORD  = 1,
 	WEAPON_CLUB   = 2,
 	WEAPON_AXE    = 3,
@@ -65,20 +66,20 @@ enum WeaponType {
 enum subfight_t {
 	DIST_NONE          = 0,
 	DIST_BOLT          = 1,
-  DIST_ARROW         = 2,
-  DIST_FIRE          = 3,
-  DIST_ENERGY        = 4,
-  DIST_POISONARROW   = 5,
-  DIST_BURSTARROW    = 6,
-  DIST_THROWINGSTAR  = 7,
-  DIST_THROWINGKNIFE = 8,
-  DIST_SMALLSTONE    = 9,
-  DIST_SUDDENDEATH   = 10,
-  DIST_LARGEROCK     = 11,
-  DIST_SNOWBALL      = 12,
-  DIST_POWERBOLT     = 13,
-  DIST_SPEAR         = 14,
-  DIST_POISONFIELD   = 15
+	DIST_ARROW         = 2,
+	DIST_FIRE          = 3,
+	DIST_ENERGY        = 4,
+	DIST_POISONARROW   = 5,
+	DIST_BURSTARROW    = 6,
+	DIST_THROWINGSTAR  = 7,
+	DIST_THROWINGKNIFE = 8,
+	DIST_SMALLSTONE    = 9,
+	DIST_SUDDENDEATH   = 10,
+	DIST_LARGEROCK     = 11,
+	DIST_SNOWBALL      = 12,
+	DIST_POWERBOLT     = 13,
+	DIST_SPEAR         = 14,
+	DIST_POISONFIELD   = 15
 };
 
 enum amu_t{
@@ -117,51 +118,51 @@ public:
 	bool pickupable;
 	bool fluidcontainer;
 	bool creature;
-
+	
 	//xml data
 	char name[128];
 	char descr[128];
 	double weight;
-  unsigned short	decayTo;
-  unsigned short	decayTime;
+	unsigned short	decayTo;
+	unsigned short	decayTime;
 	bool blockingProjectile;
 	bool floorchange;
 	int slot_position;
-
+	
 	bool floorChangeNorth;
 	bool floorChangeSouth;
 	bool floorChangeEast;
 	bool floorChangeWest;
-
+	
 	//container
 	int maxItems;
-
+	
 	//weapon
 	amu_t amuType;
 	WeaponType weaponType;
-  subfight_t shootType;
-  int attack;
-  int	defence;
-
+	subfight_t shootType;
+	int attack;
+	int	defence;
+	
 	//armor
 	int armor;
 	
 	//rune
 	int runeMagLevel;
-
+	
 	//teleport
 	bool isteleport;
-
+	
 	//magicfield
 	bool ismagicfield;
 	int magicfieldtype;
-
+	
 	//writeable
 	unsigned short readonlyId;
-
+	
 	//key
 	bool iskey;
-
+	
 	//splash
 	bool issplash;	
 };
@@ -173,12 +174,12 @@ public:
 
 	bool setGroup(int id, itemgroup_t newgroup);
 	ItemType* getItem(int id);
-
+	
 private:
 	static int loadstatus;
 	static void XMLCALL xmlstartNode(void *userData, const char *name, const char **atts);
 	static void XMLCALL xmlendNode(void *userData, const char *name);
-
+	
 	typedef std::map<unsigned short, ItemType*> ItemMap;
 	ItemMap item;
 };

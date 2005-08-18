@@ -46,46 +46,46 @@ ItemType::ItemType()
 	name[0] = '\0';
 	descr[0] = '\0'; 
 	weight = 0.00;
-  decayTo = 0;
-  decayTime = 0;
+	decayTo = 0;
+	decayTime = 0;
 	blockingProjectile = false;
 	floorchange = false;
 	slot_position = SLOT_HAND;
-
+	
 	floorChangeNorth = false;
 	floorChangeSouth = false;
 	floorChangeEast = false;
 	floorChangeWest = false;
-
+	
 	//container
 	maxItems = 20;
-
+	
 	//weapon
 	amuType = AMU_NONE;
 	weaponType = WEAPON_NONE;
-  shootType = DIST_NONE;
-  attack = 0;
-  defence = 0;
-
+	shootType = DIST_NONE;
+	attack = 0;
+	defence = 0;
+	
 	//armor
 	armor = 0;
 	
 	//rune
 	runeMagLevel = -1;
-
+	
 	//teleport
 	isteleport = false;
-
+	
 	//magicfield
 	ismagicfield = false;
 	magicfieldtype = 0;
-
+	
 	//writeable
 	readonlyId = 0;
-
+	
 	//key
 	iskey = false;
-
+	
 	//splash
 	issplash = false;
 }
@@ -305,7 +305,7 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 							    else if (!strcmp(sshoottype, "spear"))
 							    	sType->shootType = DIST_SPEAR;
 
-                	/*else
+                				/*else
 										std::cout << "wrong shootype tag" << std::endl;*/
 								}
 								/*else
