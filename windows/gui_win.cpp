@@ -30,6 +30,7 @@
 
 extern HINSTANCE g_instance;
 extern ItemsSprites *g_itemsSprites;
+extern ItemsTypes *g_itemsTypes;
 
 #ifdef __OLDINCLUDE__
 extern "C" WINGDIAPI BOOL  WINAPI TransparentBlt(IN HDC,IN int,IN int,IN int,IN int,IN HDC,IN int,IN int,IN int,IN int,IN UINT);
@@ -37,10 +38,12 @@ extern "C" WINGDIAPI BOOL  WINAPI TransparentBlt(IN HDC,IN int,IN int,IN int,IN 
 
 GUIDraw* GUIWin::drawEngine = NULL;
 long GUIWin::curItemClientId = 0;
+HTREEITEM GUIWin::curItem = NULL;
 long GUIWin::curItemServerId = 0;
 bool GUIWin::m_dragging = false;
 HWND GUIWin::m_hwndTree = 0;
 HTREEITEM GUIWin::m_dragItem = NULL;
+HTREEITEM GUIWin::rootItems[ITEM_GROUP_LAST] = {NULL};
 
 GUIWin::GUIWin()
 {
@@ -197,10 +200,17 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 		return FALSE;
 		break;
 	case WM_COMMAND:
-		if((wParam & 0xFFFF0000 >> 16) == IDC_EDITCID){
+		switch((wParam & 0xFFFF0000 >> 16)){
+		case IDC_EDITCID:
 			if((wParam & 0xFFFF0000) >> 16 == EN_CHANGE){
 				return onClientIdChange(h, (HWND)lParam);
 			}
+			break;
+		case ID_FILE_EXIT:
+			EndDialog(h,NULL);
+			break;
+		case ID_HELP_ABOUT:
+			break;
 		}
 		break;
 	}
@@ -262,7 +272,7 @@ bool GUIWin::onDragEnd()
 		itemInfo.mask = TVIF_PARAM;
 		itemInfo.hItem = hitTarget;
 		TreeView_GetItem(m_hwndTree, &itemInfo);
-		//updateType(id, itemInfo.lParam);
+		g_itemsTypes->setGroup(id, (itemgroup_t)itemInfo.lParam);
 		if(id == curItemServerId){
 			saveCurrentItem();
 			loadItem();
@@ -280,9 +290,11 @@ bool GUIWin::onTreeSelChange(HWND h, NMTREEVIEW* nmTree)
 	saveCurrentItem();
 
 	if(nmTree->itemNew.lParam >= 100){
+		curItem = nmTree->itemNew.hItem;
 		curItemServerId = nmTree->itemNew.lParam;
 	}
 	else{
+		curItem = NULL;
 		curItemServerId = 0;
 	}
 
@@ -392,17 +404,26 @@ void GUIWin::createGroupsTree(HWND htree)
 {
 	long item_height;
 	long entry_size;
-	HTREEITEM root;
 
 	item_height = SendMessage(htree, TVM_GETITEMHEIGHT, 0, 0);
 	entry_size = 32/item_height+1;
 
-	root = insterTreeItem(htree, "Ground", NULL, ITEM_GROUP_GROUND);
-	insterTreeItem(htree, "Container 1", root, 1988);
-	insterTreeItem(htree, "Container 2", root,  1987);
-	root = insterTreeItem(htree, "Container", NULL,  ITEM_GROUP_CONTAINER);
-	root = insterTreeItem(htree, "Splash", NULL, ITEM_GROUP_SPLASH);
-	root = insterTreeItem(htree, "Other", NULL, ITEM_GROUP_NONE);
+	rootItems[ITEM_GROUP_GROUND] = insterTreeItem(htree, "Ground", NULL, ITEM_GROUP_GROUND);
+	rootItems[ITEM_GROUP_CONTAINER] = insterTreeItem(htree, "Container", NULL, ITEM_GROUP_CONTAINER);
+	rootItems[ITEM_GROUP_WEAPON] = insterTreeItem(htree, "Weapon", NULL, ITEM_GROUP_WEAPON);
+	rootItems[ITEM_GROUP_AMMUNITION] = insterTreeItem(htree, "Ammunition", NULL, ITEM_GROUP_AMMUNITION);
+	rootItems[ITEM_GROUP_ARMOR] = insterTreeItem(htree, "Armor", NULL, ITEM_GROUP_ARMOR);
+	rootItems[ITEM_GROUP_RUNE] = insterTreeItem(htree, "Rune", NULL, ITEM_GROUP_RUNE);
+	rootItems[ITEM_GROUP_TELEPORT] = insterTreeItem(htree, "Teleport", NULL, ITEM_GROUP_TELEPORT);
+	rootItems[ITEM_GROUP_MAGICFIELD] = insterTreeItem(htree, "Magic Field", NULL, ITEM_GROUP_MAGICFIELD);
+	rootItems[ITEM_GROUP_WRITEABLE] = insterTreeItem(htree, "Writeable", NULL, ITEM_GROUP_WRITEABLE);
+	rootItems[ITEM_GROUP_KEY] = insterTreeItem(htree, "Key", NULL, ITEM_GROUP_KEY);
+	rootItems[ITEM_GROUP_SPLASH] = insterTreeItem(htree, "Splash", NULL, ITEM_GROUP_SPLASH);
+	rootItems[ITEM_GROUP_NONE] = insterTreeItem(htree, "Other", NULL, ITEM_GROUP_NONE);
+
+	insterTreeItem(htree, "Container 1", rootItems[ITEM_GROUP_NONE], 1988);
+	insterTreeItem(htree, "Container 2", rootItems[ITEM_GROUP_NONE],  1987);
+
 }
 
 HTREEITEM GUIWin::insterTreeItem(HWND h, char* name, HTREEITEM parent, long entryID)
@@ -420,7 +441,6 @@ HTREEITEM GUIWin::insterTreeItem(HWND h, char* name, HTREEITEM parent, long entr
 bool GUIWin::onSpinScroll(HWND h, HWND spin)
 {
 	long pos = SendMessage(spin,UDM_GETPOS, 0,0);
-	curItemClientId = pos;
 	return true;
 }
 
@@ -450,6 +470,7 @@ void GUIWin::saveCurrentItem()
 		return;
 
 	//validate and save values to itemType[curItemServerId] map
+	//change name in tree
 }
 
 void GUIWin::loadItem()
@@ -472,7 +493,7 @@ void GUIWin::updateControls()
 
 void GUIWin::loadTreeItemTypes()
 {
-	//delete all items
+	//delete all items in the tree
 	//load itemType map
 }
 
@@ -563,7 +584,6 @@ HBITMAP GUIDraw::getBitmap(const InternalSprite sprite)
 	else 
 	{
 		hdc = CreateCompatibleDC(NULL);
-
 		memset(&binfo,0,sizeof(BITMAPINFO));
 		binfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 		binfo.bmiHeader.biWidth = 32;
@@ -573,9 +593,7 @@ HBITMAP GUIDraw::getBitmap(const InternalSprite sprite)
 		binfo.bmiHeader.biSizeImage = 32*32*4;
 		binfo.bmiHeader.biCompression = BI_RGB;
 	
-
 		HBITMAP bitmap = CreateDIBSection(hdc, &binfo, DIB_RGB_COLORS, &dest, NULL,0);
-
 		ASSERT(dest != NULL && bitmap != 0);
 		if(dest){
 			if(sprite){

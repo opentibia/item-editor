@@ -36,6 +36,12 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Exit",                        ID_FILE_EXIT
     END
+    POPUP "Tools"
+    BEGIN
+        MENUITEM "Verify items",                ID_TOOLS_VERIFYCLIENTOPTIONS
+        MENUITEM "Find missing items",          ID_TOOLS_FINDMISSINGCLIENTITEMS
+
+    END
     POPUP "Help"
     BEGIN
         MENUITEM "About OTItemEditor...",       ID_HELP_ABOUT
@@ -59,12 +65,12 @@ BEGIN
                     7,15,119,234
     GROUPBOX        "Settings",IDC_STATIC,133,15,275,234
     CONTROL         "",IDC_ITEM_PIC,"Static",SS_BLACKFRAME,145,25,50,43
-    LTEXT           "Name:",IDC_STATIC,208,28,22,8
-    EDITTEXT        IDC_EDITNAME,208,40,193,12,ES_AUTOHSCROLL
-    LTEXT           "Description:",IDC_STATIC,208,56,44,8
+    LTEXT           "Name:",IDC_STATIC,210,28,22,8
+    EDITTEXT        IDC_EDITNAME,210,40,191,12,ES_AUTOHSCROLL
+    LTEXT           "Description:",IDC_STATIC,210,56,42,8
     LTEXT           "sid:",IDC_STATIC,144,70,12,8
     LTEXT           "10000",IDC_SID,159,70,21,8
-    EDITTEXT        IDC_EDITDESCR,208,68,193,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDITDESCR,210,68,191,12,ES_AUTOHSCROLL
     LTEXT           "cid:",IDC_STATIC,144,83,12,8
     EDITTEXT        IDC_EDITCID,159,80,36,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "",IDC_SPINCID,"msctls_updown32",UDS_SETBUDDYINT | 
@@ -72,37 +78,37 @@ BEGIN
                     UDS_NOTHOUSANDS,187,80,8,11
     GROUPBOX        "Options:",IDC_STATIC,139,101,259,140
     CONTROL         "*Blocking",IDC_OPT_BLOCKING,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,150,112,58,8
+                    WS_TABSTOP,150,112,60,8
     CONTROL         "*Always Top",IDC_OPT_ATOP,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,150,125,58,8
+                    WS_TABSTOP,150,125,60,8
     CONTROL         "*Stackable",IDC_OPT_STACKABLE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,150,138,58,8
+                    WS_TABSTOP,150,138,60,8
     CONTROL         "*Useable",IDC_OPT_USEABLE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,150,151,58,8
+                    WS_TABSTOP,150,151,60,8
     CONTROL         "*Not Moveable",IDC_OPT_NO_MOVE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,150,164,58,8
+                    WS_TABSTOP,150,164,60,8
     CONTROL         "*Pickupable",IDC_OPT_PICKUP,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,150,177,58,8
+                    WS_TABSTOP,150,190,60,8
     CONTROL         "*Fluid",IDC_OPT_FLUID,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,150,203,58,8
+                    WS_TABSTOP,150,215,60,8
     CONTROL         "*Rotable",IDC_OPT_ROTS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,150,190,58,8
-    LTEXT           "Weight",IDC_STATIC,208,112,44,8
+                    WS_TABSTOP,150,203,60,8
+    LTEXT           "Weight",IDC_STATIC,210,112,42,8
     EDITTEXT        IDC_EDIT_WEIGHT,252,112,50,12,ES_AUTOHSCROLL
-    LTEXT           "DecayTo",IDC_STATIC,208,125,44,8
+    LTEXT           "DecayTo",IDC_STATIC,210,125,42,8
     EDITTEXT        IDC_EDIT_DECAYTO,252,125,50,12,ES_AUTOHSCROLL | 
                     ES_NUMBER
-    LTEXT           "DecayTime",IDC_STATIC,208,138,44,8
+    LTEXT           "DecayTime",IDC_STATIC,210,138,42,8
     EDITTEXT        IDC_EDIT_DECAYTIME,252,138,50,12,ES_AUTOHSCROLL | 
                     ES_NUMBER
-    LTEXT           "FloorChagne",IDC_STATIC,208,151,44,8
+    LTEXT           "FloorChange",IDC_STATIC,210,151,42,8
     COMBOBOX        IDC_COMBO_FLOOR,252,151,50,90,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "Block projectile",IDC_OPT_BLOCKPROJECTILE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,150,216,61,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,150,228,61,8
     EDITTEXT        IDC_ROTATETO,252,190,50,12,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "RotateTo",IDC_STATIC,208,190,44,9
-    LTEXT           "Slot",IDC_STATIC,208,164,44,9
+    LTEXT           "RotateTo",IDC_STATIC,210,190,42,9
+    LTEXT           "Slot",IDC_STATIC,210,164,42,9
     COMBOBOX        IDC_COMBO_SLOT,252,164,50,85,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
     LTEXT           "MaxItems",IDC_STATIC,307,112,36,9
@@ -123,12 +129,15 @@ BEGIN
     LTEXT           "Armor",IDC_STATIC,307,190,36,9
     EDITTEXT        IDC_EDIT_DEF,343,177,50,12,ES_AUTOHSCROLL | ES_NUMBER
     EDITTEXT        IDC_EDIT_ARM,343,190,50,12,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "ReadOnlyID",IDC_STATIC,208,177,44,11
+    LTEXT           "ReadOnlyID",IDC_STATIC,210,177,42,11
     EDITTEXT        IDC_EDIT_READ_ONLY,252,177,50,12,ES_AUTOHSCROLL | 
                     ES_NUMBER
     PUSHBUTTON      "Set Client *Opt",IDC_SET_CLIENT_OPT,252,224,55,11
-    LTEXT           "*Speed",IDC_STATIC,208,203,44,10
+    LTEXT           "*Speed",IDC_STATIC,210,203,42,10
     EDITTEXT        IDC_EDIT_SPEED,252,203,50,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "Write 1 time",IDC_OPT_WRITE1TIME,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,150,177,60,8
+    PUSHBUTTON      "Save Item",IDC_SAVE_ITEM,326,224,55,11
 END
 
 
@@ -149,7 +158,7 @@ BEGIN
         VERTGUIDE, 150
         VERTGUIDE, 159
         VERTGUIDE, 195
-        VERTGUIDE, 208
+        VERTGUIDE, 210
         VERTGUIDE, 252
         VERTGUIDE, 302
         VERTGUIDE, 307

@@ -76,6 +76,9 @@ protected:
 	static GUIDraw* drawEngine;
 	static HWND m_hwndTree;
 
+	static HTREEITEM rootItems[ITEM_GROUP_LAST];
+	static HTREEITEM curItem;
+
 	//dragging variables
 	static bool m_dragging;
 	static HTREEITEM m_dragItem;
