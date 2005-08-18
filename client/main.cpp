@@ -27,6 +27,7 @@
 
 GUI *g_gui = NULL;
 ItemsSprites *g_itemsSprites = NULL;
+ItemsTypes *g_itemsTypes = NULL;
 
 #if defined WIN32 || defined __WINDOWS__
 //windows 
@@ -53,13 +54,12 @@ bool OtItemEditorApp::OnInit()
 	g_gui = GUI::getGUI();
 	ASSERT( g_gui != NULL )
 	
+	g_itemsTypes = new ItemsTypes();
+
 	//load sprites/items
 	g_itemsSprites = new ItemsSprites();
 	if(!g_itemsSprites->loadFromDat("tibia.dat"))
 		g_gui->messageBox("Error while loading client's tibia.dat.", MESSAGE_TYPE_FATAL_ERROR);
-
-	if(!g_itemsSprites->loadFromXml("items.xml"))
-		g_gui->messageBox("Error while loading client's items.xml.", MESSAGE_TYPE_FATAL_ERROR);
 
 	if(!g_itemsSprites->loadFromSpr("tibia.spr"))
 		g_gui->messageBox("Error while loading client's tibia.spr.", MESSAGE_TYPE_FATAL_ERROR);

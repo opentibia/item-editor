@@ -21,13 +21,7 @@
 #ifndef __OTITEMEDITOR_ITEM_SPRITE_H__
 #define __OTITEMEDITOR_ITEM_SPRITE_H__
 
-#include "expat.h"
 #include <map>
-
-struct xmlProp{
-	char *name;
-	char *value;
-};
 
 typedef void* InternalSprite;
 
@@ -41,61 +35,6 @@ public:
 	unsigned char *dump;
 	unsigned short size;
 	InternalSprite internal;
-};
-
-
-enum slots_t {
-	SLOT_HEAD=1,
-	SLOT_NECKLACE=2,
-	SLOT_BACKPACK=3,
-	SLOT_ARMOR=4,
-	SLOT_HAND=5,
-	SLOT_LEGS=6,
-	SLOT_FEET=7,
-	SLOT_RING=8,
-	SLOT_AMMO=9
-};
-
-enum WeaponType {
-  WEAPON_NONE   = 0,
-	WEAPON_SWORD  = 1,
-	WEAPON_CLUB   = 2,
-	WEAPON_AXE    = 3,
-	WEAPON_DIST   = 4,
-	WEAPON_MAGIC  = 5,
-	WEAPON_AMO    = 6,
-	WEAPON_SHIELD = 7
-};
-
-enum subfight_t {
-	DIST_NONE          = 0,
-	DIST_BOLT          = 1,
-  DIST_ARROW         = 2,
-  DIST_FIRE          = 3,
-  DIST_ENERGY        = 4,
-  DIST_POISONARROW   = 5,
-  DIST_BURSTARROW    = 6,
-  DIST_THROWINGSTAR  = 7,
-  DIST_THROWINGKNIFE = 8,
-  DIST_SMALLSTONE    = 9,
-  DIST_SUDDENDEATH   = 10,
-  DIST_LARGEROCK     = 11,
-  DIST_SNOWBALL      = 12,
-  DIST_POWERBOLT     = 13,
-  DIST_SPEAR         = 14,
-  DIST_POISONFIELD   = 15
-};
-
-enum amu_t{
-	AMU_NONE = 0,
-	AMU_BOLT = 1,
-	AMU_ARROW = 2
-};
-
-enum magicfield_t {
-	MAGIC_FIELD_FIRE,
-	MAGIC_FIELD_POISON,
-	MAGIC_FIELD_ENERGY,	
 };
 
 class SpriteType
@@ -132,53 +71,6 @@ public:
 	int numsprites;
 	
 	unsigned short *imageID;
-
-	//xml data
-	std::string name;
-	std::string descr;
-	double weight;
-  unsigned short	decayTo;
-  unsigned short	decayTime;
-	bool blockingProjectile;
-	bool floorchange;
-	int slot_position;
-
-	bool floorChangeNorth;
-	bool floorChangeSouth;
-	bool floorChangeEast;
-	bool floorChangeWest;
-
-	//container
-	int maxItems;
-
-	//weapon
-	amu_t amuType;
-	WeaponType weaponType;
-  subfight_t shootType;
-  int attack;
-  int	defence;
-
-	//armor
-	int armor;
-	
-	//rune
-	int runeMagLevel;
-
-	//teleport
-	bool isteleport;
-
-	//magicfield
-	bool ismagicfield;
-	int magicfieldtype;
-
-	//writeable
-	unsigned short readonlyId;
-
-	//key
-	bool iskey;
-
-	//splash
-	bool issplash;	
 };
 
 
@@ -191,7 +83,6 @@ public:
 	
 	bool loadFromDat(const char *filename);
 	bool loadFromSpr(const char *filename);
-	bool loadFromXml(const char *filename);
 	void unloadSpr();
 	void unloadDat();
 	
@@ -202,14 +93,9 @@ public:
 	
 	InternalSprite getSpriteInternalFormat(unsigned short item_id, unsigned short frame);
 
-	SpriteType* getItem(int id);
 	const SpriteType& operator[](int id);
 
 protected:
-	static int loadstatus;
-	static void XMLCALL xmlstartNode(void *userData, const char *name, const char **atts);
-	static void XMLCALL xmlendNode(void *userData, const char *name);
-
 	bool datLoaded;
 	bool sprLoaded;
 	
