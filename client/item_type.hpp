@@ -28,6 +28,14 @@ enum itemgroup_t{
 	ITEM_GROUP_NONE,
 	ITEM_GROUP_GROUND,
 	ITEM_GROUP_CONTAINER,
+	ITEM_GROUP_WEAPON,
+	ITEM_GROUP_AMMUNITION,
+	ITEM_GROUP_ARMOR,
+	ITEM_GROUP_RUNE,
+	ITEM_GROUP_TELEPORT,
+	ITEM_GROUP_MAGICFIELD,
+	ITEM_GROUP_WRITEABLE,
+	ITEM_GROUP_KEY,
 	ITEM_GROUP_SPLASH
 };
 
@@ -97,6 +105,7 @@ public:
 	ItemType();
 	~ItemType(){}
 	
+	itemgroup_t group;
 	unsigned short id;
 	bool groundtile;
 	bool blocking;
@@ -110,8 +119,8 @@ public:
 	bool creature;
 
 	//xml data
-	std::string name;
-	std::string descr;
+	char name[128];
+	char descr[128];
 	double weight;
   unsigned short	decayTo;
   unsigned short	decayTime;
@@ -162,6 +171,7 @@ class ItemsTypes {
 public:
 	bool loadFromXml(const char *filename);
 
+	bool setGroup(int id, itemgroup_t newgroup);
 	ItemType* getItem(int id);
 
 private:

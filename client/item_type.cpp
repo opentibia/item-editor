@@ -29,6 +29,7 @@ extern ItemsTypes *g_itemsTypes;
 
 ItemType::ItemType()
 {
+	group = ITEM_GROUP_NONE;
 	id			= 100;
 	groundtile	= false;
 	blocking	= false;
@@ -42,8 +43,8 @@ ItemType::ItemType()
 	creature	= false;
 	
 	//xml
-	name = "";
-	descr = "";
+	name[0] = '\0';
+	descr[0] = '\0'; 
 	weight = 0.00;
   decayTo = 0;
   decayTime = 0;
@@ -183,11 +184,13 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 
 		if(sType) {
 			if((tmp = readXmlProp("name", props)) != 0){
-				sType->name = tmp;
+				//sType->name = tmp;
+				strncpy(sType->name, tmp, 127);
 			}
 
 			if((tmp = readXmlProp("descr", props)) != 0){
-				sType->descr = tmp;
+				//sType->descr = tmp;
+				strncpy(sType->descr, tmp, 127);
 			}
 
 			if((tmp = readXmlProp("weight", props)) != 0){
@@ -439,6 +442,17 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 void XMLCALL ItemsTypes::xmlendNode(void *userData, const char *name)
 {
 	//
+}
+
+bool ItemsTypes::setGroup(int id, itemgroup_t newgroup)
+{
+	ItemType* it = getItem(id);
+	if(it) {
+		it->group = newgroup;
+		return true;
+	}
+
+	return false;
 }
 
 ItemType* ItemsTypes::getItem(int id)
