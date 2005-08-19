@@ -55,7 +55,7 @@ protected:
 	static bool onSpinScroll(HWND h, HWND spin);
 	static bool onDragBegin(HWND h, NMTREEVIEW* nmTree);
 	static bool onDragMove(HWND h, LPARAM lParam);
-	static bool onDragEnd();
+	static bool onDragEnd(HWND h);
 	static bool onClientIdChange(HWND h, HWND hEdit);
 
 	//combo
@@ -66,10 +66,10 @@ protected:
 
 	static void invalidateSprite(HWND h);
 
-	static void saveCurrentItem();
-	static void loadItem();
-	static void updateControls();
-	static void loadTreeItemTypes();
+	static void saveCurrentItem(HWND h);
+	static void loadItem(HWND h);
+	static void updateControls(HWND h);
+	static void loadTreeItemTypes(HWND h);
 
 	static long curItemClientId;
 	static long curItemServerId;

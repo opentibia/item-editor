@@ -174,7 +174,7 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 		break;
 	case WM_LBUTTONUP:
 		if(m_dragging){
-			return onDragEnd();
+			return onDragEnd(h);
 		}
 		break;
 	case WM_VSCROLL:
@@ -248,7 +248,7 @@ bool GUIWin::onDragMove(HWND h, LPARAM lParam)
 	return TRUE;
 }
 
-bool GUIWin::onDragEnd()
+bool GUIWin::onDragEnd(HWND h)
 {
 	TV_ITEM itemInfo;
 	char *buffer;
@@ -274,9 +274,9 @@ bool GUIWin::onDragEnd()
 		TreeView_GetItem(m_hwndTree, &itemInfo);
 		g_itemsTypes->setGroup(id, (itemgroup_t)itemInfo.lParam);
 		if(id == curItemServerId){
-			saveCurrentItem();
-			loadItem();
-			updateControls();
+			saveCurrentItem(h);
+			loadItem(h);
+			updateControls(h);
 		}
 	}
 	m_dragging = false;
@@ -287,7 +287,7 @@ bool GUIWin::onDragEnd()
 
 bool GUIWin::onTreeSelChange(HWND h, NMTREEVIEW* nmTree)
 {
-	saveCurrentItem();
+	saveCurrentItem(h);
 
 	if(nmTree->itemNew.lParam >= 100){
 		curItem = nmTree->itemNew.hItem;
@@ -298,8 +298,8 @@ bool GUIWin::onTreeSelChange(HWND h, NMTREEVIEW* nmTree)
 		curItemServerId = 0;
 	}
 
-	loadItem();
-	updateControls();
+	loadItem(h);
+	updateControls(h);
 
 	return true;
 }
@@ -389,7 +389,7 @@ bool GUIWin::onInitDialog(HWND h)
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Poison Arrow", 0);
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Burst Arrow", 0);
 
-	updateControls();
+	updateControls(h);
 	
 	return TRUE;
 }
@@ -419,6 +419,7 @@ void GUIWin::createGroupsTree(HWND htree)
 	rootItems[ITEM_GROUP_WRITEABLE] = insterTreeItem(htree, "Writeable", NULL, ITEM_GROUP_WRITEABLE);
 	rootItems[ITEM_GROUP_KEY] = insterTreeItem(htree, "Key", NULL, ITEM_GROUP_KEY);
 	rootItems[ITEM_GROUP_SPLASH] = insterTreeItem(htree, "Splash", NULL, ITEM_GROUP_SPLASH);
+	rootItems[ITEM_GROUP_FLUID] = insterTreeItem(htree, "FLuid Container", NULL, ITEM_GROUP_FLUID);
 	rootItems[ITEM_GROUP_NONE] = insterTreeItem(htree, "Other", NULL, ITEM_GROUP_NONE);
 
 	insterTreeItem(htree, "Container 1", rootItems[ITEM_GROUP_NONE], 1988);
@@ -464,19 +465,126 @@ void GUIWin::invalidateSprite(HWND h)
 	InvalidateRect(h, &rect, false);
 }
 
-void GUIWin::saveCurrentItem()
+void GUIWin::saveCurrentItem(HWND h)
 {
 	if(!curItemServerId)
 		return;
 
 	//validate and save values to itemType[curItemServerId] map
+	//UINT IsDlgButtonChecked(HWND hDlg,int nIDButton);BST_UNCHECKED, BST_UNCHECKED
+
 	//change name in tree
 }
 
-void GUIWin::loadItem()
+void GUIWin::loadItem(HWND h)
 {
 	//load ItemType[curItemServerId] options in gui
-	if(curItemServerId){
+	ItemType *iType;
+	char buffer[128];
+	if(curItemServerId && (iType = g_itemsTypes->getItem(curItemServerId))){
+		
+		SetDlgItemText(h, IDC_EDITNAME, iType->name);
+
+		SetDlgItemText(h, IDC_EDITDESCR, iType->descr);
+
+		sprintf(buffer, "%d", iType->id);
+		SetDlgItemText(h, IDC_SID, buffer);
+
+		sprintf(buffer, "%d", iType->clientid);
+		SetDlgItemText(h, IDC_EDITCID, buffer);
+
+		sprintf(buffer, "%d", iType->decayTo);
+		SetDlgItemText(h, IDC_EDIT_DECAYTO, buffer);
+
+		sprintf(buffer, "%d", iType->decayTime);
+		SetDlgItemText(h, IDC_EDIT_DECAYTIME, buffer);
+
+		sprintf(buffer, "%d", iType->attack);
+		SetDlgItemText(h, IDC_EDIT_ATK, buffer);
+
+		sprintf(buffer, "%d", iType->defence);
+		SetDlgItemText(h, IDC_EDIT_DEF, buffer);
+		
+		sprintf(buffer, "%d", iType->armor);
+		SetDlgItemText(h, IDC_EDIT_ARM, buffer);
+
+		sprintf(buffer, "%d", iType->maxItems);
+		SetDlgItemText(h, IDC_EDIT_MAXITEMS, buffer);
+
+		sprintf(buffer, "%d", iType->decayTo);
+		SetDlgItemText(h, IDC_EDIT_DECAYTO, buffer);
+
+		sprintf(buffer, "%d", iType->speed);
+		SetDlgItemText(h, IDC_EDIT_SPEED, buffer);
+
+		sprintf(buffer, "%d", iType->readonlyId);
+		SetDlgItemText(h, IDC_EDIT_READONLY, buffer);
+
+		sprintf(buffer, "%d", iType->rotateTo);
+		SetDlgItemText(h, IDC_EDIT_ROTATETO, buffer);
+
+		sprintf(buffer, "%f", iType->weight);
+		SetDlgItemText(h, IDC_EDIT_ROTATETO, buffer);
+
+		UINT check;
+
+		if(iType->blocking)
+			check = BST_CHECKED;
+		else
+			check = BST_CHECKED;
+		CheckDlgButton(h,IDC_OPT_BLOCKING,check);
+
+		if(iType->alwaysOnTop)
+			check = BST_CHECKED;
+		else
+			check = BST_CHECKED;
+		CheckDlgButton(h,IDC_OPT_ATOP,check);
+		
+		if(iType->stackable)
+			check = BST_CHECKED;
+		else
+			check = BST_CHECKED;
+		CheckDlgButton(h,IDC_OPT_STACKABLE,check);
+		
+		if(iType->useable)
+			check = BST_CHECKED;
+		else
+			check = BST_CHECKED;
+		CheckDlgButton(h,IDC_OPT_USEABLE,check);
+		
+		if(iType->notMoveable)
+			check = BST_CHECKED;
+		else
+			check = BST_CHECKED;
+		CheckDlgButton(h,IDC_OPT_NO_MOVE,check);
+
+		if(iType->pickupable)
+			check = BST_CHECKED;
+		else
+			check = BST_CHECKED;
+		CheckDlgButton(h,IDC_OPT_PICKUP,check);
+
+		if(iType->rotable)
+			check = BST_CHECKED;
+		else
+			check = BST_CHECKED;
+		CheckDlgButton(h,IDC_OPT_ROTABLE,check);
+		
+		if(iType->blockingProjectile)
+			check = BST_CHECKED;
+		else
+			check = BST_CHECKED;
+		CheckDlgButton(h,IDC_OPT_BLOCKPROJECTILE,check);
+
+		//IDC_OPT_WRITE1TIME
+
+
+		//CB_SETCURSEL, CB_GETCURSEL
+		//IDC_COMBO_SLOT
+		//IDC_COMBO_SKILL
+		//IDC_COMBO_AMU
+		//IDC_COMBO_SHOOT
+		//IDC_COMBO_FLOOR
 
 	}
 	else{
@@ -484,14 +592,14 @@ void GUIWin::loadItem()
 	}
 }
 
-void GUIWin::updateControls()
+void GUIWin::updateControls(HWND h)
 {
 	//update controls depending on curItemServerId
 	//EnableWindow(GetDlgItem(h, IDC_SPINCID),false);
 	//EnableWindow(GetDlgItem(h, IDC_EDITCID),false);
 }
 
-void GUIWin::loadTreeItemTypes()
+void GUIWin::loadTreeItemTypes(HWND h)
 {
 	//delete all items in the tree
 	//load itemType map
