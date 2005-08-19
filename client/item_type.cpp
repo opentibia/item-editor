@@ -42,6 +42,7 @@ ItemType::ItemType()
 	pickupable	= false;
 	fluid = false;
 	rotable = false;
+	isammo = false;
 	
 	rotateTo = 0;
 
@@ -88,6 +89,7 @@ ItemType::ItemType()
 	
 	//writeable
 	readonlyId = 0;
+	write1time = false;
 	
 	//key
 	iskey = false;
@@ -243,9 +245,9 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 				if (!strcmp(tmp, "helmet") || !strcmp(tmp, "head"))
 					sType->slot_position = SLOT_HEAD;
 				else if (!strcmp(tmp, "amulet"))
-					sType->slot_position = SLOT_NECKLACE;
+					sType->slot_position = SLOT_AMULET;
 				else if (!strcmp(tmp, "body"))
-					sType->slot_position = SLOT_ARMOR;
+					sType->slot_position = SLOT_BODY;
 				else if (!strcmp(tmp, "legs"))
 					sType->slot_position = SLOT_LEGS;
 				else if (!strcmp(tmp, "boots"))
@@ -254,14 +256,13 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 					sType->slot_position = SLOT_RING;
 				else if (!strcmp(tmp, "backpack"))					 	
 					sType->slot_position = SLOT_BACKPACK;
-				/*else if (!strcmp(tmp, "weapon"))
-					sType->slot_position = SLOT_HAND;*/
-				/*else if (!strcmp(tmp, "twohand"))
-					sType->slot_position = SLOTP_RIGHT | SLOTP_LEFT | SLOTP_TWO_HAND;*/
-				/*else if (!strcmp(tmp, "hand"))
-					sType->slot_position = SLOTP_RIGHT | SLOTP_LEFT | SLOTP_AMMO;*/
+				else if (!strcmp(tmp, "weapon"))
+					sType->slot_position = SLOT_HAND;
+				else if (!strcmp(tmp, "twohand"))
+					sType->slot_position = SLOT_2HAND;
+				else if (!strcmp(tmp, "hand"))
+					sType->slot_position = SLOT_HAND;
 				
-				//sType->slot_position |= SLOTP_LEFT | SLOTP_RIGHT | SLOTP_AMMO;
 				sType->slot_position = SLOT_HAND;
 			}
 			
@@ -356,7 +357,7 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 				}
 				//ammunition
 				else if(strcmp(type, "amunition") == 0) {
-					sType->weaponType = WEAPON_AMO;
+					sType->isammo = true;
 					
 					const char *amutype;
 					if((amutype = readXmlProp("amutype", props)) != 0) {
@@ -432,6 +433,7 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 				else if(!strcmp(type, "write1time")) {
 					if((tmp = readXmlProp("readonlyid", props)) != 0) {
 						sType->readonlyId = atoi(tmp);
+						sType->write1time = true;
 					}
 				}
 				//key

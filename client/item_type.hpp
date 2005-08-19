@@ -42,26 +42,27 @@ enum itemgroup_t{
 };
 
 enum slots_t {
-	SLOT_HEAD=1,
-	SLOT_NECKLACE=2,
-	SLOT_BACKPACK=3,
-	SLOT_ARMOR=4,
-	SLOT_HAND=5,
-	SLOT_LEGS=6,
-	SLOT_FEET=7,
-	SLOT_RING=8,
-	SLOT_AMMO=9
+	SLOT_DEFAULT,
+	SLOT_HEAD,
+	SLOT_BODY,
+	SLOT_LEGS,
+	SLOT_BACKPACK,
+	SLOT_WEAPON,
+	SLOT_2HAND,
+	SLOT_FEET,
+	SLOT_AMULET,
+	SLOT_RING,
+	SLOT_HAND,
 };
 
 enum WeaponType {
-	WEAPON_NONE   = 0,
-	WEAPON_SWORD  = 1,
-	WEAPON_CLUB   = 2,
-	WEAPON_AXE    = 3,
-	WEAPON_DIST   = 4,
-	WEAPON_MAGIC  = 5,
-	WEAPON_AMO    = 6,
-	WEAPON_SHIELD = 7
+	WEAPON_NONE,
+	WEAPON_SWORD,
+	WEAPON_CLUB,
+	WEAPON_AXE,
+	WEAPON_SHIELD,
+	WEAPON_DIST,
+	WEAPON_MAGIC,
 };
 
 enum subfight_t {
@@ -120,6 +121,7 @@ public:
 	bool pickupable;
 	bool fluid;
 	bool rotable;
+	bool isammo;
 
 	unsigned short rotateTo;
 	
@@ -131,7 +133,7 @@ public:
 	unsigned short	decayTime;
 	bool blockingProjectile;
 	bool floorchange;
-	int slot_position;
+	slots_t slot_position;
 	bool floorChangeNorth;
 	bool floorChangeSouth;
 	bool floorChangeEast;
@@ -165,6 +167,7 @@ public:
 	
 	//writeable
 	unsigned short readonlyId;
+	bool write1time;
 	
 	//key
 	bool iskey;
