@@ -37,6 +37,7 @@ enum itemgroup_t{
 	ITEM_GROUP_WRITEABLE,
 	ITEM_GROUP_KEY,
 	ITEM_GROUP_SPLASH,
+	ITEM_GROUP_FLUID,
 	ITEM_GROUP_LAST
 };
 
@@ -108,6 +109,7 @@ public:
 	
 	itemgroup_t group;
 	unsigned short id;
+	unsigned short clientid;
 	bool groundtile;
 	bool blocking;
 	bool alwaysOnTop;
@@ -116,8 +118,10 @@ public:
 	bool useable;
 	bool notMoveable;
 	bool pickupable;
-	bool fluidcontainer;
-	bool creature;
+	bool fluid;
+	bool rotable;
+
+	unsigned short rotateTo;
 	
 	//xml data
 	char name[128];
@@ -128,12 +132,14 @@ public:
 	bool blockingProjectile;
 	bool floorchange;
 	int slot_position;
-	
 	bool floorChangeNorth;
 	bool floorChangeSouth;
 	bool floorChangeEast;
 	bool floorChangeWest;
-	
+
+	//ground
+	int speed;
+
 	//container
 	int maxItems;
 	

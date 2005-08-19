@@ -31,6 +31,7 @@ ItemType::ItemType()
 {
 	group = ITEM_GROUP_NONE;
 	id			= 100;
+	clientid	= 100;
 	groundtile	= false;
 	blocking	= false;
 	alwaysOnTop	= false;
@@ -39,9 +40,11 @@ ItemType::ItemType()
 	useable		= false;
 	notMoveable	= false;
 	pickupable	= false;
-	fluidcontainer = false;
-	creature	= false;
+	fluid = false;
+	rotable = false;
 	
+	rotateTo = 0;
+
 	//xml
 	name[0] = '\0';
 	descr[0] = '\0'; 
@@ -51,12 +54,15 @@ ItemType::ItemType()
 	blockingProjectile = false;
 	floorchange = false;
 	slot_position = SLOT_HAND;
-	
+
 	floorChangeNorth = false;
 	floorChangeSouth = false;
 	floorChangeEast = false;
 	floorChangeWest = false;
-	
+
+	//ground
+	speed = 0;
+
 	//container
 	maxItems = 20;
 	
@@ -88,6 +94,7 @@ ItemType::ItemType()
 	
 	//splash
 	issplash = false;
+
 }
 
 
@@ -206,7 +213,10 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 			}
 
 			if((tmp = readXmlProp("blockingprojectile", props)) != 0){
-				sType->blockingProjectile = atoi(tmp);
+				if(atoi(tmp) == 0)
+					sType->blockingProjectile = false;
+				else
+					sType->blockingProjectile = true;
 			}
 
 			if((tmp = readXmlProp("floorchange", props)) != 0){
