@@ -109,8 +109,8 @@ public:
 	~ItemType(){}
 	
 	itemgroup_t group;
-	unsigned short id;
-	unsigned short clientid;
+	int id;
+	int clientid;
 	bool groundtile;
 	bool blocking;
 	bool alwaysOnTop;
@@ -123,14 +123,14 @@ public:
 	bool rotable;
 	bool isammo;
 
-	unsigned short rotateTo;
+	int rotateTo;
 	
 	//xml data
 	char name[128];
 	char descr[128];
 	double weight;
-	unsigned short	decayTo;
-	unsigned short	decayTime;
+	int	decayTo;
+	int	decayTime;
 	bool blockingProjectile;
 	bool floorchange;
 	slots_t slot_position;
@@ -166,7 +166,7 @@ public:
 	int magicfieldtype;
 	
 	//writeable
-	unsigned short readonlyId;
+	int readonlyId;
 	bool write1time;
 	
 	//key
