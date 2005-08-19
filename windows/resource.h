@@ -19,7 +19,6 @@
 #define IDC_OPT_USEABLE                 1020
 #define IDC_OPT_NO_MOVE                 1021
 #define IDC_OPT_PICKUP                  1022
-#define IDC_OPT_FLUID                   1023
 #define IDC_OPT_ROTABLE                 1024
 #define IDC_EDIT_DECAYTO                1025
 #define IDC_COMBO_FLOOR                 1026
@@ -34,7 +33,7 @@
 #define IDC_EDIT_ATK                    1036
 #define IDC_EDIT_DEF                    1037
 #define IDC_EDIT_ARM                    1038
-#define IDC_EDIT_READONLY               1039
+#define IDC_EDIT_READONLYID             1039
 #define IDC_SET_CLIENT_OPT              1040
 #define IDC_EDIT_SPEED                  1041
 #define IDC_OPT_WRITE1TIME              1045

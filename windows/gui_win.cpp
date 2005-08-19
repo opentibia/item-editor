@@ -36,6 +36,19 @@ extern ItemsTypes *g_itemsTypes;
 extern "C" WINGDIAPI BOOL  WINAPI TransparentBlt(IN HDC,IN int,IN int,IN int,IN int,IN HDC,IN int,IN int,IN int,IN int,IN UINT);
 #endif
 
+inline bool getFlagState(unsigned long n, unsigned long flag)
+{
+	if((n & flag) != 0)
+		return true;
+	else
+		return false;
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// class GUIWin
+/////////////////////////////////////////////////////////////////////////////////////////////
+
 GUIDraw* GUIWin::drawEngine = NULL;
 long GUIWin::curItemClientId = 0;
 HTREEITEM GUIWin::curItem = NULL;
@@ -242,8 +255,15 @@ bool GUIWin::onDragMove(HWND h, LPARAM lParam)
 		itemInfo.mask = TVIF_HANDLE;
 		itemInfo.hItem = hitTarget;
 		TreeView_GetItem(m_hwndTree, &itemInfo);
-		if(itemInfo.lParam < 100)
+		if(itemInfo.lParam < 100){
 			TreeView_SelectDropTarget(m_hwndTree, hitTarget);
+		}
+		else{
+			ItemType *iType;
+			if(iType = g_itemsTypes->getItem(curItemServerId)){
+				//TreeView_SelectDropTarget(m_hwndTree, rootItems[iType->getGroup()]);
+			}
+		}
 	} 
 	return TRUE;
 }
@@ -334,60 +354,62 @@ bool GUIWin::onInitDialog(HWND h)
 	SendMessage(GetDlgItem(h, IDC_SPINCID),UDM_SETRANGE,0,MAKELONG((short) SpriteType::maxClientId, (short)SpriteType::minClientId));
 
 	//floor change
-	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "No change", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Down", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up North", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up South", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up East", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up West", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up NE", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up NW", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up SW", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up SE", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "No change", FLOOR_NO_CHANGE);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Down", FLOOR_DOWN);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up North", FLOOR_U_N);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up South", FLOOR_U_S);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up East", FLOOR_U_E);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up West", FLOOR_U_W);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up NE", FLOOR_U_NE);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up NW", FLOOR_U_NW);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up SE", FLOOR_U_SE);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up SW", FLOOR_U_SW);
 
 	//slot
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Default", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Head", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Body", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Legs", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Backpack", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "weapon", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Wwo hand", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Boots", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Amulet", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Ring", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Hand", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Default", SLOT_DEFAULT);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Head", SLOT_HEAD);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Body", SLOT_BODY);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Legs", SLOT_LEGS);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Backpack", SLOT_BACKPACK);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "weapon", SLOT_WEAPON);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Two hand", SLOT_2HAND);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Boots", SLOT_FEET);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Amulet", SLOT_AMULET);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Ring", SLOT_RING);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Hand", SLOT_HAND);
 
+	
 	//skills
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "Sword", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "Club", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "Axe", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "Shield", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "Distance", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "Magic", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "None", WEAPON_NONE);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "Sword", WEAPON_SWORD);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "Club", WEAPON_CLUB);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "Axe", WEAPON_AXE);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "Shield", WEAPON_SHIELD);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "Distance", WEAPON_DIST);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "Magic", WEAPON_MAGIC);
 
 	//amu
-	createItemCombo(GetDlgItem(h, IDC_COMBO_AMU), "None", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_AMU), "Bolt", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_AMU), "Arrow", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_AMU), "None", AMU_NONE);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_AMU), "Bolt", AMU_BOLT);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_AMU), "Arrow", AMU_ARROW);
 
 	//shoot
 	SendMessage(GetDlgItem(h, IDC_COMBO_SHOOT), CB_SETDROPPEDWIDTH, 96, 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "None", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Throwing Star", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Throwing Knife", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Small Stone", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Sudden Death", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Large Rock", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Snowball", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Spear", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Fire", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Energy", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Bolt", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Power Bolt", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Arrow", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Poison Arrow", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Burst Arrow", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "None", DIST_NONE);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Throwing Star", DIST_THROWINGSTAR);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Throwing Knife", DIST_THROWINGKNIFE);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Small Stone", DIST_SMALLSTONE);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Sudden Death", DIST_SUDDENDEATH);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Large Rock", DIST_LARGEROCK);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Snowball", DIST_SNOWBALL);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Spear", DIST_SPEAR);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Fire", DIST_FIRE);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Energy", DIST_ENERGY);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Bolt", DIST_BOLT);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Power Bolt", DIST_POWERBOLT);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Arrow", DIST_ARROW);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Poison Arrow", DIST_POISONARROW);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Burst Arrow", DIST_BURSTARROW);
 
 	updateControls(h);
 	
@@ -480,123 +502,208 @@ void GUIWin::loadItem(HWND h)
 {
 	//load ItemType[curItemServerId] options in gui
 	ItemType *iType;
-	char buffer[128];
 	if(curItemServerId && (iType = g_itemsTypes->getItem(curItemServerId))){
 		
 		SetDlgItemText(h, IDC_EDITNAME, iType->name);
-
 		SetDlgItemText(h, IDC_EDITDESCR, iType->descr);
 
-		sprintf(buffer, "%d", iType->id);
-		SetDlgItemText(h, IDC_SID, buffer);
+		setEditTextInt(h, IDC_SID, iType->id);
+		setEditTextInt(h, IDC_EDITCID, iType->clientid);
+		setEditTextInt(h, IDC_EDIT_DECAYTO, iType->decayTo);
+		setEditTextInt(h, IDC_EDIT_DECAYTIME, iType->decayTime);
+		setEditTextInt(h, IDC_EDIT_ATK, iType->attack);
+		setEditTextInt(h, IDC_EDIT_DEF, iType->defence);
+		setEditTextInt(h, IDC_EDIT_ARM, iType->armor);
+		setEditTextInt(h, IDC_EDIT_MAXITEMS, iType->maxItems);
+		setEditTextInt(h, IDC_EDIT_SPEED, iType->speed);
+		setEditTextInt(h, IDC_EDIT_READONLYID, iType->readonlyId);
+		setEditTextInt(h, IDC_EDIT_ROTATETO, iType->rotateTo);
+		setEditTextDouble(h, IDC_EDIT_WEIGHT, iType->weight);
 
-		sprintf(buffer, "%d", iType->clientid);
-		SetDlgItemText(h, IDC_EDITCID, buffer);
+		setCheckButton(h, IDC_OPT_BLOCKING, iType->blocking);
+		setCheckButton(h, IDC_OPT_ATOP, iType->alwaysOnTop);
+		setCheckButton(h, IDC_OPT_STACKABLE, iType->stackable);
+		setCheckButton(h, IDC_OPT_USEABLE, iType->useable);
+		setCheckButton(h, IDC_OPT_NO_MOVE, iType->notMoveable);
+		setCheckButton(h, IDC_OPT_PICKUP, iType->pickupable);
+		setCheckButton(h, IDC_OPT_ROTABLE, iType->rotable);
+		setCheckButton(h, IDC_OPT_BLOCKPROJECTILE, iType->blockingProjectile);
+		setCheckButton(h, IDC_OPT_WRITE1TIME, iType->write1time);
 
-		sprintf(buffer, "%d", iType->decayTo);
-		SetDlgItemText(h, IDC_EDIT_DECAYTO, buffer);
+		setComboValue(h, IDC_COMBO_SLOT, iType->slot_position);
+		setComboValue(h, IDC_COMBO_SKILL, iType->weaponType);
+		setComboValue(h, IDC_COMBO_AMU, iType->amuType);
+		setComboValue(h, IDC_COMBO_SHOOT, iType->shootType);
 
-		sprintf(buffer, "%d", iType->decayTime);
-		SetDlgItemText(h, IDC_EDIT_DECAYTIME, buffer);
-
-		sprintf(buffer, "%d", iType->attack);
-		SetDlgItemText(h, IDC_EDIT_ATK, buffer);
-
-		sprintf(buffer, "%d", iType->defence);
-		SetDlgItemText(h, IDC_EDIT_DEF, buffer);
-		
-		sprintf(buffer, "%d", iType->armor);
-		SetDlgItemText(h, IDC_EDIT_ARM, buffer);
-
-		sprintf(buffer, "%d", iType->maxItems);
-		SetDlgItemText(h, IDC_EDIT_MAXITEMS, buffer);
-
-		sprintf(buffer, "%d", iType->decayTo);
-		SetDlgItemText(h, IDC_EDIT_DECAYTO, buffer);
-
-		sprintf(buffer, "%d", iType->speed);
-		SetDlgItemText(h, IDC_EDIT_SPEED, buffer);
-
-		sprintf(buffer, "%d", iType->readonlyId);
-		SetDlgItemText(h, IDC_EDIT_READONLY, buffer);
-
-		sprintf(buffer, "%d", iType->rotateTo);
-		SetDlgItemText(h, IDC_EDIT_ROTATETO, buffer);
-
-		sprintf(buffer, "%f", iType->weight);
-		SetDlgItemText(h, IDC_EDIT_ROTATETO, buffer);
-
-		UINT check;
-
-		if(iType->blocking)
-			check = BST_CHECKED;
+		if(iType->floorchange)
+			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_DOWN);
+		else if(iType->floorChangeNorth && iType->floorChangeEast)
+			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_U_NE);
+		else if(iType->floorChangeSouth && iType->floorChangeEast)
+			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_U_SE);
+		else if(iType->floorChangeNorth && iType->floorChangeWest)
+			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_U_NW);
+		else if(iType->floorChangeSouth && iType->floorChangeWest)
+			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_U_SW);
+		else if(iType->floorChangeNorth)
+			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_U_N);
+		else if(iType->floorChangeSouth)
+			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_U_S);
+		else if(iType->floorChangeEast)
+			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_U_E);
+		else if(iType->floorChangeWest)
+			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_U_W);
 		else
-			check = BST_CHECKED;
-		CheckDlgButton(h,IDC_OPT_BLOCKING,check);
-
-		if(iType->alwaysOnTop)
-			check = BST_CHECKED;
-		else
-			check = BST_CHECKED;
-		CheckDlgButton(h,IDC_OPT_ATOP,check);
-		
-		if(iType->stackable)
-			check = BST_CHECKED;
-		else
-			check = BST_CHECKED;
-		CheckDlgButton(h,IDC_OPT_STACKABLE,check);
-		
-		if(iType->useable)
-			check = BST_CHECKED;
-		else
-			check = BST_CHECKED;
-		CheckDlgButton(h,IDC_OPT_USEABLE,check);
-		
-		if(iType->notMoveable)
-			check = BST_CHECKED;
-		else
-			check = BST_CHECKED;
-		CheckDlgButton(h,IDC_OPT_NO_MOVE,check);
-
-		if(iType->pickupable)
-			check = BST_CHECKED;
-		else
-			check = BST_CHECKED;
-		CheckDlgButton(h,IDC_OPT_PICKUP,check);
-
-		if(iType->rotable)
-			check = BST_CHECKED;
-		else
-			check = BST_CHECKED;
-		CheckDlgButton(h,IDC_OPT_ROTABLE,check);
-		
-		if(iType->blockingProjectile)
-			check = BST_CHECKED;
-		else
-			check = BST_CHECKED;
-		CheckDlgButton(h,IDC_OPT_BLOCKPROJECTILE,check);
-
-		//IDC_OPT_WRITE1TIME
-
-
-		//CB_SETCURSEL, CB_GETCURSEL
-		//IDC_COMBO_SLOT
-		//IDC_COMBO_SKILL
-		//IDC_COMBO_AMU
-		//IDC_COMBO_SHOOT
-		//IDC_COMBO_FLOOR
+			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_NO_CHANGE);
 
 	}
 	else{
+		SetDlgItemText(h, IDC_EDITNAME, "");
+		SetDlgItemText(h, IDC_EDITDESCR, "");
 
+		setEditTextInt(h, IDC_SID, 0);
+		setEditTextInt(h, IDC_EDITCID, 0);
+		setEditTextInt(h, IDC_EDIT_DECAYTO, 0);
+		setEditTextInt(h, IDC_EDIT_DECAYTIME, 0);
+		setEditTextInt(h, IDC_EDIT_ATK, 0);
+		setEditTextInt(h, IDC_EDIT_DEF, 0);
+		setEditTextInt(h, IDC_EDIT_ARM, 0);
+		setEditTextInt(h, IDC_EDIT_MAXITEMS, 0);
+		setEditTextInt(h, IDC_EDIT_SPEED, 0);
+		setEditTextInt(h, IDC_EDIT_READONLYID, 0);
+		setEditTextInt(h, IDC_EDIT_ROTATETO, 0);
+		setEditTextDouble(h, IDC_EDIT_WEIGHT, 0);
+
+		setCheckButton(h, IDC_OPT_BLOCKING, false);
+		setCheckButton(h, IDC_OPT_ATOP, false);
+		setCheckButton(h, IDC_OPT_STACKABLE, false);
+		setCheckButton(h, IDC_OPT_USEABLE, false);
+		setCheckButton(h, IDC_OPT_NO_MOVE, false);
+		setCheckButton(h, IDC_OPT_PICKUP, false);
+		setCheckButton(h, IDC_OPT_ROTABLE, false);
+		setCheckButton(h, IDC_OPT_BLOCKPROJECTILE, false);
+		setCheckButton(h, IDC_OPT_WRITE1TIME, false);
+
+		setComboValue(h, IDC_COMBO_SLOT, SLOT_DEFAULT);
+		setComboValue(h, IDC_COMBO_SKILL, WEAPON_NONE);
+		setComboValue(h, IDC_COMBO_AMU, AMU_NONE);
+		setComboValue(h, IDC_COMBO_SHOOT, DIST_NONE);
+
+		setComboValue(h, IDC_COMBO_FLOOR, FLOOR_NO_CHANGE);
 	}
+}
+
+void GUIWin::setComboValue(HWND h, int combo, int value)
+{
+	//CB_SETCURSEL, CB_GETCURSEL
+}
+
+void GUIWin::setCheckButton(HWND h, int button, bool value)
+{
+	UINT check;
+	if(value)
+		check = BST_CHECKED;
+	else
+		check = BST_UNCHECKED;
+
+	CheckDlgButton(h,button,check);
+
+}
+
+void GUIWin::setEditTextInt(HWND h, int button, int value)
+{
+	char buffer[16];
+	sprintf(buffer, "%d", value);
+	SetDlgItemText(h, button , buffer);
+}
+
+void GUIWin::setEditTextDouble(HWND h, int button, double value)
+{
+	char buffer[16];
+	sprintf(buffer, "%.2f", value);
+	SetDlgItemText(h, button , buffer);
 }
 
 void GUIWin::updateControls(HWND h)
 {
 	//update controls depending on curItemServerId
-	//EnableWindow(GetDlgItem(h, IDC_SPINCID),false);
-	//EnableWindow(GetDlgItem(h, IDC_EDITCID),false);
+	ItemType *iType;
+	if(curItemServerId && (iType = g_itemsTypes->getItem(curItemServerId))){
+		unsigned long editbase = IDC_EDITNAME_FLAG | IDC_EDITDSECR_FLAG | IDC_EDITCID_FLAG |
+						IDC_EDIT_DECAYTO_FLAG | IDC_EDIT_DECAYTIME_FLAG;
+		/*switch(iType->getGroup()){
+		case ITEM_GROUP_GROUND:
+			setControlState(h, editbase | ......, 0, 0, 0);
+			break
+		case ITEM_GROUP_CONTAINER:
+			break
+		case ITEM_GROUP_WEAPON:
+			break
+		case ITEM_GROUP_AMMUNITION:
+			break
+		case ITEM_GROUP_ARMOR:
+			break
+		case ITEM_GROUP_RUNE:
+			break
+		case ITEM_GROUP_TELEPORT:
+			break
+		case ITEM_GROUP_MAGICFIELD:
+			break
+		case ITEM_GROUP_WRITEABLE:
+			break
+		case ITEM_GROUP_KEY:
+			break
+		case ITEM_GROUP_SPLASH:
+			break
+		case ITEM_GROUP_FLUID:
+			break
+		case ITEM_GROUP_NONE:
+			break
+		default:
+			break;
+		}*/
+	}
+	else{
+		setControlState(h, IDC_EDITCID_FLAG, 0, 0, 0);
+	}
+}
+
+void GUIWin::setControlState(HWND h, unsigned long flagsEdit, unsigned long flagsOpt, unsigned long flagsCombo, unsigned long flagsButton)
+{
+
+	EnableWindow(GetDlgItem(h, IDC_EDITNAME),getFlagState(flagsEdit, IDC_EDITNAME_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_EDITDESCR),getFlagState(flagsEdit, IDC_EDITDSECR_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_EDITCID),getFlagState(flagsEdit, IDC_EDITCID_FLAG));
+
+	EnableWindow(GetDlgItem(h, IDC_EDIT_DECAYTO),getFlagState(flagsEdit, IDC_EDIT_DECAYTO_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_EDIT_DECAYTIME),getFlagState(flagsEdit, IDC_EDIT_DECAYTIME_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_EDIT_ATK),getFlagState(flagsEdit, IDC_EDIT_ATK_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_EDIT_DEF),getFlagState(flagsEdit, IDC_EDIT_DEF_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_EDIT_ARM),getFlagState(flagsEdit, IDC_EDIT_ARM_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_EDIT_MAXITEMS),getFlagState(flagsEdit, IDC_EDIT_MAXITEMS_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_EDIT_SPEED),getFlagState(flagsEdit, IDC_EDIT_SPEED_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_EDIT_READONLYID),getFlagState(flagsEdit, IDC_EDIT_READONLYID_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_EDIT_ROTATETO),getFlagState(flagsEdit, IDC_EDIT_ROTATETO_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_EDIT_WEIGHT),getFlagState(flagsEdit, IDC_EDIT_WEIGHT_FLAG));
+
+	EnableWindow(GetDlgItem(h, IDC_OPT_BLOCKING),getFlagState(flagsOpt, IDC_OPT_BLOCKING_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_OPT_ATOP),getFlagState(flagsOpt, IDC_OPT_ATOP_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_OPT_STACKABLE),getFlagState(flagsOpt, IDC_OPT_STACKABLE_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_OPT_USEABLE),getFlagState(flagsOpt, IDC_OPT_USEABLE_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_OPT_NO_MOVE),getFlagState(flagsOpt, IDC_OPT_NO_MOVE_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_OPT_PICKUP),getFlagState(flagsOpt, IDC_OPT_PICKUP_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_OPT_ROTABLE),getFlagState(flagsOpt, IDC_OPT_ROTABLE_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_OPT_BLOCKPROJECTILE),getFlagState(flagsOpt, IDC_OPT_BLOCKPROJECTILE_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_OPT_WRITE1TIME),getFlagState(flagsOpt, IDC_OPT_WRITE1TIME_FLAG));
+
+	EnableWindow(GetDlgItem(h, IDC_COMBO_SLOT),getFlagState(flagsCombo, IDC_COMBO_SLOT_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_COMBO_SKILL),getFlagState(flagsCombo, IDC_COMBO_SKILL_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_COMBO_AMU),getFlagState(flagsCombo, IDC_COMBO_AMU_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_COMBO_SHOOT),getFlagState(flagsCombo, IDC_COMBO_SHOOT_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_COMBO_FLOOR),getFlagState(flagsCombo, IDC_COMBO_FLOOR_FLAG));
+
+	EnableWindow(GetDlgItem(h, IDC_SET_CLIENT_OPT),getFlagState(flagsButton, IDC_SET_CLIENT_OPT_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_SAVE_ITEM),getFlagState(flagsButton, IDC_SAVE_ITEM_FLAG));
 }
 
 void GUIWin::loadTreeItemTypes(HWND h)

@@ -48,6 +48,61 @@ public:
 	virtual void unloadSpriteInternal(InternalSprite);
 
 protected:
+
+	enum floorchange_t{
+		FLOOR_NO_CHANGE,
+		FLOOR_DOWN,
+		FLOOR_U_N,
+		FLOOR_U_S,
+		FLOOR_U_E,
+		FLOOR_U_W,
+		FLOOR_U_NE,
+		FLOOR_U_NW,
+		FLOOR_U_SE,
+		FLOOR_U_SW,
+	};
+
+	enum controlEdit_t{
+		IDC_EDITNAME_FLAG = 1,
+		IDC_EDITDSECR_FLAG = 2,
+		IDC_EDITCID_FLAG = 4,
+		IDC_EDIT_DECAYTO_FLAG = 8,
+		IDC_EDIT_DECAYTIME_FLAG = 16,
+		IDC_EDIT_ATK_FLAG = 32,
+		IDC_EDIT_DEF_FLAG = 64,
+		IDC_EDIT_ARM_FLAG = 128,
+		IDC_EDIT_MAXITEMS_FLAG = 256,
+		IDC_EDIT_SPEED_FLAG = 512,
+		IDC_EDIT_READONLYID_FLAG = 1024,
+		IDC_EDIT_ROTATETO_FLAG = 2048,
+		IDC_EDIT_WEIGHT_FLAG = 4096,
+	};
+
+	enum controlOpt_t{
+		IDC_OPT_BLOCKING_FLAG = 1,
+		IDC_OPT_ATOP_FLAG = 2,
+		IDC_OPT_STACKABLE_FLAG = 4,
+		IDC_OPT_USEABLE_FLAG = 8,
+		IDC_OPT_NO_MOVE_FLAG = 16,
+		IDC_OPT_PICKUP_FLAG = 32,
+		IDC_OPT_ROTABLE_FLAG = 64,
+		IDC_OPT_BLOCKPROJECTILE_FLAG = 128,
+		IDC_OPT_WRITE1TIME_FLAG = 256,
+	};
+
+	enum controlCombo_t{
+		IDC_COMBO_SLOT_FLAG = 1,
+		IDC_COMBO_SKILL_FLAG = 2,
+		IDC_COMBO_AMU_FLAG = 4,
+		IDC_COMBO_SHOOT_FLAG = 8,
+		IDC_COMBO_FLOOR_FLAG = 16,
+	};
+
+	enum controlButton_t{
+		IDC_SET_CLIENT_OPT_FLAG = 1,
+		IDC_SAVE_ITEM_FLAG = 2,
+	};
+
 	static LRESULT CALLBACK DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lParam);
 
 	static bool onInitDialog(HWND h);
@@ -58,8 +113,17 @@ protected:
 	static bool onDragEnd(HWND h);
 	static bool onClientIdChange(HWND h, HWND hEdit);
 
+	static void setControlState(HWND h, unsigned long flagsEdit, unsigned long flagsOpt, 
+			unsigned long flagsCombo, unsigned long flagsButton);
+
+	//edit
+	static void setEditTextInt(HWND h, int button, int value);
+	static void setEditTextDouble(HWND h, int button, double value);
+	//option
+	static void setCheckButton(HWND h, int button, bool value);
 	//combo
 	static void createItemCombo(HWND hcombo, char* name, long value);
+	static void setComboValue(HWND h, int combo, int value);
 	//treeview
 	static void createGroupsTree(HWND htree);
 	static HTREEITEM insterTreeItem(HWND h, char* name, HTREEITEM parent, long entryID);
