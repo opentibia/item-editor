@@ -61,8 +61,8 @@ MENU MENU_MAIN
 FONT 8, "MS Shell Dlg"
 BEGIN
     CONTROL         "",IDC_EDITOR_TREE,"SysTreeView32",TVS_HASBUTTONS | 
-                    TVS_HASLINES | TVS_LINESATROOT | WS_BORDER | WS_TABSTOP,
-                    7,15,119,234
+                    TVS_HASLINES | TVS_LINESATROOT | TVS_SHOWSELALWAYS | 
+                    WS_BORDER | WS_TABSTOP,7,15,119,234
     GROUPBOX        "Settings",IDC_STATIC,133,15,275,234
     CONTROL         "",IDC_ITEM_PIC,"Static",SS_BLACKFRAME,145,25,50,43
     LTEXT           "Name:",IDC_STATIC,210,28,22,8

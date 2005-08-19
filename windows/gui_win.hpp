@@ -50,16 +50,16 @@ public:
 protected:
 
 	enum floorchange_t{
-		FLOOR_NO_CHANGE,
-		FLOOR_DOWN,
-		FLOOR_U_N,
-		FLOOR_U_S,
-		FLOOR_U_E,
-		FLOOR_U_W,
-		FLOOR_U_NE,
-		FLOOR_U_NW,
-		FLOOR_U_SE,
-		FLOOR_U_SW,
+		FLOOR_NO_CHANGE = 1,
+		FLOOR_DOWN = 2,
+		FLOOR_U_N = 4,
+		FLOOR_U_S = 8,
+		FLOOR_U_E = 16,
+		FLOOR_U_W = 32,
+		FLOOR_U_NE = FLOOR_U_N | FLOOR_U_E,
+		FLOOR_U_NW = FLOOR_U_N | FLOOR_U_W,
+		FLOOR_U_SE = FLOOR_U_S | FLOOR_U_E,
+		FLOOR_U_SW = FLOOR_U_S | FLOOR_U_W,
 	};
 
 	enum controlEdit_t{
@@ -119,18 +119,22 @@ protected:
 	//edit
 	static void setEditTextInt(HWND h, int button, int value);
 	static void setEditTextDouble(HWND h, int button, double value);
+	static bool getEditTextInt(HWND h, int button, int &value);
+	static bool getEditTextDouble(HWND h, int button, double &value);
 	//option
 	static void setCheckButton(HWND h, int button, bool value);
+	static bool getCheckButton(HWND h, int button);
 	//combo
 	static void createItemCombo(HWND hcombo, char* name, long value);
 	static void setComboValue(HWND h, int combo, int value);
+	static int getComboValue(HWND h, int button);
 	//treeview
 	static void createGroupsTree(HWND htree);
 	static HTREEITEM insterTreeItem(HWND h, char* name, HTREEITEM parent, long entryID);
 
 	static void invalidateSprite(HWND h);
 
-	static void saveCurrentItem(HWND h);
+	static bool saveCurrentItem(HWND h);
 	static void loadItem(HWND h);
 	static void updateControls(HWND h);
 	static void loadTreeItemTypes(HWND h);

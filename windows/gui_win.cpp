@@ -44,7 +44,6 @@ inline bool getFlagState(unsigned long n, unsigned long flag)
 		return false;
 }
 
-
 /////////////////////////////////////////////////////////////////////////////////////////////
 // class GUIWin
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -245,7 +244,7 @@ bool GUIWin::onDragMove(HWND h, LPARAM lParam)
 {
 	HTREEITEM hitTarget;
 	TVHITTESTINFO tvht;
-	TV_ITEM itemInfo;
+	TVITEM itemInfo;
 	tvht.pt.x = lParam & 0xFFFF; 
 	tvht.pt.y = (lParam & 0xFFFF0000) >> 16;
 	tvht.flags = TVHT_ONITEM;
@@ -270,7 +269,7 @@ bool GUIWin::onDragMove(HWND h, LPARAM lParam)
 
 bool GUIWin::onDragEnd(HWND h)
 {
-	TV_ITEM itemInfo;
+	TVITEM itemInfo;
 	char *buffer;
 	long id;
 	HTREEITEM hitTarget = TreeView_GetDropHilight(m_hwndTree);
@@ -284,7 +283,8 @@ bool GUIWin::onDragEnd(HWND h)
 		itemInfo.cchTextMax = 128;
 		TreeView_GetItem(m_hwndTree, &itemInfo);
 		id = itemInfo.lParam;
-		insterTreeItem(m_hwndTree, itemInfo.pszText, hitTarget, itemInfo.lParam);
+		curItem = insterTreeItem(m_hwndTree, itemInfo.pszText, hitTarget, itemInfo.lParam);
+		curItemServerId = itemInfo.lParam;
 		TreeView_DeleteItem(m_hwndTree, m_dragItem);
 		TreeView_SortChildren(m_hwndTree, hitTarget, 0);
 		delete buffer;
@@ -293,11 +293,8 @@ bool GUIWin::onDragEnd(HWND h)
 		itemInfo.hItem = hitTarget;
 		TreeView_GetItem(m_hwndTree, &itemInfo);
 		g_itemsTypes->setGroup(id, (itemgroup_t)itemInfo.lParam);
-		if(id == curItemServerId){
-			saveCurrentItem(h);
-			loadItem(h);
-			updateControls(h);
-		}
+		
+		updateControls(h);
 	}
 	m_dragging = false;
 	m_dragItem = NULL;
@@ -307,7 +304,10 @@ bool GUIWin::onDragEnd(HWND h)
 
 bool GUIWin::onTreeSelChange(HWND h, NMTREEVIEW* nmTree)
 {
-	saveCurrentItem(h);
+	if(!saveCurrentItem(h)){
+		SetWindowLong(h, DWL_MSGRESULT, TRUE);
+		return TRUE;
+	}
 
 	if(nmTree->itemNew.lParam >= 100){
 		curItem = nmTree->itemNew.hItem;
@@ -321,7 +321,7 @@ bool GUIWin::onTreeSelChange(HWND h, NMTREEVIEW* nmTree)
 	loadItem(h);
 	updateControls(h);
 
-	return true;
+	return TRUE;
 }
 
 bool GUIWin::onClientIdChange(HWND h, HWND hEdit)
@@ -341,7 +341,7 @@ bool GUIWin::onClientIdChange(HWND h, HWND hEdit)
 		invalidateSprite(h);
 	}
 	delete tmp;
-	return true;
+	return TRUE;
 }
 
 
@@ -464,7 +464,7 @@ HTREEITEM GUIWin::insterTreeItem(HWND h, char* name, HTREEITEM parent, long entr
 bool GUIWin::onSpinScroll(HWND h, HWND spin)
 {
 	long pos = SendMessage(spin,UDM_GETPOS, 0,0);
-	return true;
+	return TRUE;
 }
 
 void GUIWin::invalidateSprite(HWND h)
@@ -487,15 +487,120 @@ void GUIWin::invalidateSprite(HWND h)
 	InvalidateRect(h, &rect, false);
 }
 
-void GUIWin::saveCurrentItem(HWND h)
+bool GUIWin::saveCurrentItem(HWND h)
 {
+	////CHANGE THIS///////////////////////////
+	return true;
+	//////////////////////////////////////////
+	ItemType *iType;
 	if(!curItemServerId)
-		return;
+		return true;
+
+	if(curItemServerId && !(iType = g_itemsTypes->getItem(curItemServerId))){
+		return false;
+	}
 
 	//validate and save values to itemType[curItemServerId] map
-	//UINT IsDlgButtonChecked(HWND hDlg,int nIDButton);BST_UNCHECKED, BST_UNCHECKED
+	char buffer[128];
+	int len = GetDlgItemText(h, IDC_EDITNAME, buffer, 127);
+	if(len >= 0)
+		memcpy(iType->name, buffer, len);
 
+	len = GetDlgItemText(h, IDC_EDITDESCR, buffer, 127);
+	if(len >= 0)
+		memcpy(iType->descr, buffer, len);
+
+	if(!getEditTextInt(h, IDC_EDITCID, iType->clientid)){
+		return false;
+	}
+	if(!getEditTextInt(h, IDC_EDIT_DECAYTO, iType->decayTo)){
+		return false;
+	}
+	if(!getEditTextInt(h, IDC_EDIT_DECAYTIME, iType->decayTime)){
+		return false;
+	}
+	if(!getEditTextInt(h, IDC_EDIT_ATK, iType->attack)){
+		return false;
+	}
+	if(!getEditTextInt(h, IDC_EDIT_DEF, iType->defence)){
+		return false;
+	}
+	if(!getEditTextInt(h, IDC_EDIT_ARM, iType->armor)){
+		return false;
+	}
+	if(!getEditTextInt(h, IDC_EDIT_MAXITEMS, iType->maxItems)){
+		return false;
+	}
+	if(!getEditTextInt(h, IDC_EDIT_SPEED, iType->speed)){
+		return false;
+	}
+	if(!getEditTextInt(h, IDC_EDIT_READONLYID, iType->readonlyId)){
+		return false;
+	}
+	if(!getEditTextInt(h, IDC_EDIT_ROTATETO, iType->rotateTo)){
+		return false;
+	}
+	if(!getEditTextDouble(h, IDC_EDIT_WEIGHT, iType->weight)){
+		return false;
+	}
+
+	iType->blocking = getCheckButton(h, IDC_OPT_BLOCKING);
+	iType->alwaysOnTop = getCheckButton(h, IDC_OPT_ATOP);
+	iType->stackable = getCheckButton(h, IDC_OPT_STACKABLE);
+	iType->useable = getCheckButton(h, IDC_OPT_USEABLE);
+	iType->notMoveable = getCheckButton(h, IDC_OPT_NO_MOVE);
+	iType->pickupable = getCheckButton(h, IDC_OPT_PICKUP);
+	iType->rotable= getCheckButton(h, IDC_OPT_ROTABLE);
+	iType->blockingProjectile = getCheckButton(h, IDC_OPT_BLOCKPROJECTILE);
+	iType->write1time = getCheckButton(h, IDC_OPT_WRITE1TIME);
+
+
+	iType->slot_position = (enum slots_t)getComboValue(h, IDC_COMBO_SLOT);
+	iType->weaponType = (enum WeaponType)getComboValue(h, IDC_COMBO_SKILL);
+	iType->amuType = (enum amu_t)getComboValue(h, IDC_COMBO_AMU);
+	iType->shootType = (enum subfight_t)getComboValue(h, IDC_COMBO_SHOOT);
+
+	int comboFloor = getComboValue(h, IDC_COMBO_FLOOR);
+	if(comboFloor & FLOOR_DOWN){
+		iType->floorchange = true;
+	}
+	else{
+		iType->floorchange = false;
+	}
+	if(comboFloor & FLOOR_U_N){
+		iType->floorChangeNorth = true;
+	}
+	else{
+		iType->floorChangeNorth = false;
+	}
+	if(comboFloor & FLOOR_U_S){
+		iType->floorChangeSouth = true;
+	}
+	else{
+		iType->floorChangeSouth = false;
+	}
+	if(comboFloor & FLOOR_U_E){
+		iType->floorChangeEast = true;
+	}
+	else{
+		iType->floorChangeEast = false;
+	}
+	if(comboFloor & FLOOR_U_W){
+		iType->floorChangeWest = true;
+	}
+	else{
+		iType->floorChangeWest = false;
+	}
+	
 	//change name in tree
+	TVITEM itemInfo;
+	itemInfo.mask = TVIF_HANDLE | TVIF_TEXT;
+	itemInfo.hItem = curItem;
+	itemInfo.pszText = iType->name;
+	itemInfo.cchTextMax = strlen(iType->name);
+	SendMessage(m_hwndTree, TVM_SETITEM, 0, (long)&itemInfo);
+
+	return true;
 }
 
 void GUIWin::loadItem(HWND h)
@@ -595,7 +700,26 @@ void GUIWin::loadItem(HWND h)
 
 void GUIWin::setComboValue(HWND h, int combo, int value)
 {
-	//CB_SETCURSEL, CB_GETCURSEL
+	HWND hCombo = GetDlgItem(h, combo);
+	int count = SendMessage(hCombo, CB_GETCOUNT, 0, 0);
+	for(count--;count >= 0; count--){
+		int itemvalue = SendMessage(hCombo, CB_GETITEMDATA, count, 0);
+		if(itemvalue == value){
+			SendMessage(hCombo, CB_SETCURSEL, count, 0);
+			return;
+		}
+	}
+	SendMessage(hCombo, CB_SETCURSEL, -1, 0);
+}
+
+int GUIWin::getComboValue(HWND h, int combo)
+{
+	HWND hCombo = GetDlgItem(h, combo);
+	int index = SendMessage(hCombo, CB_GETCURSEL, 0, 0);
+	if(index != -1){
+		return SendMessage(hCombo, CB_GETITEMDATA, index, 0);
+	}
+	return 0;
 }
 
 void GUIWin::setCheckButton(HWND h, int button, bool value)
@@ -610,6 +734,15 @@ void GUIWin::setCheckButton(HWND h, int button, bool value)
 
 }
 
+bool GUIWin::getCheckButton(HWND h, int button)
+{
+	UINT ret = IsDlgButtonChecked(h, button);
+	if(ret == BST_UNCHECKED)
+		return false;
+	else
+		return true;
+}
+
 void GUIWin::setEditTextInt(HWND h, int button, int value)
 {
 	char buffer[16];
@@ -622,6 +755,34 @@ void GUIWin::setEditTextDouble(HWND h, int button, double value)
 	char buffer[16];
 	sprintf(buffer, "%.2f", value);
 	SetDlgItemText(h, button , buffer);
+}
+
+bool GUIWin::getEditTextInt(HWND h, int button, int &value)
+{
+	char buffer[16];
+	int tmp;
+	if(!GetDlgItemText(h, button, buffer, 15))
+		return false;
+	
+	if(sscanf(buffer, "%d", &tmp) != 1)
+		return false;
+
+	value = tmp;
+	return true;
+}
+
+bool GUIWin::getEditTextDouble(HWND h, int button, double &value)
+{
+	char buffer[16];
+	double tmp;
+	if(!GetDlgItemText(h, button, buffer, 15))
+		return false;
+	
+	if(sscanf(buffer, "%lf", &tmp) != 1)
+		return false;
+
+	value = tmp;
+	return true;
 }
 
 void GUIWin::updateControls(HWND h)
