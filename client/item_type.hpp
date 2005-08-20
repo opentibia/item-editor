@@ -137,8 +137,8 @@ public:
 	double weight;
 	int	decayTo;
 	int	decayTime;
-	bool floorchange;
 	slots_t slot_position;
+	bool floorChangeDown;
 	bool floorChangeNorth;
 	bool floorChangeSouth;
 	bool floorChangeEast;

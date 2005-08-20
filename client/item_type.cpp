@@ -61,9 +61,9 @@ ItemType::ItemType()
 	weight = 0.00;
 	decayTo = 0;
 	decayTime = 0;
-	floorchange = true;
 	slot_position = SLOT_HAND;
 
+	floorChangeDown = false;
 	floorChangeNorth = false;
 	floorChangeSouth = false;
 	floorChangeEast = false;
@@ -231,7 +231,7 @@ bool ItemsTypes::loadFromDat(const char *filename)
 			case 0x11: // can see what is under (ladder holes, stairs holes etc)
 				break;
 			case 0x12: // ground tiles that don't cause level change
-				sType->floorchange = false;
+				//sType->floorchange = false;
 				break;
 			case 0x18: // cropses that don't decay
 				break;
@@ -424,7 +424,7 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 			}
 
 			if((tmp = readXmlProp("floorchange", props)) != 0){
-				sType->floorchange = true;
+				sType->floorChangeDown = true;
 			}
 
 			if((tmp = readXmlProp("floorchangenorth", props)) != 0){
