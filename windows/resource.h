@@ -39,12 +39,14 @@
 #define IDC_OPT_WRITE1TIME              1045
 #define IDC_SAVE_ITEM                   1046
 #define ID_FILE_IMPORTXML               40001
+#define ID_FILE_IMPORTOLD               40001
 #define ID_FILE_IMPORTDAT               40002
 #define ID_FILE_SAVEAS                  40003
 #define ID_FILE_EXIT                    40004
 #define ID_HELP_ABOUT                   40005
-#define ID_TOOLS_VERIFYCLIENTOPTIONS    40006
+#define ID_TOOLS_VERIFYITEMS            40006
 #define ID_TOOLS_FINDMISSINGCLIENTITEMS 40007
+#define ID_TOOLS_FINDMISSINGITEMS       40007
 
 // Next default values for new objects
 // 

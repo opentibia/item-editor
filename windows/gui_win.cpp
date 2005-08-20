@@ -221,6 +221,15 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 		case ID_FILE_EXIT:
 			EndDialog(h,NULL);
 			break;
+		case ID_FILE_IMPORTOLD:
+			return onImportOld(h);
+			break;
+		case ID_FILE_SAVEAS:
+			break;
+		case ID_TOOLS_VERIFYITEMS:
+			break;
+		case ID_TOOLS_FINDMISSINGITEMS:
+			break;
 		case ID_HELP_ABOUT:
 			break;
 		}
@@ -229,7 +238,7 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 	return FALSE;
 }
 
-bool GUIWin::onDragBegin(HWND h, NMTREEVIEW* nmTree)
+LRESULT GUIWin::onDragBegin(HWND h, const NMTREEVIEW* nmTree)
 {
 	long id = nmTree->itemNew.lParam;
 	if(id > 100){
@@ -240,7 +249,7 @@ bool GUIWin::onDragBegin(HWND h, NMTREEVIEW* nmTree)
 	return TRUE;
 }
 
-bool GUIWin::onDragMove(HWND h, LPARAM lParam)
+LRESULT GUIWin::onDragMove(HWND h, LPARAM lParam)
 {
 	HTREEITEM hitTarget;
 	TVHITTESTINFO tvht;
@@ -258,16 +267,13 @@ bool GUIWin::onDragMove(HWND h, LPARAM lParam)
 			TreeView_SelectDropTarget(m_hwndTree, hitTarget);
 		}
 		else{
-			ItemType *iType;
-			if(iType = g_itemsTypes->getType(curItemServerId)){
-				//TreeView_SelectDropTarget(m_hwndTree, rootItems[iType->getGroup()]);
-			}
+			TreeView_SelectDropTarget(m_hwndTree,  rootItems[g_itemsTypes->getGroup(itemInfo.lParam)]);
 		}
 	} 
 	return TRUE;
 }
 
-bool GUIWin::onDragEnd(HWND h)
+LRESULT GUIWin::onDragEnd(HWND h)
 {
 	TVITEM itemInfo;
 	char *buffer;
@@ -284,7 +290,7 @@ bool GUIWin::onDragEnd(HWND h)
 		itemInfo.cchTextMax = 128;
 		TreeView_GetItem(m_hwndTree, &itemInfo);
 		id = itemInfo.lParam;
-		curItem = insterTreeItem(m_hwndTree, itemInfo.pszText, hitTarget, itemInfo.lParam);
+		curItem = insertTreeItem(m_hwndTree, itemInfo.pszText, hitTarget, itemInfo.lParam);
 		curItemServerId = itemInfo.lParam;
 		TreeView_DeleteItem(m_hwndTree, m_dragItem);
 		TreeView_SortChildren(m_hwndTree, hitTarget, 0);
@@ -306,7 +312,7 @@ bool GUIWin::onDragEnd(HWND h)
 	return TRUE;
 }
 
-bool GUIWin::onTreeSelChange(HWND h, NMTREEVIEW* nmTree)
+LRESULT GUIWin::onTreeSelChange(HWND h, const NMTREEVIEW* nmTree)
 {
 	if(!saveCurrentItem(h)){
 		SetWindowLong(h, DWL_MSGRESULT, TRUE);
@@ -328,7 +334,7 @@ bool GUIWin::onTreeSelChange(HWND h, NMTREEVIEW* nmTree)
 	return TRUE;
 }
 
-bool GUIWin::onClientIdChange(HWND h, HWND hEdit)
+LRESULT GUIWin::onClientIdChange(HWND h, HWND hEdit)
 {
 	char *tmp;
 	long new_id;
@@ -348,8 +354,46 @@ bool GUIWin::onClientIdChange(HWND h, HWND hEdit)
 	return TRUE;
 }
 
+LRESULT GUIWin::onImportOld(HWND h)
+{
+	OPENFILENAME opf;
+	char fileItemsXml[512];
+	char fileTibiaDat[512];
+	long ret;
+	memset(&opf, 0, sizeof(opf));
+	fileItemsXml[0] = 0;
+	fileTibiaDat[0] = 0;
+	opf.lStructSize = sizeof(OPENFILENAME);
+	opf.hwndOwner = h;
+	opf.nFilterIndex = 1;
+	opf.nMaxFile = 511;
+	opf.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_NOLONGNAMES;
 
-bool GUIWin::onInitDialog(HWND h)
+	opf.lpstrFile = fileTibiaDat;
+	opf.lpstrFilter = "DAT files\0*.dat\0\0";
+	ret = GetOpenFileName(&opf);
+	if(ret == 0)
+		return TRUE;
+
+	opf.lpstrFile = fileItemsXml;
+	opf.lpstrFilter = "XML files\0*.xml\0\0";
+	ret = GetOpenFileName(&opf);
+	if(ret == 0)
+		return TRUE;
+	
+	curItemClientId = 0;
+	curItem = NULL;
+	curItemServerId = 0;
+	/* UNCOMMENT THIS
+	g_itemsTypes->loadFromDat(fileTibiaDat);
+	g_itemsTypes->loadFromXml(fileItemsXml);
+	*/
+	loadTreeItemTypes(h);
+
+	return TRUE;
+}
+
+LRESULT GUIWin::onInitDialog(HWND h)
 {
 
 	m_hwndTree = GetDlgItem(h, IDC_EDITOR_TREE);
@@ -420,7 +464,7 @@ bool GUIWin::onInitDialog(HWND h)
 	return TRUE;
 }
 
-void GUIWin::createItemCombo(HWND hcombo, char* name, long value)
+void GUIWin::createItemCombo(HWND hcombo, const char* name, long value)
 {
 	long index = SendMessage(hcombo,CB_ADDSTRING, 0, (long)name);
 	SendMessage(hcombo, CB_SETITEMDATA, index, value);
@@ -434,38 +478,52 @@ void GUIWin::createGroupsTree(HWND htree)
 	item_height = SendMessage(htree, TVM_GETITEMHEIGHT, 0, 0);
 	entry_size = 32/item_height+1;
 
-	rootItems[ITEM_GROUP_GROUND] = insterTreeItem(htree, "Ground", NULL, ITEM_GROUP_GROUND);
-	rootItems[ITEM_GROUP_CONTAINER] = insterTreeItem(htree, "Container", NULL, ITEM_GROUP_CONTAINER);
-	rootItems[ITEM_GROUP_WEAPON] = insterTreeItem(htree, "Weapon", NULL, ITEM_GROUP_WEAPON);
-	rootItems[ITEM_GROUP_AMMUNITION] = insterTreeItem(htree, "Ammunition", NULL, ITEM_GROUP_AMMUNITION);
-	rootItems[ITEM_GROUP_ARMOR] = insterTreeItem(htree, "Armor", NULL, ITEM_GROUP_ARMOR);
-	rootItems[ITEM_GROUP_RUNE] = insterTreeItem(htree, "Rune", NULL, ITEM_GROUP_RUNE);
-	rootItems[ITEM_GROUP_TELEPORT] = insterTreeItem(htree, "Teleport", NULL, ITEM_GROUP_TELEPORT);
-	rootItems[ITEM_GROUP_MAGICFIELD] = insterTreeItem(htree, "Magic Field", NULL, ITEM_GROUP_MAGICFIELD);
-	rootItems[ITEM_GROUP_WRITEABLE] = insterTreeItem(htree, "Writeable", NULL, ITEM_GROUP_WRITEABLE);
-	rootItems[ITEM_GROUP_KEY] = insterTreeItem(htree, "Key", NULL, ITEM_GROUP_KEY);
-	rootItems[ITEM_GROUP_SPLASH] = insterTreeItem(htree, "Splash", NULL, ITEM_GROUP_SPLASH);
-	rootItems[ITEM_GROUP_FLUID] = insterTreeItem(htree, "FLuid Container", NULL, ITEM_GROUP_FLUID);
-	rootItems[ITEM_GROUP_NONE] = insterTreeItem(htree, "Other", NULL, ITEM_GROUP_NONE);
+	rootItems[ITEM_GROUP_GROUND] = insertTreeItem(htree, "Ground", NULL, ITEM_GROUP_GROUND);
+	rootItems[ITEM_GROUP_CONTAINER] = insertTreeItem(htree, "Container", NULL, ITEM_GROUP_CONTAINER);
+	rootItems[ITEM_GROUP_WEAPON] = insertTreeItem(htree, "Weapon", NULL, ITEM_GROUP_WEAPON);
+	rootItems[ITEM_GROUP_AMMUNITION] = insertTreeItem(htree, "Ammunition", NULL, ITEM_GROUP_AMMUNITION);
+	rootItems[ITEM_GROUP_ARMOR] = insertTreeItem(htree, "Armor", NULL, ITEM_GROUP_ARMOR);
+	rootItems[ITEM_GROUP_RUNE] = insertTreeItem(htree, "Rune", NULL, ITEM_GROUP_RUNE);
+	rootItems[ITEM_GROUP_TELEPORT] = insertTreeItem(htree, "Teleport", NULL, ITEM_GROUP_TELEPORT);
+	rootItems[ITEM_GROUP_MAGICFIELD] = insertTreeItem(htree, "Magic Field", NULL, ITEM_GROUP_MAGICFIELD);
+	rootItems[ITEM_GROUP_WRITEABLE] = insertTreeItem(htree, "Writeable", NULL, ITEM_GROUP_WRITEABLE);
+	rootItems[ITEM_GROUP_KEY] = insertTreeItem(htree, "Key", NULL, ITEM_GROUP_KEY);
+	rootItems[ITEM_GROUP_SPLASH] = insertTreeItem(htree, "Splash", NULL, ITEM_GROUP_SPLASH);
+	rootItems[ITEM_GROUP_FLUID] = insertTreeItem(htree, "FLuid Container", NULL, ITEM_GROUP_FLUID);
+	rootItems[ITEM_GROUP_NONE] = insertTreeItem(htree, "Other", NULL, ITEM_GROUP_NONE);
 
-	insterTreeItem(htree, "Container 1", rootItems[ITEM_GROUP_NONE], 1988);
-	insterTreeItem(htree, "Container 2", rootItems[ITEM_GROUP_NONE],  1987);
+	insertTreeItem(htree, "Container 1", rootItems[ITEM_GROUP_NONE], 1988);
+	insertTreeItem(htree, "Container 2", rootItems[ITEM_GROUP_NONE],  1987);
 
 }
 
-HTREEITEM GUIWin::insterTreeItem(HWND h, char* name, HTREEITEM parent, long entryID)
+HTREEITEM GUIWin::insertTreeItem(HWND h, const char* name, HTREEITEM parent, long entryID)
 {
 	TVINSERTSTRUCT itemstruct;
 	itemstruct.hParent = parent;
 	itemstruct.hInsertAfter = TVI_LAST;
 	itemstruct.itemex.mask = TVIF_TEXT | TVIF_PARAM;
-	itemstruct.itemex.pszText = name;
+	itemstruct.itemex.pszText = (char*)name;
 	itemstruct.itemex.lParam = entryID;
 	itemstruct.itemex.cchTextMax = strlen(name);
 	return (HTREEITEM)SendMessage(h, TVM_INSERTITEM, 0, (long)&itemstruct); 
 }
 
-bool GUIWin::onSpinScroll(HWND h, HWND spin)
+HTREEITEM GUIWin::insertTreeItemType(HWND h, const ItemType *iType)
+{
+	char buffer[128];
+	char *name;
+	if(iType->name[0] != 0){
+		name = (char*)&(iType->name[0]);
+	}
+	else{
+		sprintf(buffer, "Item number %d", iType->id);
+		name = buffer;
+	}
+	return insertTreeItem(h, name, rootItems[iType->group], iType->id);
+}
+
+LRESULT GUIWin::onSpinScroll(HWND h, HWND spin)
 {
 	long pos = SendMessage(spin,UDM_GETPOS, 0,0);
 	return TRUE;
@@ -493,14 +551,15 @@ void GUIWin::invalidateSprite(HWND h)
 
 bool GUIWin::saveCurrentItem(HWND h)
 {
-	////CHANGE THIS///////////////////////////
-	return true;
-	//////////////////////////////////////////
 	ItemType *iType;
 	if(!curItemServerId)
 		return true;
 
-	if(curItemServerId && !(iType = g_itemsTypes->getType(curItemServerId))){
+	if(curItemServerId >= 100 && !(iType = g_itemsTypes->getType(curItemServerId))){
+		return false;
+	}
+	if(GetWindowTextLength(GetDlgItem(h, IDC_EDITNAME)) > 127 || GetWindowTextLength(GetDlgItem(h, IDC_EDITDESCR)) > 127){
+		MessageBox(h, "Name or description too long.", NULL, MB_OK | MB_ICONEXCLAMATION);
 		return false;
 	}
 
@@ -600,7 +659,13 @@ bool GUIWin::saveCurrentItem(HWND h)
 	TVITEM itemInfo;
 	itemInfo.mask = TVIF_HANDLE | TVIF_TEXT;
 	itemInfo.hItem = curItem;
-	itemInfo.pszText = iType->name;
+	if(iType->name[0] != 0){
+		itemInfo.pszText = iType->name;
+	}
+	else{
+		sprintf(buffer, "Item number %d", iType->id);
+		itemInfo.pszText = buffer;
+	}
 	itemInfo.cchTextMax = strlen(iType->name);
 	SendMessage(m_hwndTree, TVM_SETITEM, 0, (long)&itemInfo);
 
@@ -796,6 +861,8 @@ void GUIWin::updateControls(HWND h)
 	if(curItemServerId && (iType = g_itemsTypes->getType(curItemServerId))){
 		unsigned long editbase = IDC_EDITNAME_FLAG | IDC_EDITDSECR_FLAG | IDC_EDITCID_FLAG |
 						IDC_EDIT_DECAYTO_FLAG | IDC_EDIT_DECAYTIME_FLAG;
+		setControlState(h, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
+		//TODO
 		/*switch(iType->getGroup()){
 		case ITEM_GROUP_GROUND:
 			setControlState(h, editbase | ......, 0, 0, 0);
@@ -830,6 +897,7 @@ void GUIWin::updateControls(HWND h)
 	}
 	else{
 		setControlState(h, IDC_EDITCID_FLAG, 0, 0, 0);
+		//setControlState(h, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
 	}
 }
 
@@ -874,7 +942,13 @@ void GUIWin::setControlState(HWND h, unsigned long flagsEdit, unsigned long flag
 void GUIWin::loadTreeItemTypes(HWND h)
 {
 	//delete all items in the tree
+	TreeView_DeleteAllItems(m_hwndTree);
+	//create groups
+	createGroupsTree(m_hwndTree);
 	//load itemType map
+	//TODO
+	//insertTreeItemType(m_hwndTree, iType);
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////

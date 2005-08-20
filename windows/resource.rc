@@ -30,17 +30,15 @@ MENU_MAIN MENU DISCARDABLE
 BEGIN
     POPUP "File"
     BEGIN
-        MENUITEM "Import .xml",                 ID_FILE_IMPORTXML
-        MENUITEM "Import .dat",                 ID_FILE_IMPORTDAT
+        MENUITEM "Import old...",               ID_FILE_IMPORTOLD
         MENUITEM "Save as...",                  ID_FILE_SAVEAS
         MENUITEM SEPARATOR
         MENUITEM "Exit",                        ID_FILE_EXIT
     END
     POPUP "Tools"
     BEGIN
-        MENUITEM "Verify items",                ID_TOOLS_VERIFYCLIENTOPTIONS
-        MENUITEM "Find missing items",          ID_TOOLS_FINDMISSINGCLIENTITEMS
-
+        MENUITEM "Verify items",                ID_TOOLS_VERIFYITEMS
+        MENUITEM "Find missing items",          ID_TOOLS_FINDMISSINGITEMS
     END
     POPUP "Help"
     BEGIN

@@ -105,13 +105,14 @@ protected:
 
 	static LRESULT CALLBACK DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lParam);
 
-	static bool onInitDialog(HWND h);
-	static bool onTreeSelChange(HWND h, NMTREEVIEW* nmTree);
-	static bool onSpinScroll(HWND h, HWND spin);
-	static bool onDragBegin(HWND h, NMTREEVIEW* nmTree);
-	static bool onDragMove(HWND h, LPARAM lParam);
-	static bool onDragEnd(HWND h);
-	static bool onClientIdChange(HWND h, HWND hEdit);
+	static LRESULT onInitDialog(HWND h);
+	static LRESULT onTreeSelChange(HWND h, const NMTREEVIEW* nmTree);
+	static LRESULT onSpinScroll(HWND h, HWND spin);
+	static LRESULT onDragBegin(HWND h, const NMTREEVIEW* nmTree);
+	static LRESULT onDragMove(HWND h, LPARAM lParam);
+	static LRESULT onDragEnd(HWND h);
+	static LRESULT onClientIdChange(HWND h, HWND hEdit);
+	static LRESULT onImportOld(HWND h);
 
 	static void setControlState(HWND h, unsigned long flagsEdit, unsigned long flagsOpt, 
 			unsigned long flagsCombo, unsigned long flagsButton);
@@ -125,12 +126,13 @@ protected:
 	static void setCheckButton(HWND h, int button, bool value);
 	static bool getCheckButton(HWND h, int button);
 	//combo
-	static void createItemCombo(HWND hcombo, char* name, long value);
+	static void createItemCombo(HWND hcombo, const char* name, long value);
 	static void setComboValue(HWND h, int combo, int value);
 	static int getComboValue(HWND h, int button);
 	//treeview
 	static void createGroupsTree(HWND htree);
-	static HTREEITEM insterTreeItem(HWND h, char* name, HTREEITEM parent, long entryID);
+	static HTREEITEM insertTreeItem(HWND h, const char* name, HTREEITEM parent, long entryID);
+	static HTREEITEM insertTreeItemType(HWND h, const ItemType *iType);
 
 	static void invalidateSprite(HWND h);
 
