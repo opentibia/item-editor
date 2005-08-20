@@ -39,6 +39,7 @@ BEGIN
     BEGIN
         MENUITEM "Verify items",                ID_TOOLS_VERIFYITEMS
         MENUITEM "Find missing items",          ID_TOOLS_FINDMISSINGITEMS
+        MENUITEM "Go to item...",               ID_TOOLS_GOTOITEM
     END
     POPUP "Help"
     BEGIN
