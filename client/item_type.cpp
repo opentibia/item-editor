@@ -137,9 +137,9 @@ bool ItemsTypes::loadFromDat(const char *filename)
 	{
 		ItemType *sType = getType(id);
 		if(!sType) {
-			ItemType *sType = new ItemType();
+			sType = new ItemType();
 			sType->id = id;
-			item[id] = sType;
+			addType(id, sType);
 		}
 
 		// read the options until we find a 0xff
