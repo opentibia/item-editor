@@ -548,14 +548,14 @@ bool GUIWin::saveCurrentItem(HWND h)
 		return false;
 	}
 
-	iType->blocking = getCheckButton(h, IDC_OPT_BLOCKING);
+	iType->blockSolid = getCheckButton(h, IDC_OPT_BLOCKING);
 	iType->alwaysOnTop = getCheckButton(h, IDC_OPT_ATOP);
 	iType->stackable = getCheckButton(h, IDC_OPT_STACKABLE);
 	iType->useable = getCheckButton(h, IDC_OPT_USEABLE);
-	iType->notMoveable = getCheckButton(h, IDC_OPT_NO_MOVE);
+	iType->moveable = !getCheckButton(h, IDC_OPT_NO_MOVE);
 	iType->pickupable = getCheckButton(h, IDC_OPT_PICKUP);
-	iType->rotable= getCheckButton(h, IDC_OPT_ROTABLE);
-	iType->blockingProjectile = getCheckButton(h, IDC_OPT_BLOCKPROJECTILE);
+	iType->rotable = getCheckButton(h, IDC_OPT_ROTABLE);
+	iType->blockProjectile = getCheckButton(h, IDC_OPT_BLOCKPROJECTILE);
 	iType->write1time = getCheckButton(h, IDC_OPT_WRITE1TIME);
 
 
@@ -629,14 +629,14 @@ void GUIWin::loadItem(HWND h)
 		setEditTextInt(h, IDC_EDIT_ROTATETO, iType->rotateTo);
 		setEditTextDouble(h, IDC_EDIT_WEIGHT, iType->weight);
 
-		setCheckButton(h, IDC_OPT_BLOCKING, iType->blocking);
+		setCheckButton(h, IDC_OPT_BLOCKING, iType->blockSolid);
 		setCheckButton(h, IDC_OPT_ATOP, iType->alwaysOnTop);
 		setCheckButton(h, IDC_OPT_STACKABLE, iType->stackable);
 		setCheckButton(h, IDC_OPT_USEABLE, iType->useable);
-		setCheckButton(h, IDC_OPT_NO_MOVE, iType->notMoveable);
+		setCheckButton(h, IDC_OPT_NO_MOVE, !iType->moveable);
 		setCheckButton(h, IDC_OPT_PICKUP, iType->pickupable);
 		setCheckButton(h, IDC_OPT_ROTABLE, iType->rotable);
-		setCheckButton(h, IDC_OPT_BLOCKPROJECTILE, iType->blockingProjectile);
+		setCheckButton(h, IDC_OPT_BLOCKPROJECTILE, iType->blockProjectile);
 		setCheckButton(h, IDC_OPT_WRITE1TIME, iType->write1time);
 
 		setComboValue(h, IDC_COMBO_SLOT, iType->slot_position);

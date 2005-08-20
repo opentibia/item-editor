@@ -35,17 +35,23 @@ ItemType::ItemType()
 	group = ITEM_GROUP_NONE;
 	id			= 100;
 	clientid	= 100;
-	groundtile	= false;
-	blocking	= false;
+
+	blockSolid	= false;
+	blockProjectile = false;
+	blockPickupable = true;
+	blockPathFind = false;
+
+	//container	= false;
+	//isammo = false;
+	//groundtile	= false;
+	//fluid = false;
+
 	alwaysOnTop	= false;
-	container	= false;
 	stackable	= false;
 	useable		= false;
-	notMoveable	= false;
+	moveable	= true;
 	pickupable	= false;
-	fluid = false;
 	rotable = false;
-	isammo = false;
 	
 	rotateTo = 0;
 
@@ -55,7 +61,6 @@ ItemType::ItemType()
 	weight = 0.00;
 	decayTo = 0;
 	decayTime = 0;
-	blockingProjectile = false;
 	floorchange = true;
 	slot_position = SLOT_HAND;
 
@@ -84,10 +89,10 @@ ItemType::ItemType()
 	runeMagLevel = -1;
 	
 	//teleport
-	isteleport = false;
+	//isteleport = false;
 	
 	//magicfield
-	ismagicfield = false;
+	//ismagicfield = false;
 	magicfieldtype = 0;
 	
 	//writeable
@@ -95,16 +100,31 @@ ItemType::ItemType()
 	write1time = false;
 	
 	//key
-	iskey = false;
+	//iskey = false;
 	
 	//splash
-	issplash = false;
+	//issplash = false;
 
 }
 
 ItemsTypes::ItemsTypes()
 {
 	datLoaded = false;
+}
+
+ItemsTypes::~ItemsTypes()
+{
+	clear();
+}
+
+void ItemsTypes::clear()
+{
+	ItemMap::iterator it;
+	for(it = item.begin(); it != item.end(); ++it) {
+		delete it->second;
+	}
+
+	item.clear();
 }
 
 bool ItemsTypes::loadFromDat(const char *filename)
@@ -154,11 +174,9 @@ bool ItemsTypes::loadFromDat(const char *filename)
 				fread(&read_short, 2, 1, fp); 
 				speed = read_short;
 				sType->speed = speed;
-				sType->groundtile = true;
-				if(speed == 0)
-					sType->blocking = true;
-
+				sType->group = ITEM_GROUP_GROUND;
 				break;
+
 			case 0x01: // all OnTop
 				sType->alwaysOnTop = true;
 				break;
@@ -166,7 +184,7 @@ bool ItemsTypes::loadFromDat(const char *filename)
 				break;
 			case 0x03:
 				//is a container
-				sType->container = true;
+				sType->group = ITEM_GROUP_CONTAINER;
 				break;
 			case 0x04:
 				//is stackable
@@ -177,16 +195,15 @@ bool ItemsTypes::loadFromDat(const char *filename)
 				sType->useable = true;
 				break;
 			case 0x0A:
-				//is multitype !!! wrong definition (only water splash on floor)
-				sType->fluid = true;
+				sType->group = ITEM_GROUP_SPLASH;
 				break;
 			case 0x0B:
 				//is blocking
-				sType->blocking = true;
+				sType->blockSolid = true;
 				break;
 			case 0x0C:
-				//is on moveable
-				sType->notMoveable = true;
+				//is not moveable
+				sType->moveable = false;
 				break;
 			case 0x0F:
 				//can be equipped
@@ -202,12 +219,13 @@ bool ItemsTypes::loadFromDat(const char *filename)
 			case 0x06: // ladder up (id 1386)   why a group for just 1 item ???   
 				break;
 			case 0x09: //can contain fluids
-				sType->fluid = true;
+				sType->group = ITEM_GROUP_FLUID;
 				break;
 			case 0x0D: // blocks missiles (walls, magic wall etc)
-				sType->blockingProjectile = true;
+				sType->blockProjectile = true;
 				break;
 			case 0x0E: // blocks monster movement (flowers, parcels etc)
+				sType->blockPathFind = true;
 				break;
 			case 0x11: // can see what is under (ladder holes, stairs holes etc)
 				break;
@@ -227,6 +245,7 @@ bool ItemsTypes::loadFromDat(const char *filename)
 				fgetc(fp); //always 4 max number of  newlines ? 
 				break;
 			case 0x13: // mostly blocking items, but also items that can pile up in level (boxes, chairs etc)
+				sType->blockPickupable = false;
 				fgetc(fp); //always 8
 				fgetc(fp); //always 0
 				break;
@@ -395,9 +414,9 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 
 			if((tmp = readXmlProp("blockingprojectile", props)) != 0){
 				if(atoi(tmp) == 0)
-					sType->blockingProjectile = false;
+					sType->blockProjectile = false;
 				else
-					sType->blockingProjectile = true;
+					sType->blockProjectile = true;
 			}
 
 			if((tmp = readXmlProp("floorchange", props)) != 0){
@@ -457,6 +476,8 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 					}
 				}
 				else if(strcmp(type, "weapon") == 0) {
+					sType->group = ITEM_GROUP_WEAPON;
+
 					const char* skill;
 					if((skill = readXmlProp("skill", props)) != 0){
 						if (!strcmp(skill, "sword"))
@@ -536,7 +557,7 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 				}
 				//ammunition
 				else if(strcmp(type, "amunition") == 0) {
-					sType->isammo = true;
+					sType->group = ITEM_GROUP_AMMUNITION;
 					
 					const char *amutype;
 					if((amutype = readXmlProp("amutype", props)) != 0) {
@@ -573,6 +594,8 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 				}
 				//armor
 				else if(strcmp(type, "armor") == 0) {
+					sType->group = ITEM_GROUP_ARMOR;
+
 					if((tmp = readXmlProp("arm", props)) != 0) {
 						sType->armor = atoi(tmp);
 					}
@@ -581,6 +604,8 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 				}
 				//rune
 				else if (!strcmp(type, "rune")) {
+					sType->group = ITEM_GROUP_RUNE;
+
 					if((tmp = readXmlProp("maglevel", props)) != 0) {
 						sType->runeMagLevel = atoi(tmp);
 					}
@@ -589,11 +614,11 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 				}
 				//teleport
 				else if (!strcmp(type, "teleport")) {
-					sType->isteleport = true;
+					sType->group = ITEM_GROUP_TELEPORT;
 				}
 				//magicfield
 				else if (!strcmp(type, "magicfield")) {
-					sType->ismagicfield = true;
+					sType->group = ITEM_GROUP_MAGICFIELD;
 
 					if((tmp = readXmlProp("fieldtype", props)) != 0) {
 						if (!strcmp(tmp, "fire"))
@@ -610,6 +635,8 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 				}
 				//write1time
 				else if(!strcmp(type, "write1time")) {
+					sType->group = ITEM_GROUP_WRITEABLE;
+
 					if((tmp = readXmlProp("readonlyid", props)) != 0) {
 						sType->readonlyId = atoi(tmp);
 						sType->write1time = true;
@@ -617,11 +644,11 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 				}
 				//key
 				else if(!strcmp(type, "key")) {
-					sType->iskey = true;
+					sType->group = ITEM_GROUP_KEY;
 				}
 				//splash
 				else if(!strcmp(type, "splash")) {
-					sType->issplash = true;
+					sType->group = ITEM_GROUP_SPLASH;
 				}
 			}
 		}

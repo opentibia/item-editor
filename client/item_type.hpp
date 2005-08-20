@@ -101,7 +101,6 @@ struct xmlProp {
 	char *value;
 };
 
-
 class ItemType
 {
 public:
@@ -114,27 +113,30 @@ public:
 	itemgroup_t group;
 	int id;
 	int clientid;
-	bool groundtile;
-	bool blocking;
+
+	bool blockSolid;
+	bool blockPickupable;
+	bool blockProjectile;
+	bool blockPathFind;
+
+	//bool groundtile;
+	//bool container;
+	//bool fluid;
+	//bool isammo;
 	bool alwaysOnTop;
-	bool container;
 	bool stackable;
 	bool useable;
-	bool notMoveable;
+	bool moveable;
 	bool pickupable;
-	bool fluid;
 	bool rotable;
-	bool isammo;
 
 	int rotateTo;
 	
-	//xml data
 	char name[128];
 	char descr[128];
 	double weight;
 	int	decayTo;
 	int	decayTime;
-	bool blockingProjectile;
 	bool floorchange;
 	slots_t slot_position;
 	bool floorChangeNorth;
@@ -162,10 +164,10 @@ public:
 	int runeMagLevel;
 	
 	//teleport
-	bool isteleport;
+	//bool isteleport;
 	
 	//magicfield
-	bool ismagicfield;
+	//bool ismagicfield;
 	int magicfieldtype;
 	
 	//writeable
@@ -173,19 +175,25 @@ public:
 	bool write1time;
 	
 	//key
-	bool iskey;
+	//bool iskey;
 	
 	//splash
-	bool issplash;	
+	//bool issplash;
 };
 
+typedef std::map<unsigned short, ItemType*> ItemMap;
 
 class ItemsTypes {
 public:
 	ItemsTypes();
+	~ItemsTypes();
+	void clear();
 
 	bool loadFromDat(const char *filename);
 	bool loadFromXml(const char *filename);
+
+	ItemMap::iterator getTypes() {item.begin();};
+	ItemMap::iterator getEnd() {item.end();};
 
 	bool setGroup(int id, itemgroup_t newgroup);
 	itemgroup_t getGroup(int id);
@@ -199,7 +207,6 @@ private:
 	static void XMLCALL xmlstartNode(void *userData, const char *name, const char **atts);
 	static void XMLCALL xmlendNode(void *userData, const char *name);
 	
-	typedef std::map<unsigned short, ItemType*> ItemMap;
 	ItemMap item;
 };
 
