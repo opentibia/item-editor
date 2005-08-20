@@ -259,7 +259,7 @@ bool GUIWin::onDragMove(HWND h, LPARAM lParam)
 		}
 		else{
 			ItemType *iType;
-			if(iType = g_itemsTypes->getItem(curItemServerId)){
+			if(iType = g_itemsTypes->getType(curItemServerId)){
 				//TreeView_SelectDropTarget(m_hwndTree, rootItems[iType->getGroup()]);
 			}
 		}
@@ -275,6 +275,7 @@ bool GUIWin::onDragEnd(HWND h)
 	HTREEITEM hitTarget = TreeView_GetDropHilight(m_hwndTree);
 	if(hitTarget){
 		TreeView_SelectDropTarget(m_hwndTree, NULL);
+
 		//change parent
 		itemInfo.mask = TVIF_TEXT | TVIF_PARAM;
 		itemInfo.hItem = m_dragItem;
@@ -287,6 +288,8 @@ bool GUIWin::onDragEnd(HWND h)
 		curItemServerId = itemInfo.lParam;
 		TreeView_DeleteItem(m_hwndTree, m_dragItem);
 		TreeView_SortChildren(m_hwndTree, hitTarget, 0);
+		TreeView_Expand(m_hwndTree, hitTarget, TVE_EXPAND);
+
 		delete buffer;
 		//update type
 		itemInfo.mask = TVIF_PARAM;
@@ -296,6 +299,7 @@ bool GUIWin::onDragEnd(HWND h)
 		
 		updateControls(h);
 	}
+	
 	m_dragging = false;
 	m_dragItem = NULL;
 	ReleaseCapture();
@@ -496,7 +500,7 @@ bool GUIWin::saveCurrentItem(HWND h)
 	if(!curItemServerId)
 		return true;
 
-	if(curItemServerId && !(iType = g_itemsTypes->getItem(curItemServerId))){
+	if(curItemServerId && !(iType = g_itemsTypes->getType(curItemServerId))){
 		return false;
 	}
 
@@ -607,7 +611,7 @@ void GUIWin::loadItem(HWND h)
 {
 	//load ItemType[curItemServerId] options in gui
 	ItemType *iType;
-	if(curItemServerId && (iType = g_itemsTypes->getItem(curItemServerId))){
+	if(curItemServerId && (iType = g_itemsTypes->getType(curItemServerId))){
 		
 		SetDlgItemText(h, IDC_EDITNAME, iType->name);
 		SetDlgItemText(h, IDC_EDITDESCR, iType->descr);
@@ -789,7 +793,7 @@ void GUIWin::updateControls(HWND h)
 {
 	//update controls depending on curItemServerId
 	ItemType *iType;
-	if(curItemServerId && (iType = g_itemsTypes->getItem(curItemServerId))){
+	if(curItemServerId && (iType = g_itemsTypes->getType(curItemServerId))){
 		unsigned long editbase = IDC_EDITNAME_FLAG | IDC_EDITDSECR_FLAG | IDC_EDITCID_FLAG |
 						IDC_EDIT_DECAYTO_FLAG | IDC_EDIT_DECAYTIME_FLAG;
 		/*switch(iType->getGroup()){

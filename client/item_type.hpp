@@ -107,6 +107,9 @@ class ItemType
 public:
 	ItemType();
 	~ItemType(){}
+
+	static long minClientId;
+	static long maxClientId;
 	
 	itemgroup_t group;
 	int id;
@@ -179,12 +182,19 @@ public:
 
 class ItemsTypes {
 public:
+	ItemsTypes();
+
+	bool loadFromDat(const char *filename);
 	bool loadFromXml(const char *filename);
 
 	bool setGroup(int id, itemgroup_t newgroup);
-	ItemType* getItem(int id);
+	itemgroup_t getGroup(int id);
+
+	ItemType* getType(int id);
+	bool addType(int id, ItemType* type);
 	
 private:
+	bool datLoaded;
 	static int loadstatus;
 	static void XMLCALL xmlstartNode(void *userData, const char *name, const char **atts);
 	static void XMLCALL xmlendNode(void *userData, const char *name);

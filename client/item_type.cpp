@@ -27,6 +27,9 @@
 const char* readXmlProp(const char* propName, const xmlProp *props);
 extern ItemsTypes *g_itemsTypes;
 
+long ItemType::minClientId = 0;
+long ItemType::maxClientId = 0;
+
 ItemType::ItemType()
 {
 	group = ITEM_GROUP_NONE;
@@ -53,7 +56,7 @@ ItemType::ItemType()
 	decayTo = 0;
 	decayTime = 0;
 	blockingProjectile = false;
-	floorchange = false;
+	floorchange = true;
 	slot_position = SLOT_HAND;
 
 	floorChangeNorth = false;
@@ -99,6 +102,179 @@ ItemType::ItemType()
 
 }
 
+ItemsTypes::ItemsTypes()
+{
+	datLoaded = false;
+}
+
+bool ItemsTypes::loadFromDat(const char *filename)
+{
+	if(datLoaded)
+		return false;
+	
+	unsigned short id = 100;  // tibia.dat start with id 100
+	FILE *fp;
+	long size;
+	int speed;
+	short read_short;
+	
+	fp = fopen(filename, "rb");
+	if(!fp)
+		return false;
+	
+	fseek(fp,0,SEEK_END);
+	size = ftell(fp);
+
+	//get max id
+	fseek(fp, 0x04, SEEK_SET);
+	fread(&read_short, 2, 1, fp); 
+	ItemType::maxClientId = read_short;
+	ItemType::minClientId = 100;
+
+	fseek(fp, 0x0C, SEEK_SET);
+	// loop throw all Items until we reach the end of file
+	while(ftell(fp) < size && id <= ItemType::maxClientId)
+	{
+		ItemType *sType = getType(id);
+		if(!sType) {
+			ItemType *sType = new ItemType();
+			sType->id = id;
+			item[id] = sType;
+		}
+
+		// read the options until we find a 0xff
+		int optbyte;
+		
+		while (((optbyte = fgetc(fp)) >= 0) && (optbyte != 0xFF))
+		{                                                            
+			switch (optbyte)
+			{
+			case 0x00:
+				//is groundtile
+				fread(&read_short, 2, 1, fp); 
+				speed = read_short;
+				sType->speed = speed;
+				sType->groundtile = true;
+				if(speed == 0)
+					sType->blocking = true;
+
+				break;
+			case 0x01: // all OnTop
+				sType->alwaysOnTop = true;
+				break;
+			case 0x02: // can walk trough (open doors, arces, bug pen fence ??)
+				break;
+			case 0x03:
+				//is a container
+				sType->container = true;
+				break;
+			case 0x04:
+				//is stackable
+				sType->stackable = true;
+				break;
+			case 0x05:
+				//is useable
+				sType->useable = true;
+				break;
+			case 0x0A:
+				//is multitype !!! wrong definition (only water splash on floor)
+				sType->fluid = true;
+				break;
+			case 0x0B:
+				//is blocking
+				sType->blocking = true;
+				break;
+			case 0x0C:
+				//is on moveable
+				sType->notMoveable = true;
+				break;
+			case 0x0F:
+				//can be equipped
+				sType->pickupable = true;
+				break;
+			case 0x10:
+				//makes light (skip 4 bytes)
+				fgetc(fp); //number of tiles around
+				fgetc(fp); // always 0
+				fgetc(fp); // 215 items, 208 fe non existant items other values
+				fgetc(fp); // always 0
+				break;
+			case 0x06: // ladder up (id 1386)   why a group for just 1 item ???   
+				break;
+			case 0x09: //can contain fluids
+				sType->fluid = true;
+				break;
+			case 0x0D: // blocks missiles (walls, magic wall etc)
+				sType->blockingProjectile = true;
+				break;
+			case 0x0E: // blocks monster movement (flowers, parcels etc)
+				break;
+			case 0x11: // can see what is under (ladder holes, stairs holes etc)
+				break;
+			case 0x12: // ground tiles that don't cause level change
+				sType->floorchange = false;
+				break;
+			case 0x18: // cropses that don't decay
+				break;
+			case 0x14: // player color templates
+				break;
+			case 0x07: // writtable objects
+				fgetc(fp); //max characters that can be written in it (0 unlimited)
+				fgetc(fp); //max number of  newlines ? 0, 2, 4, 7
+				break;
+			case 0x08: // writtable objects that can't be edited 
+				fgetc(fp); //always 0 max characters that can be written in it (0 unlimited) 
+				fgetc(fp); //always 4 max number of  newlines ? 
+				break;
+			case 0x13: // mostly blocking items, but also items that can pile up in level (boxes, chairs etc)
+				fgetc(fp); //always 8
+				fgetc(fp); //always 0
+				break;
+			case 0x16: // ground, blocking items and mayby some more 
+				fgetc(fp); //12, 186, 210, 129 and other.. 
+				fgetc(fp); //always 0
+				break;
+			case 0x1A: 
+				//7.4 (change no data ?? ) action that can be performed (doors-> open, hole->open, book->read) not all included ex. wall torches
+				break;  
+			case 0x1D:  // line spot ...
+				fgetc(fp); // 86 -> openable holes, 77-> can be used to go down, 76 can be used to go up, 82 -> stairs up, 79 switch,    
+				fgetc(fp); // always 4                  
+				break;         
+			case 0x1B:  // walls 2 types of them same material (total 4 pairs)                  
+				break;
+			case 0x19:  // wall items                 
+				break;    
+			case 0x17:  // seems like decorables with 4 states of turning (exception first 4 are unique statues)                 
+				sType->rotable = true;
+				break;
+			case 0x1C:  // ?? ...                 
+				break;            
+			default:
+				//std::cout << "unknown byte: " << (unsigned short)optbyte << std::endl;
+				return false;
+				break;
+			}
+		}
+
+		// now skip the size and sprite data		
+ 		int width  = fgetc(fp);
+ 		int height = fgetc(fp);
+ 		if ((width > 1) || (height > 1))
+ 		   fgetc(fp);
+ 		   
+		int blendframes = fgetc(fp);
+		int xdiv        = fgetc(fp);
+		int ydiv        = fgetc(fp);
+		int animcount   = fgetc(fp);
+
+  	fseek(fp, width*height*blendframes*xdiv*ydiv*animcount*2, SEEK_CUR);
+		++id;
+	}
+
+	datLoaded = true;
+	return true;
+}
 
 int ItemsTypes::loadstatus;
 bool ItemsTypes::loadFromXml(const char *filename)
@@ -106,8 +282,7 @@ bool ItemsTypes::loadFromXml(const char *filename)
 	void *buff;
 	int bytes_read;
 	int eof;
-	//SpriteType xml_sType;
-	//xml_sType.id = 0;
+
 	XML_Parser p = XML_ParserCreate(NULL);
 
 	eof = 0;
@@ -116,7 +291,6 @@ bool ItemsTypes::loadFromXml(const char *filename)
 	}
 
 	XML_SetElementHandler(p, xmlstartNode, xmlendNode);
-	//XML_SetUserData(p, &xml_sType);
 
 	FILE *f = fopen(filename,"rb");
 	if(!f){
@@ -186,7 +360,12 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 
 		if((tmp = readXmlProp("id", props)) != 0){
 			id = atoi(tmp);
-			sType = g_itemsTypes->getItem(id);
+			sType = g_itemsTypes->getType(id);
+			if(!sType) {
+				sType = new ItemType();
+				sType->id = id;
+				g_itemsTypes->addType(id, sType);
+			}
 		}
 		else
 			loadstatus = 1;
@@ -458,7 +637,7 @@ void XMLCALL ItemsTypes::xmlendNode(void *userData, const char *name)
 
 bool ItemsTypes::setGroup(int id, itemgroup_t newgroup)
 {
-	ItemType* it = getItem(id);
+	ItemType* it = getType(id);
 	if(it) {
 		it->group = newgroup;
 		return true;
@@ -467,7 +646,27 @@ bool ItemsTypes::setGroup(int id, itemgroup_t newgroup)
 	return false;
 }
 
-ItemType* ItemsTypes::getItem(int id)
+itemgroup_t ItemsTypes::getGroup(int id)
+{
+	ItemMap::iterator it = item.find(id);
+
+	if ((it != item.end()) && (it->second != NULL))
+		return it->second->group;
+
+	return ITEM_GROUP_NONE;
+}
+
+bool ItemsTypes::addType(int id, ItemType* type)
+{
+	if(!getType(id)) {
+		item[id] = type;
+		return true;
+	}
+
+	return false;
+}
+
+ItemType* ItemsTypes::getType(int id)
 {
 	ItemMap::iterator it = item.find(id);
 	if ((it != item.end()) && (it->second != NULL))
