@@ -61,7 +61,7 @@ ItemType::ItemType()
 	weight = 0.00;
 	decayTo = 0;
 	decayTime = 0;
-	floorchange = true;
+	floorchange = false;
 	slot_position = SLOT_HAND;
 
 	floorChangeNorth = false;
@@ -159,6 +159,7 @@ bool ItemsTypes::loadFromDat(const char *filename)
 		if(!sType) {
 			sType = new ItemType();
 			sType->id = id;
+			sType->clientid = id;
 			addType(id, sType);
 		}
 
@@ -382,7 +383,10 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 			sType = g_itemsTypes->getType(id);
 			if(!sType) {
 				sType = new ItemType();
+				if(id < 100)
+					id = id + 20000;
 				sType->id = id;
+				sType->clientid = id;
 				g_itemsTypes->addType(id, sType);
 			}
 		}
@@ -471,6 +475,7 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 
 				//container
 				if(strcmp(type, "container") == 0) {
+					sType->group = ITEM_GROUP_CONTAINER;
 					if((tmp = readXmlProp("maxitems", props)) != 0){
 						sType->maxItems = atoi(tmp);
 					}
