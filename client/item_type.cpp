@@ -61,7 +61,7 @@ ItemType::ItemType()
 	weight = 0.00;
 	decayTo = 0;
 	decayTime = 0;
-	floorchange = false;
+	floorchange = true;
 	slot_position = SLOT_HAND;
 
 	floorChangeNorth = false;
