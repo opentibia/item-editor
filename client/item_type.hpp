@@ -192,8 +192,8 @@ public:
 	bool loadFromDat(const char *filename);
 	bool loadFromXml(const char *filename);
 
-	ItemMap::iterator getTypes() {item.begin();};
-	ItemMap::iterator getEnd() {item.end();};
+	ItemMap::iterator getTypes() {return item.begin();};
+	ItemMap::iterator getEnd() {return item.end();};
 
 	bool setGroup(int id, itemgroup_t newgroup);
 	itemgroup_t getGroup(int id);
