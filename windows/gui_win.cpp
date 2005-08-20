@@ -293,7 +293,7 @@ LRESULT GUIWin::onDragEnd(HWND h)
 		curItem = insertTreeItem(m_hwndTree, itemInfo.pszText, hitTarget, itemInfo.lParam);
 		curItemServerId = itemInfo.lParam;
 		TreeView_DeleteItem(m_hwndTree, m_dragItem);
-		TreeView_SortChildren(m_hwndTree, hitTarget, 0);
+		//TreeView_SortChildren(m_hwndTree, hitTarget, 0);
 		TreeView_Expand(m_hwndTree, hitTarget, TVE_EXPAND);
 
 		delete buffer;
@@ -384,10 +384,10 @@ LRESULT GUIWin::onImportOld(HWND h)
 	curItemClientId = 0;
 	curItem = NULL;
 	curItemServerId = 0;
-	/* UNCOMMENT THIS
+
 	g_itemsTypes->loadFromDat(fileTibiaDat);
 	g_itemsTypes->loadFromXml(fileItemsXml);
-	*/
+	
 	loadTreeItemTypes(h);
 
 	return TRUE;
@@ -489,11 +489,11 @@ void GUIWin::createGroupsTree(HWND htree)
 	rootItems[ITEM_GROUP_WRITEABLE] = insertTreeItem(htree, "Writeable", NULL, ITEM_GROUP_WRITEABLE);
 	rootItems[ITEM_GROUP_KEY] = insertTreeItem(htree, "Key", NULL, ITEM_GROUP_KEY);
 	rootItems[ITEM_GROUP_SPLASH] = insertTreeItem(htree, "Splash", NULL, ITEM_GROUP_SPLASH);
-	rootItems[ITEM_GROUP_FLUID] = insertTreeItem(htree, "FLuid Container", NULL, ITEM_GROUP_FLUID);
+	rootItems[ITEM_GROUP_FLUID] = insertTreeItem(htree, "Fluid Container", NULL, ITEM_GROUP_FLUID);
 	rootItems[ITEM_GROUP_NONE] = insertTreeItem(htree, "Other", NULL, ITEM_GROUP_NONE);
 
-	insertTreeItem(htree, "Container 1", rootItems[ITEM_GROUP_NONE], 1988);
-	insertTreeItem(htree, "Container 2", rootItems[ITEM_GROUP_NONE],  1987);
+	//insertTreeItem(htree, "Container 1", rootItems[ITEM_GROUP_NONE], 1988);
+	//insertTreeItem(htree, "Container 2", rootItems[ITEM_GROUP_NONE],  1987);
 
 }
 
@@ -567,11 +567,11 @@ bool GUIWin::saveCurrentItem(HWND h)
 	char buffer[128];
 	int len = GetDlgItemText(h, IDC_EDITNAME, buffer, 127);
 	if(len >= 0)
-		memcpy(iType->name, buffer, len);
+		memcpy(iType->name, buffer, len+1);
 
 	len = GetDlgItemText(h, IDC_EDITDESCR, buffer, 127);
 	if(len >= 0)
-		memcpy(iType->descr, buffer, len);
+		memcpy(iType->descr, buffer, len+1);
 
 	if(!getEditTextInt(h, IDC_EDITCID, iType->clientid)){
 		return false;
@@ -946,9 +946,10 @@ void GUIWin::loadTreeItemTypes(HWND h)
 	//create groups
 	createGroupsTree(m_hwndTree);
 	//load itemType map
-	//TODO
-	//insertTreeItemType(m_hwndTree, iType);
-
+	ItemMap::iterator it;
+	for(it = g_itemsTypes->getTypes(); it != g_itemsTypes->getEnd(); it++){
+		insertTreeItemType(m_hwndTree, it->second);
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
