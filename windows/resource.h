@@ -4,6 +4,8 @@
 //
 #define DLG_MAIN                        101
 #define MENU_MAIN                       102
+#define MENU_POPUP_ITEMS                110
+#define IDR_POPUP_ITEM                  112
 #define IDC_ITEMTYPE                    1004
 #define IDC_EDITOR_TREE                 1006
 #define IDC_ITEM_PIC                    1007
@@ -47,13 +49,26 @@
 #define ID_TOOLS_VERIFYITEMS            40006
 #define ID_TOOLS_FINDMISSINGITEMS       40007
 #define ID_TOOLS_GOTOITEM               40008
+#define ID_MENUG_CONTAINER              40011
+#define ID_MENUG_WEAPON                 40012
+#define ID_MENUG_AMMUNITION             40013
+#define ID_MENUG_RUNE                   40015
+#define ID_MENUG_TELEPORT               40016
+#define ID_MENUG_MAGICFIELD             40017
+#define ID_MENUG_WRITEABLE              40018
+#define ID_MENUG_KEY                    40019
+#define ID_MENUG_SPLASH                 40020
+#define ID_MENUG_FLUID                  40021
+#define ID_MENUG_NONE                   40022
+#define ID_MENUG_GROUND                 40023
+#define ID_MENUG_ARMOR                  40024
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        110
-#define _APS_NEXT_COMMAND_VALUE         40009
+#define _APS_NEXT_RESOURCE_VALUE        113
+#define _APS_NEXT_COMMAND_VALUE         40026
 #define _APS_NEXT_CONTROL_VALUE         1047
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

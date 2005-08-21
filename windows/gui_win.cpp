@@ -56,6 +56,8 @@ bool GUIWin::m_dragging = false;
 HWND GUIWin::m_hwndTree = 0;
 HTREEITEM GUIWin::m_dragItem = NULL;
 HTREEITEM GUIWin::rootItems[ITEM_GROUP_LAST] = {NULL};
+unsigned long GUIWin::menuGroups[ITEM_GROUP_LAST] = {NULL};
+HMENU GUIWin::popupMenu = 0;
 
 GUIWin::GUIWin()
 {
@@ -69,8 +71,23 @@ void GUIWin::initGUI()
 	icc.dwICC = ICC_WIN95_CLASSES;
 	InitCommonControlsEx(&icc);
 
-	//InitCommonControls();
-	DialogBoxParam(g_instance,MAKEINTRESOURCE(DLG_MAIN),NULL,reinterpret_cast<DLGPROC>(GUIWin::DlgProcMain),NULL);
+	//DialogBoxParam(g_instance,MAKEINTRESOURCE(DLG_MAIN),NULL,reinterpret_cast<DLGPROC>(GUIWin::DlgProcMain),NULL);
+	
+	MSG msg; 
+	int ret;
+	HACCEL haccel = LoadAccelerators(g_instance, MAKEINTRESOURCE(IDR_POPUP_ITEM)); 
+	HWND hDlg = CreateDialog(g_instance, MAKEINTRESOURCE(DLG_MAIN), NULL, reinterpret_cast<DLGPROC>(GUIWin::DlgProcMain)); 
+	ShowWindow(hDlg, SW_SHOW);
+	while(ret = GetMessage (&msg, NULL, 0, 0)){
+		if(ret == -1){
+			return;
+		}
+		if((!TranslateAccelerator(hDlg, haccel, &msg)) && !IsDialogMessage(hDlg, &msg)){ 
+			TranslateMessage (&msg); 
+			DispatchMessage (&msg); 
+		} 
+	}
+	DestroyWindow(hDlg);
 }
 
 void GUIWin::messageBox(const char *text, MesageBoxType_t type)
@@ -169,6 +186,8 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 		break;
 	case WM_NOTIFY:
 		if(LOWORD(wParam) == IDC_EDITOR_TREE){
+			NMHDR *ahh;
+			ahh = (NMHDR*)lParam;
 			switch(((NMHDR*)lParam)->code){
 			case TVN_SELCHANGING:
 				return onTreeSelChange(h, (NMTREEVIEW*)lParam);
@@ -189,11 +208,16 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 			return onDragEnd(h);
 		}
 		break;
+	case WM_CONTEXTMENU:
+		if((HWND)wParam == m_hwndTree){
+			return onContextMenu(h, (unsigned long)lParam);
+		}
+		break;
 	case WM_VSCROLL:
 		return onSpinScroll(h, (HWND)lParam);
 		break;
 	case WM_CLOSE:
-		EndDialog(h,NULL);
+		PostQuitMessage(0);
 		break;
 	case WM_PAINT:
 		HDC tmp;
@@ -212,14 +236,15 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 		return FALSE;
 		break;
 	case WM_COMMAND:
-		switch((wParam & 0xFFFF0000 >> 16)){
+		int controlid = (wParam & 0xFFFF0000 >> 16);
+		switch(controlid){
 		case IDC_EDITCID:
 			if((wParam & 0xFFFF0000) >> 16 == EN_CHANGE){
 				return onClientIdChange(h, (HWND)lParam);
 			}
 			break;
 		case ID_FILE_EXIT:
-			EndDialog(h,NULL);
+			PostQuitMessage(0);
 			break;
 		case ID_FILE_IMPORTOLD:
 			return onImportOld(h);
@@ -231,6 +256,14 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 		case ID_TOOLS_FINDMISSINGITEMS:
 			break;
 		case ID_HELP_ABOUT:
+			break;
+		default:
+			//context menu
+			for(int i = 0; i < ITEM_GROUP_LAST; i++){
+				if(controlid == menuGroups[i]){
+					return onContextMenuClick(h, i);
+				}
+			}
 			break;
 		}
 		break;
@@ -276,39 +309,49 @@ LRESULT GUIWin::onDragMove(HWND h, LPARAM lParam)
 LRESULT GUIWin::onDragEnd(HWND h)
 {
 	TVITEM itemInfo;
-	char *buffer;
 	long id;
 	HTREEITEM hitTarget = TreeView_GetDropHilight(m_hwndTree);
 	if(hitTarget){
 		TreeView_SelectDropTarget(m_hwndTree, NULL);
-
-		//change parent
-		itemInfo.mask = TVIF_TEXT | TVIF_PARAM;
+		
+		itemInfo.mask = TVIF_PARAM;
 		itemInfo.hItem = m_dragItem;
-		buffer = new char[128];
-		itemInfo.pszText = buffer;
-		itemInfo.cchTextMax = 128;
 		TreeView_GetItem(m_hwndTree, &itemInfo);
 		id = itemInfo.lParam;
-		curItem = insertTreeItem(m_hwndTree, itemInfo.pszText, hitTarget, itemInfo.lParam);
-		curItemServerId = itemInfo.lParam;
-		TreeView_DeleteItem(m_hwndTree, m_dragItem);
-		//TreeView_SortChildren(m_hwndTree, hitTarget, 0);
-		TreeView_Expand(m_hwndTree, hitTarget, TVE_EXPAND);
 
-		delete buffer;
-		//update type
-		itemInfo.mask = TVIF_PARAM;
 		itemInfo.hItem = hitTarget;
 		TreeView_GetItem(m_hwndTree, &itemInfo);
-		g_itemsTypes->setGroup(id, (itemgroup_t)itemInfo.lParam);
-		
-		updateControls(h);
+
+		if((itemgroup_t)itemInfo.lParam != g_itemsTypes->getGroup(id)){
+			if(TreeView_SelectItem(m_hwndTree, hitTarget)){
+				changeGroup(h, m_dragItem, hitTarget);
+			}
+		}
 	}
 	
 	m_dragging = false;
 	m_dragItem = NULL;
 	ReleaseCapture();
+	return TRUE;
+}
+
+LRESULT GUIWin::onContextMenuClick(HWND h, unsigned long newgroup)
+{
+	if(!curItemServerId)
+		return TRUE;
+
+	if(newgroup != g_itemsTypes->getGroup(curItemServerId)){
+		HTREEITEM nextSel;
+		nextSel = TreeView_GetNextSibling(m_hwndTree, curItem);
+		if(!nextSel){
+			nextSel = TreeView_GetPrevSibling(m_hwndTree, curItem);
+			if(!nextSel){
+				nextSel = TreeView_GetParent(m_hwndTree, curItem);
+			}
+		}
+		changeGroup(h, curItem, rootItems[newgroup]);
+		TreeView_SelectItem(m_hwndTree, nextSel);
+	}
 	return TRUE;
 }
 
@@ -354,6 +397,33 @@ LRESULT GUIWin::onClientIdChange(HWND h, HWND hEdit)
 	return TRUE;
 }
 
+LRESULT GUIWin::onContextMenu(HWND h, unsigned long lParam)
+{
+	HTREEITEM hitTarget;
+	TVHITTESTINFO tvht;
+	TVITEM itemInfo;
+	POINT screen_coords;
+	screen_coords.x = lParam & 0xFFFF;
+	screen_coords.y = (lParam & 0xFFFF0000) >> 16;
+	tvht.pt.x = lParam & 0xFFFF;
+	tvht.pt.y = (lParam & 0xFFFF0000) >> 16;
+	ScreenToClient(m_hwndTree, &tvht.pt);
+	tvht.flags = TVHT_ONITEM;
+	if((hitTarget = TreeView_HitTest(m_hwndTree, &tvht)) != NULL){
+		if(TreeView_SelectItem(m_hwndTree, hitTarget)){
+			itemInfo.mask = TVIF_HANDLE;
+			itemInfo.hItem = hitTarget;
+			TreeView_GetItem(m_hwndTree, &itemInfo);
+			if(itemInfo.lParam >= 100){
+				setContextMenuGroup(g_itemsTypes->getGroup(itemInfo.lParam));
+				TrackPopupMenuEx(popupMenu, 0, screen_coords.x, screen_coords.y, h, NULL);
+			}
+		}
+	}
+
+	return TRUE;
+}
+
 LRESULT GUIWin::onImportOld(HWND h)
 {
 	OPENFILENAME opf;
@@ -381,7 +451,6 @@ LRESULT GUIWin::onImportOld(HWND h)
 	if(ret == 0)
 		return TRUE;
 	
-	curItemClientId = 0;
 	curItem = NULL;
 	curItemServerId = 0;
 
@@ -458,6 +527,22 @@ LRESULT GUIWin::onInitDialog(HWND h)
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Arrow", DIST_ARROW);
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Poison Arrow", DIST_POISONARROW);
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Burst Arrow", DIST_BURSTARROW);
+
+	//initialize menu entryes
+	menuGroups[ITEM_GROUP_GROUND] = ID_MENUG_GROUND;
+	menuGroups[ITEM_GROUP_CONTAINER] = ID_MENUG_CONTAINER;
+	menuGroups[ITEM_GROUP_WEAPON] = ID_MENUG_WEAPON;
+	menuGroups[ITEM_GROUP_AMMUNITION] = ID_MENUG_AMMUNITION;
+	menuGroups[ITEM_GROUP_ARMOR] = ID_MENUG_ARMOR;
+	menuGroups[ITEM_GROUP_RUNE] = ID_MENUG_RUNE;
+	menuGroups[ITEM_GROUP_TELEPORT] = ID_MENUG_TELEPORT;
+	menuGroups[ITEM_GROUP_MAGICFIELD] = ID_MENUG_MAGICFIELD;
+	menuGroups[ITEM_GROUP_WRITEABLE] = ID_MENUG_WRITEABLE;
+	menuGroups[ITEM_GROUP_KEY] = ID_MENUG_KEY;
+	menuGroups[ITEM_GROUP_SPLASH] = ID_MENUG_SPLASH;
+	menuGroups[ITEM_GROUP_FLUID] = ID_MENUG_FLUID;
+	menuGroups[ITEM_GROUP_NONE] = ID_MENUG_NONE;
+	popupMenu = GetSubMenu(LoadMenu(g_instance, MAKEINTRESOURCE(MENU_POPUP_ITEMS)), 0);
 
 	updateControls(h);
 	
@@ -547,6 +632,32 @@ void GUIWin::invalidateSprite(HWND h)
 	rect.top = pt.y;
 
 	InvalidateRect(h, &rect, false);
+}
+
+void GUIWin::changeGroup(HWND h, HTREEITEM htItem, HTREEITEM newParent)
+{
+	TVITEM itemInfo;
+	char *buffer;
+	long id;
+
+	//change parent
+	itemInfo.mask = TVIF_TEXT | TVIF_PARAM;
+	itemInfo.hItem = htItem;
+	buffer = new char[128];
+	itemInfo.pszText = buffer;
+	itemInfo.cchTextMax = 128;
+	TreeView_GetItem(m_hwndTree, &itemInfo);
+	id = itemInfo.lParam;
+	insertTreeItem(m_hwndTree, itemInfo.pszText, newParent, itemInfo.lParam);
+	TreeView_DeleteItem(m_hwndTree, htItem);
+	
+	delete buffer;
+	//update type
+	itemInfo.mask = TVIF_PARAM;
+	itemInfo.hItem = newParent;
+	TreeView_GetItem(m_hwndTree, &itemInfo);
+	g_itemsTypes->setGroup(id, (itemgroup_t)itemInfo.lParam);
+
 }
 
 bool GUIWin::saveCurrentItem(HWND h)
@@ -949,6 +1060,18 @@ void GUIWin::loadTreeItemTypes(HWND h)
 	ItemMap::iterator it;
 	for(it = g_itemsTypes->getTypes(); it != g_itemsTypes->getEnd(); it++){
 		insertTreeItemType(m_hwndTree, it->second);
+	}
+}
+
+void GUIWin::setContextMenuGroup(itemgroup_t group)
+{
+	for(int i = 0;i < ITEM_GROUP_LAST; i++){
+		if(i != group){
+			CheckMenuItem(popupMenu, menuGroups[i], MF_UNCHECKED);
+		}
+		else{
+			CheckMenuItem(popupMenu, menuGroups[i], MF_CHECKED);
+		}
 	}
 }
 

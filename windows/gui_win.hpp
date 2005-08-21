@@ -113,6 +113,8 @@ protected:
 	static LRESULT onDragEnd(HWND h);
 	static LRESULT onClientIdChange(HWND h, HWND hEdit);
 	static LRESULT onImportOld(HWND h);
+	static LRESULT onContextMenu(HWND h, unsigned long lParam);
+	static LRESULT onContextMenuClick(HWND h, unsigned long newgroup);
 
 	static void setControlState(HWND h, unsigned long flagsEdit, unsigned long flagsOpt, 
 			unsigned long flagsCombo, unsigned long flagsButton);
@@ -133,6 +135,8 @@ protected:
 	static void createGroupsTree(HWND htree);
 	static HTREEITEM insertTreeItem(HWND h, const char* name, HTREEITEM parent, long entryID);
 	static HTREEITEM insertTreeItemType(HWND h, const ItemType *iType);
+	//context menu
+	static void setContextMenuGroup(itemgroup_t group);
 
 	static void invalidateSprite(HWND h);
 
@@ -140,12 +144,15 @@ protected:
 	static void loadItem(HWND h);
 	static void updateControls(HWND h);
 	static void loadTreeItemTypes(HWND h);
+	static void changeGroup(HWND h, HTREEITEM htItem, HTREEITEM newParent);
 
 	static long curItemClientId;
 	static long curItemServerId;
 	static GUIDraw* drawEngine;
 	static HWND m_hwndTree;
 
+	static unsigned long menuGroups[ITEM_GROUP_LAST];
+	static HMENU popupMenu;
 	static HTREEITEM rootItems[ITEM_GROUP_LAST];
 	static HTREEITEM curItem;
 

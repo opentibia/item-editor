@@ -47,6 +47,26 @@ BEGIN
     END
 END
 
+MENU_POPUP_ITEMS MENU DISCARDABLE 
+BEGIN
+    POPUP ""
+    BEGIN
+        MENUITEM "Ground",                      ID_MENUG_GROUND
+        MENUITEM "Container",                   ID_MENUG_CONTAINER
+        MENUITEM "Weapon",                      ID_MENUG_WEAPON
+        MENUITEM "Ammunition",                  ID_MENUG_AMMUNITION
+        MENUITEM "Armor",                       ID_MENUG_ARMOR
+        MENUITEM "Rune",                        ID_MENUG_RUNE
+        MENUITEM "Teleport",                    ID_MENUG_TELEPORT
+        MENUITEM "Magic Field",                 ID_MENUG_MAGICFIELD
+        MENUITEM "Writeable",                   ID_MENUG_WRITEABLE
+        MENUITEM "Key",                         ID_MENUG_KEY
+        MENUITEM "Splash",                      ID_MENUG_SPLASH
+        MENUITEM "Fluid",                       ID_MENUG_FLUID
+        MENUITEM "None",                        ID_MENUG_NONE
+    END
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -87,9 +107,9 @@ BEGIN
     CONTROL         "*Not Moveable",IDC_OPT_NO_MOVE,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,150,164,60,8
     CONTROL         "*Pickupable",IDC_OPT_PICKUP,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,150,190,60,8
-    CONTROL         "*Rotable",IDC_OPT_ROTABLE,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,150,203,60,8
+    CONTROL         "*Rotable",IDC_OPT_ROTABLE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,150,190,60,8
     LTEXT           "Weight",IDC_STATIC,210,112,42,8
     EDITTEXT        IDC_EDIT_WEIGHT,252,112,50,12,ES_AUTOHSCROLL
     LTEXT           "DecayTo",IDC_STATIC,210,125,42,8
@@ -178,6 +198,29 @@ BEGIN
     END
 END
 #endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_POPUP_ITEM ACCELERATORS DISCARDABLE 
+BEGIN
+    "0",            ID_MENUG_SPLASH,        VIRTKEY, CONTROL, NOINVERT
+    "1",            ID_MENUG_TELEPORT,      VIRTKEY, CONTROL, NOINVERT
+    "2",            ID_MENUG_ARMOR,         VIRTKEY, CONTROL, NOINVERT
+    "3",            ID_MENUG_CONTAINER,     VIRTKEY, CONTROL, NOINVERT
+    "4",            ID_MENUG_FLUID,         VIRTKEY, CONTROL, NOINVERT
+    "5",            ID_MENUG_GROUND,        VIRTKEY, CONTROL, NOINVERT
+    "6",            ID_MENUG_KEY,           VIRTKEY, CONTROL, NOINVERT
+    "7",            ID_MENUG_MAGICFIELD,    VIRTKEY, CONTROL, NOINVERT
+    "8",            ID_MENUG_NONE,          VIRTKEY, CONTROL, NOINVERT
+    "9",            ID_MENUG_RUNE,          VIRTKEY, CONTROL, NOINVERT
+    "A",            ID_MENUG_AMMUNITION,    VIRTKEY, CONTROL, NOINVERT
+    "B",            ID_MENUG_WRITEABLE,     VIRTKEY, CONTROL, NOINVERT
+    "C",            ID_MENUG_WEAPON,        VIRTKEY, CONTROL, NOINVERT
+END
 
 #endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
