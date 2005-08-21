@@ -625,10 +625,10 @@ bool GUIWin::saveCurrentItem(HWND h)
 
 	int comboFloor = getComboValue(h, IDC_COMBO_FLOOR);
 	if(comboFloor & FLOOR_DOWN){
-		iType->floorchange = true;
+		iType->floorChangeDown = true;
 	}
 	else{
-		iType->floorchange = false;
+		iType->floorChangeDown = false;
 	}
 	if(comboFloor & FLOOR_U_N){
 		iType->floorChangeNorth = true;
@@ -709,7 +709,7 @@ void GUIWin::loadItem(HWND h)
 		setComboValue(h, IDC_COMBO_AMU, iType->amuType);
 		setComboValue(h, IDC_COMBO_SHOOT, iType->shootType);
 
-		if(iType->floorchange)
+		if(iType->floorChangeDown)
 			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_DOWN);
 		else if(iType->floorChangeNorth && iType->floorChangeEast)
 			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_U_NE);
