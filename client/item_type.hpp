@@ -22,10 +22,11 @@
 #define __OTITEMEDITOR_ITEM_TYPE_H__
 
 #include "expat.h"
+#include "fileloader.hpp"
 #include <map>
 
 enum itemgroup_t{
-	ITEM_GROUP_NONE,
+	ITEM_GROUP_NONE = 0,
 	ITEM_GROUP_GROUND,
 	ITEM_GROUP_CONTAINER,
 	ITEM_GROUP_WEAPON,
@@ -40,6 +41,41 @@ enum itemgroup_t{
 	ITEM_GROUP_FLUID,
 	ITEM_GROUP_LAST
 };
+
+/////////OTB specific//////////////
+enum itemattrib_t {
+	ITEM_ATTR_SERVERID = 0x10,
+	ITEM_ATTR_CLIENTID,
+	ITEM_ATTR_NAME,
+	ITEM_ATTR_DESCR,
+	ITEM_ATTR_SPEED,
+	ITEM_ATTR_SLOT,
+	ITEM_ATTR_MAXITEMS,
+	ITEM_ATTR_WEIGHT,
+	ITEM_ATTR_DECAY
+};
+
+enum itemflags_t {
+ FLAG_BLOCK_SOLID = 1,
+ FLAG_BLOCK_PROJECTILE = 2, 
+ FLAG_BLOCK_PATHFIND =  4, 
+ FLAG_BLOCK_PICKUPABLE = 8,
+ FLAG_USEABLE = 16,
+ FLAG_FLOORCHANGEDOWN = 32,
+ FLAG_FLOORCHANGENORTH = 64,
+ FLAG_FLOORCHANGEEAST = 128,
+ FLAG_FLOORCHANGESOUTH = 256,
+ FLAG_FLOORCHANGEWEST = 512,
+ FLAG_ALWAYSONTOP = 1024,
+ FLAG_PICKUPABLE = 2048,
+ FLAG_MOVEABLE = 4096,
+};
+
+struct decayBlock{
+	int decayTo;
+	int decayTime;
+};
+//////////////////////////
 
 enum slots_t {
 	SLOT_DEFAULT,
@@ -171,6 +207,7 @@ public:
 	int magicfieldtype;
 	
 	//writeable
+	bool isWriteable;
 	int readonlyId;
 	bool write1time;
 	
@@ -191,6 +228,9 @@ public:
 
 	bool loadFromDat(const char *filename);
 	bool loadFromXml(const char *filename);
+
+	int saveOtb(const char *filename);
+	int loadOtb(const char *filename);
 
 	ItemMap::iterator getTypes() {return item.begin();};
 	ItemMap::iterator getEnd() {return item.end();};

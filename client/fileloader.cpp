@@ -18,7 +18,7 @@
 // Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //////////////////////////////////////////////////////////////////////
 
-#include "fileloader.h"
+#include "fileloader.hpp"
 
 FileLoader::FileLoader()
 {
@@ -40,24 +40,38 @@ FileLoader::~FileLoader()
 }
 
 
-bool FileLoader::openFile(const char* filename)
+bool FileLoader::openFile(const char* filename, bool write)
 {
-	unsigned long version;
-	m_file = fopen(filename, "rb");
-	if(m_file){
-		fread(&version, sizeof(unsigned long), 1, m_file);
-		if(version > 0){
-			fclose(m_file);
-			m_lastError = ERROR_INVALID_FILE_VERSION;
-			return false;
+	if(write) {
+		m_file = fopen(filename, "w+");
+		if(m_file) {
+				unsigned long version = 0;
+				writeData(&version, sizeof(version), false);
+				return true;
 		}
 		else{
-			return true;
+			m_lastError = ERROR_CAN_NOT_CREATE;
+			return false;
 		}
-	}
-	else{
-		m_lastError = ERROR_CAN_NOT_OPEN;
-		return false;
+}
+	else {
+		unsigned long version;
+		m_file = fopen(filename, "rb");
+		if(m_file){
+			fread(&version, sizeof(unsigned long), 1, m_file);
+			if(version > 0){
+				fclose(m_file);
+				m_lastError = ERROR_INVALID_FILE_VERSION;
+				return false;
+			}
+			else{
+				return true;
+			}
+		}
+		else{
+			m_lastError = ERROR_CAN_NOT_OPEN;
+			return false;
+		}
 	}
 }
 
@@ -106,6 +120,45 @@ const unsigned char* FileLoader::getProps(const NODE node, unsigned long &size)
 	size = position;
 
 	return m_buffer;
+}
+
+int FileLoader::setFlags(unsigned long flags)
+{
+	//data
+	if(!writeData(&flags, sizeof(flags), true))
+		return getError();
+
+	return ERROR_NONE;
+}
+
+int FileLoader::setProps(unsigned short attr, void* data, unsigned short size)
+{
+	//size
+	if(!writeData(&size, sizeof(size), true))
+		return getError();
+
+	//attribute
+	if(!writeData(&attr, sizeof(attr), true))
+		return getError();
+
+	//data
+	if(!writeData(data, size, true))
+		return getError();
+
+	return ERROR_NONE;
+}
+
+void FileLoader::startNode(unsigned char type)
+{
+	unsigned char nodeBegin = NODE_START;
+	writeData(&nodeBegin, sizeof(nodeBegin), false);
+	writeData(&type, sizeof(type), true);
+}
+
+void FileLoader::endNode()
+{
+	unsigned char nodeEnd = NODE_END;
+	writeData(&nodeEnd, sizeof(nodeEnd), false);
 }
 
 const NODE FileLoader::getChildNode(const NODE parent, unsigned long &type)
@@ -251,6 +304,32 @@ inline bool FileLoader::readByte(int &value)
 	}
 	else
 		return true;
+}
+
+inline bool FileLoader::writeData(void* data, int size, bool unescape)
+{
+	for(int i = 0; i < size; ++i) {
+		char c = *(((char*)data) + i);
+
+		if( c == NODE_START ||
+			  c == NODE_END ||
+				c == ESCAPE_CHAR) {
+			unsigned char escape = ESCAPE_CHAR;
+			int value = fwrite(&escape, 1, 1, m_file);
+			if(value != 1) {
+				m_lastError = ERROR_COULDNOTWRITE;
+				return false;
+			}
+		}
+
+		int value = fwrite(&c, 1, 1, m_file);
+		if(value != 1) {
+			m_lastError = ERROR_COULDNOTWRITE;
+			return false;
+		}
+	}
+
+	return true;
 }
 
 inline bool FileLoader::checks(const NODE node)

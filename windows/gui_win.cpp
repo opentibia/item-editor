@@ -250,8 +250,10 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 			return onImportOld(h);
 			break;
 		case ID_FILE_SAVEAS:
-			break;
+			g_itemsTypes->saveOtb("C:\\tmp.otb");
+		break;
 		case ID_TOOLS_VERIFYITEMS:
+			g_itemsTypes->loadOtb("C:\\tmp.otb");
 			break;
 		case ID_TOOLS_FINDMISSINGITEMS:
 			break;

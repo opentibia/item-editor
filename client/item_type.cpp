@@ -56,8 +56,8 @@ ItemType::ItemType()
 	rotateTo = 0;
 
 	//xml
-	name[0] = '\0';
-	descr[0] = '\0'; 
+	memset(name, '\0', sizeof(name));
+	memset(descr, '\0', sizeof(descr));
 	weight = 0.00;
 	decayTo = 0;
 	decayTime = 0;
@@ -96,6 +96,7 @@ ItemType::ItemType()
 	magicfieldtype = 0;
 	
 	//writeable
+	isWriteable = false;
 	readonlyId = 0;
 	write1time = false;
 	
@@ -238,10 +239,14 @@ bool ItemsTypes::loadFromDat(const char *filename)
 			case 0x14: // player color templates
 				break;
 			case 0x07: // writtable objects
+				sType->group = ITEM_GROUP_WRITEABLE;
+				sType->isWriteable = true;
 				fgetc(fp); //max characters that can be written in it (0 unlimited)
 				fgetc(fp); //max number of  newlines ? 0, 2, 4, 7
 				break;
-			case 0x08: // writtable objects that can't be edited 
+			case 0x08: // writtable objects that can't be edited
+				sType->group = ITEM_GROUP_WRITEABLE;
+				sType->isWriteable = false;
 				fgetc(fp); //always 0 max characters that can be written in it (0 unlimited) 
 				fgetc(fp); //always 4 max number of  newlines ? 
 				break;
@@ -480,6 +485,7 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 						sType->maxItems = atoi(tmp);
 					}
 				}
+				//weapon
 				else if(strcmp(type, "weapon") == 0) {
 					sType->group = ITEM_GROUP_WEAPON;
 
@@ -645,6 +651,7 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 					if((tmp = readXmlProp("readonlyid", props)) != 0) {
 						sType->readonlyId = atoi(tmp);
 						sType->write1time = true;
+						sType->isWriteable = true;
 					}
 				}
 				//key
@@ -705,4 +712,164 @@ ItemType* ItemsTypes::getType(int id)
 		return it->second;
 	   
 	return NULL;
+}
+
+
+int ItemsTypes::loadOtb(const char *filename)
+{
+	FileLoader *f = new FileLoader();
+	if(!f->openFile(filename, false)) {
+		return f->getError();
+	}
+	
+	unsigned long type,len;
+	NODE node = f->getChildNode(NULL, type);
+	//f->getProps(node, len);
+	node = f->getChildNode(node, type);
+
+	while(node != NO_NODE) {
+		const unsigned char* data = f->getProps(node, len);
+		node = f->getNextNode(node, type);
+	}
+	
+}
+
+int ItemsTypes::saveOtb(const char *filename)
+{
+	FileLoader *f = new FileLoader();
+	if(!f->openFile(filename, true)) {
+		return f->getError();
+	}
+
+	f->startNode(0);
+	f->setFlags(0);
+
+	ItemMap::iterator it;
+	for(it = item.begin(); it != item.end(); it++){
+		f->startNode(it->second->group);
+
+		int flags = 0;
+
+		switch(it->second->group) {
+			case ITEM_GROUP_GROUND:
+			{
+				if(it->second->blockSolid)
+					flags |= FLAG_BLOCK_SOLID;
+
+				if(it->second->blockProjectile)
+					flags |= FLAG_BLOCK_PROJECTILE;
+
+				if(it->second->blockProjectile)
+					flags |= FLAG_BLOCK_PATHFIND;
+
+				if(it->second->blockPickupable)
+					flags |= FLAG_BLOCK_PICKUPABLE;
+				
+				if(it->second->useable)
+					flags |= FLAG_USEABLE;
+
+				if(it->second->floorChangeDown)
+					flags |= FLAG_FLOORCHANGEDOWN;
+
+				if(it->second->floorChangeNorth)
+					flags |= FLAG_FLOORCHANGENORTH;
+
+				if(it->second->floorChangeEast)
+					flags |= FLAG_FLOORCHANGEEAST;
+
+				if(it->second->floorChangeSouth)
+					flags |= FLAG_FLOORCHANGESOUTH;
+
+				if(it->second->floorChangeWest)
+					flags |= FLAG_FLOORCHANGEWEST;
+
+				if(it->second->alwaysOnTop)
+					flags |= FLAG_ALWAYSONTOP;
+
+				f->setFlags(flags);
+				
+				//
+				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
+				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
+
+				if(strlen(it->second->name) > 0)
+					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
+
+				if(strlen(it->second->descr) > 0)
+					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+				//
+
+				f->setProps(ITEM_ATTR_SPEED, &it->second->speed, sizeof(unsigned short));
+
+				struct decayBlock db;
+				db.decayTo = it->second->decayTo;
+				db.decayTime = it->second->decayTime;
+				f->setProps(ITEM_ATTR_DECAY, &db, sizeof(db));
+				
+				break;
+			}
+			
+			case ITEM_GROUP_CONTAINER:
+			{
+
+				if(it->second->pickupable)
+					flags |= FLAG_PICKUPABLE;
+
+				if(it->second->moveable)
+					flags |= FLAG_MOVEABLE;
+
+				f->setFlags(flags);
+
+				//
+				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
+				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
+
+				if(strlen(it->second->name) > 0)
+					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
+
+				if(strlen(it->second->descr) > 0)
+					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+				//
+
+				f->setProps(ITEM_ATTR_WEIGHT, &it->second->weight, sizeof(double));
+				f->setProps(ITEM_ATTR_MAXITEMS, &it->second->maxItems, sizeof(unsigned short));
+				f->setProps(ITEM_ATTR_SLOT, &it->second->slot_position, sizeof(unsigned short));
+
+				struct decayBlock db;
+				db.decayTo = it->second->decayTo;
+				db.decayTime = it->second->decayTime;
+				f->setProps(ITEM_ATTR_DECAY, &db, sizeof(db));
+
+				break;
+			}
+			
+			case ITEM_GROUP_WEAPON:
+			{
+				//sType->weaponType
+				//sType->amuType
+				//sType->shootType
+				//attack
+				//defense
+			}
+			/*ITEM_GROUP_NONE,
+			,
+			,
+			ITEM_GROUP_AMMUNITION,
+			ITEM_GROUP_ARMOR,
+			ITEM_GROUP_RUNE,
+			ITEM_GROUP_TELEPORT,
+			ITEM_GROUP_MAGICFIELD,
+			ITEM_GROUP_WRITEABLE,
+			ITEM_GROUP_KEY,
+			ITEM_GROUP_SPLASH,
+			ITEM_GROUP_FLUID,*/			
+		}
+
+		f->endNode();
+	}
+
+	f->endNode();
+
+	delete f;
+	f = NULL;
 }
