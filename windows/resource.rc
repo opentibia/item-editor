@@ -41,8 +41,9 @@ BEGIN
     POPUP "Tools"
     BEGIN
         MENUITEM "Verify items",                ID_TOOLS_VERIFYITEMS
-        MENUITEM "Find missing items",          ID_TOOLS_FINDMISSINGITEMS
+        MENUITEM "Create missing client items", ID_TOOLS_FINDMISSINGITEMS
         MENUITEM "Go to item...",               ID_TOOLS_GOTOITEM
+        MENUITEM "Autofind client id",          ID_TOOLS_AUTOFIND
     END
     POPUP "Help"
     BEGIN

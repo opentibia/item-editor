@@ -26,6 +26,7 @@
 
 const char* readXmlProp(const char* propName, const xmlProp *props);
 extern ItemsTypes *g_itemsTypes;
+extern void getImageHash(unsigned short cid, void* output);
 
 long ItemType::minClientId = 0;
 long ItemType::maxClientId = 0;
@@ -35,6 +36,7 @@ ItemType::ItemType()
 	group     = ITEM_GROUP_NONE;
 	id			  = 100;
 	clientid	= 100;
+	foundNewImage = false;
 
 	blockSolid	= false;
 	blockProjectile = false;
@@ -154,6 +156,7 @@ bool ItemsTypes::loadFromDat(const char *filename)
 
 			sType->id = id;
 			sType->clientid = id;
+			getImageHash(sType->clientid, sType->sprHash);
 			addType(id, sType);
 		}
 

@@ -118,11 +118,14 @@ protected:
 	static LRESULT onImportOld(HWND h);
 	static LRESULT onSaveOtb(HWND h);
 	static LRESULT onLoadOtb(HWND h);
+	static LRESULT onAutoFindImages(HWND h);
 	static LRESULT onContextMenu(HWND h, unsigned long lParam);
 	static LRESULT onContextMenuClick(HWND h, unsigned long newgroup);
 
 	static void setControlState(HWND h, unsigned long flagsEdit, unsigned long flagsOpt, 
 			unsigned long flagsCombo, unsigned long flagsButton);
+
+	static void getItemTypeName(const ItemType *iType,char *name);
 
 	//edit
 	static void setEditTextInt(HWND h, int button, int value);
@@ -164,6 +167,8 @@ protected:
 	//dragging variables
 	static bool m_dragging;
 	static HTREEITEM m_dragItem;
+
+	static bool autoFindPerformed;
 
 private:
 };

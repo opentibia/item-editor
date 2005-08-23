@@ -187,6 +187,7 @@ public:
 	itemgroup_t group;
 	int id;
 	int clientid;
+	bool foundNewImage;
 
 	bool blockSolid;
 	bool blockPickupable;

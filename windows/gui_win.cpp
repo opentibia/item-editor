@@ -27,6 +27,7 @@
 #endif
 
 #include "gui_win.hpp"
+#include "../client/md5.h"
 
 extern HINSTANCE g_instance;
 extern ItemsSprites *g_itemsSprites;
@@ -44,6 +45,34 @@ inline bool getFlagState(unsigned long n, unsigned long flag)
 		return false;
 }
 
+void getImageHash(unsigned short cid, void*output)
+{
+	MD5_CTX m_md5;
+	unsigned long spriteBase;
+	unsigned long spriteSize;
+	const SpriteType& it = (*g_itemsSprites)[cid];
+
+	spriteSize = it.width*it.height*it.blendframes;
+	spriteBase = 0;
+	
+	//hash sprite
+	MD5Init(&m_md5, 0);
+	for(long frame = 0; frame < it.blendframes; frame++) {
+		for(long cy = 0; cy < it.height; cy++) {
+			for(long cx = 0; cx < it.width; cx++) {
+				unsigned long frameindex = spriteBase + cx + cy*it.width + frame*it.width*it.height;
+				InternalSprite sprite = g_itemsSprites->getSpriteInternalFormat(cid,frameindex);
+				if(sprite)
+					MD5Update(&m_md5, (const unsigned char*)sprite, 32*32*4);
+			}
+		}
+	}
+
+	MD5Final(&m_md5);
+
+	memcpy(output, m_md5.digest, 16);
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////
 // class GUIWin
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -58,6 +87,7 @@ HTREEITEM GUIWin::m_dragItem = NULL;
 HTREEITEM GUIWin::rootItems[ITEM_GROUP_LAST] = {NULL};
 unsigned long GUIWin::menuGroups[ITEM_GROUP_LAST] = {NULL};
 HMENU GUIWin::popupMenu = 0;
+bool GUIWin::autoFindPerformed = false;
 
 GUIWin::GUIWin()
 {
@@ -256,9 +286,13 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 			return onLoadOtb(h);
 			break;
 		case ID_FILE_NEWIT:
+			autoFindPerformed = false;
 			g_itemsTypes->clear();
 			loadTreeItemTypes(h);
 			return TRUE;
+			break;
+		case ID_TOOLS_AUTOFIND:
+			return onAutoFindImages(h);
 			break;
 		case ID_TOOLS_VERIFYITEMS:
 			break;
@@ -464,6 +498,7 @@ LRESULT GUIWin::onImportOld(HWND h)
 	g_itemsTypes->loadFromDat(fileTibiaDat);
 	g_itemsTypes->loadFromXml(fileItemsXml);
 	
+	autoFindPerformed = false;
 	loadTreeItemTypes(h);
 
 	return TRUE;
@@ -518,7 +553,44 @@ LRESULT GUIWin::onLoadOtb(HWND h)
 
 	g_itemsTypes->clear();
 	g_itemsTypes->loadOtb(fileItemsOtb);
+
+	autoFindPerformed = false;
 	loadTreeItemTypes(h);
+	return TRUE;
+}
+
+LRESULT GUIWin::onAutoFindImages(HWND h)
+{
+	char hash[16];
+	int i,n;
+	if(!saveCurrentItem(h)){
+		return TRUE;
+	}
+
+	n = 0;
+	for(i = SpriteType::minClientId; i <= SpriteType::maxClientId ; i++){
+		getImageHash(i, hash);
+		ItemMap::iterator it;
+		for(it = g_itemsTypes->getTypes(); it != g_itemsTypes->getEnd(); it++){
+			if(it->second->foundNewImage == false && memcmp(hash, it->second->sprHash, 16) == 0){
+				it->second->foundNewImage = true;
+				it->second->clientid = i;
+				n++;
+				//break;
+			}
+		}
+	}
+
+	char str[64];
+	sprintf(str , "Found %d of %d.", n, SpriteType::maxClientId - SpriteType::minClientId + 1);
+
+	MessageBox(h, str, NULL, MB_OK | MB_ICONINFORMATION);
+
+	autoFindPerformed = true;
+	loadTreeItemTypes(h);
+
+	loadItem(h);
+	updateControls(h);
 	return TRUE;
 }
 
@@ -666,15 +738,9 @@ HTREEITEM GUIWin::insertTreeItem(HWND h, const char* name, HTREEITEM parent, lon
 
 HTREEITEM GUIWin::insertTreeItemType(HWND h, const ItemType *iType)
 {
-	char buffer[128];
-	char *name;
-	if(iType->name[0] != 0){
-		name = (char*)&(iType->name[0]);
-	}
-	else{
-		sprintf(buffer, "Item number %d", iType->id);
-		name = buffer;
-	}
+	char name[160];
+	getItemTypeName(iType, name);
+
 	return insertTreeItem(h, name, rootItems[iType->group], iType->id);
 }
 
@@ -757,6 +823,14 @@ bool GUIWin::saveCurrentItem(HWND h)
 	if(!getEditTextInt(h, IDC_EDITCID, iType->clientid)){
 		return false;
 	}
+	//update spr hash
+	if(iType->clientid >= SpriteType::minClientId && iType->clientid <= SpriteType::maxClientId){
+		getImageHash(iType->clientid, iType->sprHash);
+	}
+	else{
+		memset(iType->sprHash, 0, 16);
+	}
+
 	if(!getEditTextInt(h, IDC_EDIT_DECAYTO, iType->decayTo)){
 		return false;
 	}
@@ -839,15 +913,11 @@ bool GUIWin::saveCurrentItem(HWND h)
 	
 	//change name in tree
 	TVITEM itemInfo;
+	char name[160];
 	itemInfo.mask = TVIF_HANDLE | TVIF_TEXT;
-	itemInfo.hItem = curItem;
-	if(iType->name[0] != 0){
-		itemInfo.pszText = iType->name;
-	}
-	else{
-		sprintf(buffer, "Item number %d", iType->id);
-		itemInfo.pszText = buffer;
-	}
+	getItemTypeName(iType, name);
+
+	itemInfo.pszText = name;
 	itemInfo.cchTextMax = strlen(iType->name);
 	SendMessage(m_hwndTree, TVM_SETITEM, 0, (long)&itemInfo);
 
@@ -1153,6 +1223,24 @@ void GUIWin::setContextMenuGroup(itemgroup_t group)
 		else{
 			CheckMenuItem(popupMenu, menuGroups[i], MF_CHECKED);
 		}
+	}
+}
+
+void GUIWin::getItemTypeName(const ItemType *iType, char* name)
+{
+	char *tmp;
+	if(autoFindPerformed && iType->foundNewImage){
+		name[0] = '*';
+		tmp = name + 1;
+	}
+	else{
+		tmp = name;
+	}
+	if(iType->name[0] != 0){
+		strcpy(tmp, iType->name);
+	}
+	else{
+		sprintf(tmp, "Item number %d", iType->id);
 	}
 }
 
