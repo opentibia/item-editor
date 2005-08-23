@@ -32,13 +32,13 @@ long ItemType::maxClientId = 0;
 
 ItemType::ItemType()
 {
-	group = ITEM_GROUP_NONE;
-	id			= 100;
+	group     = ITEM_GROUP_NONE;
+	id			  = 100;
 	clientid	= 100;
 
 	blockSolid	= false;
 	blockProjectile = false;
-	blockPickupable = true;
+	blockPickupable = false; //blockPickupable = true;
 	blockPathFind = false;
 
 	//container	= false;
@@ -148,6 +148,8 @@ bool ItemsTypes::loadFromDat(const char *filename)
 		ItemType *sType = getType(id);
 		if(!sType) {
 			sType = new ItemType();
+			sType->blockPickupable = true; //default for .dat
+
 			sType->id = id;
 			sType->clientid = id;
 			addType(id, sType);
@@ -727,8 +729,70 @@ int ItemsTypes::loadOtb(const char *filename)
 	//f->getProps(node, len);
 	node = f->getChildNode(node, type);
 
+	const unsigned char* data;
+	unsigned char props[1024];
 	while(node != NO_NODE) {
-		const unsigned char* data = f->getProps(node, len);
+		data = f->getProps(node, len);
+		memcpy(&props, data, len);
+		if(data == NULL && f->getError() != ERROR_NONE)
+			return f->getError();
+
+		ItemType* sType = new ItemType();
+		
+		unsigned long flags;
+		if(data != NULL) {
+			switch(data[0]) {
+				case ITEM_GROUP_GROUND:
+				{
+					memcpy((void*)&flags, (void*)&data[1], sizeof(flags));
+
+					if((flags & FLAG_BLOCK_SOLID) == FLAG_BLOCK_SOLID)
+						sType->blockSolid = true;
+
+					if((flags & FLAG_BLOCK_PROJECTILE) == FLAG_BLOCK_PROJECTILE)
+						sType->blockProjectile = true;
+
+					if((flags & FLAG_BLOCK_PATHFIND) == FLAG_BLOCK_PATHFIND)
+						sType->blockPathFind = true;
+
+					if((flags & FLAG_BLOCK_PICKUPABLE) == FLAG_BLOCK_PICKUPABLE)
+						sType->blockPickupable = true;
+
+					if((flags & FLAG_FLOORCHANGEDOWN) == FLAG_FLOORCHANGEDOWN)
+						sType->floorChangeDown = true;
+
+					if((flags & FLAG_FLOORCHANGENORTH) == FLAG_FLOORCHANGENORTH)
+						sType->floorChangeNorth = true;
+
+					if((flags & FLAG_FLOORCHANGEEAST) == FLAG_FLOORCHANGEEAST)
+						sType->floorChangeEast = true;
+
+					if((flags & FLAG_FLOORCHANGESOUTH) == FLAG_FLOORCHANGESOUTH)
+						sType->floorChangeSouth = true;
+
+					if((flags & FLAG_FLOORCHANGEWEST) == FLAG_FLOORCHANGEWEST)
+						sType->floorChangeWest = true;
+
+					if((flags & FLAG_ALWAYSONTOP) == FLAG_ALWAYSONTOP)
+						sType->alwaysOnTop = true;
+
+					if((flags & FLAG_USEABLE) == FLAG_USEABLE)
+						sType->useable = true;
+
+					/*
+					f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
+					f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
+
+					if(strlen(it->second->name) > 0)
+						f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
+
+					if(strlen(it->second->descr) > 0)
+						f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+					*/
+				}
+			}
+		}
+
 		node = f->getNextNode(node, type);
 	}
 	
@@ -802,10 +866,12 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				f->setProps(ITEM_ATTR_SPEED, &it->second->speed, sizeof(unsigned short));
 
-				struct decayBlock db;
-				db.decayTo = it->second->decayTo;
-				db.decayTime = it->second->decayTime;
-				f->setProps(ITEM_ATTR_DECAY, &db, sizeof(db));
+				if(it->second->decayTo != 0) {
+					struct decayBlock db;
+					db.decayTo = it->second->decayTo;
+					db.decayTime = it->second->decayTime;
+					f->setProps(ITEM_ATTR_DECAY, &db, sizeof(db));
+				}
 				
 				break;
 			}			
@@ -837,10 +903,12 @@ int ItemsTypes::saveOtb(const char *filename)
 				f->setProps(ITEM_ATTR_MAXITEMS, &it->second->maxItems, sizeof(unsigned short));
 				f->setProps(ITEM_ATTR_SLOT, &it->second->slot_position, sizeof(unsigned short));
 
-				struct decayBlock db;
-				db.decayTo = it->second->decayTo;
-				db.decayTime = it->second->decayTime;
-				f->setProps(ITEM_ATTR_DECAY, &db, sizeof(db));
+				if(it->second->decayTo != 0) {
+					struct decayBlock db;
+					db.decayTo = it->second->decayTo;
+					db.decayTime = it->second->decayTime;
+					f->setProps(ITEM_ATTR_DECAY, &db, sizeof(db));
+				}
 
 				break;
 			}
@@ -1097,10 +1165,12 @@ int ItemsTypes::saveOtb(const char *filename)
 					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
 				//
 
-				struct decayBlock db;
-				db.decayTo = it->second->decayTo;
-				db.decayTime = it->second->decayTime;
-				f->setProps(ITEM_ATTR_DECAY, &db, sizeof(db));
+				if(it->second->decayTo != 0) {
+					struct decayBlock db;
+					db.decayTo = it->second->decayTo;
+					db.decayTime = it->second->decayTime;
+					f->setProps(ITEM_ATTR_DECAY, &db, sizeof(db));
+				}
 
 				break;
 			}
@@ -1126,10 +1196,12 @@ int ItemsTypes::saveOtb(const char *filename)
 					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
 				//
 
-				struct decayBlock db;
-				db.decayTo = it->second->decayTo;
-				db.decayTime = it->second->decayTime;
-				f->setProps(ITEM_ATTR_DECAY, &db, sizeof(db));
+				if(it->second->decayTo != 0) {
+					struct decayBlock db;
+					db.decayTo = it->second->decayTo;
+					db.decayTime = it->second->decayTime;
+					f->setProps(ITEM_ATTR_DECAY, &db, sizeof(db));
+				}
 
 				break;
 			}
@@ -1208,10 +1280,12 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				f->setProps(ITEM_ATTR_ROTATETO, &it->second->rotateTo, sizeof(unsigned short));
 
-				struct decayBlock db;
-				db.decayTo = it->second->decayTo;
-				db.decayTime = it->second->decayTime;
-				f->setProps(ITEM_ATTR_DECAY, &db, sizeof(db));
+				if(it->second->decayTo != 0) {
+					struct decayBlock db;
+					db.decayTo = it->second->decayTo;
+					db.decayTime = it->second->decayTime;
+					f->setProps(ITEM_ATTR_DECAY, &db, sizeof(db));
+				}
 			}
 		}
 

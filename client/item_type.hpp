@@ -80,22 +80,22 @@ enum itemflags_t {
 };
 
 struct decayBlock{
-	int decayTo;
-	int decayTime;
+	unsigned short decayTo;
+	unsigned short decayTime;
 };
 
 struct weaponBlock {
 	unsigned char weaponType;
 	unsigned char amuType;
 	unsigned char shootType;
-	unsigned short attack;
-	unsigned short defence;
+	unsigned char attack;
+	unsigned char defence;
 };
 
 struct amuBlock {
 	unsigned char amuType;
 	unsigned char shootType;
-	unsigned short attack;
+	unsigned char attack;
 };
 
 struct writeableBlock {

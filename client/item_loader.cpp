@@ -20,7 +20,7 @@
 
 #include "item_loader.hpp"
 
-int ItemLoader::setProps(unsigned short attr, void* data, unsigned short size)
+int ItemLoader::setProps(unsigned char attr, void* data, unsigned short size)
 {
 	//size
 	if(!writeData(&size, sizeof(size), true))

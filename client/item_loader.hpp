@@ -26,7 +26,7 @@
 class ItemLoader : public FileLoader {
 public:
 	int setFlags(unsigned long flags);
-	int setProps(unsigned short attr, void* data, unsigned short size);
+	int setProps(unsigned char attr, void* data, unsigned short size);
 };
 
 #endif
