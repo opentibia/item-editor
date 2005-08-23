@@ -76,7 +76,8 @@ enum itemflags_t {
  FLAG_FLOORCHANGEEAST = 1024,
  FLAG_FLOORCHANGESOUTH = 2048,
  FLAG_FLOORCHANGEWEST = 4096,
- FLAG_ALWAYSONTOP = 8192
+ FLAG_ALWAYSONTOP = 8192,
+ FLAG_READABLE = 16384
 };
 
 struct decayBlock{
@@ -204,6 +205,7 @@ public:
 	
 	char name[128];
 	char descr[128];
+	char sprHash[16];
 	double weight;
 	int decayTo;
 	int decayTime;

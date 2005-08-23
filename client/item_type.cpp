@@ -38,7 +38,7 @@ ItemType::ItemType()
 
 	blockSolid	= false;
 	blockProjectile = false;
-	blockPickupable = false; //blockPickupable = true;
+	blockPickupable = false;
 	blockPathFind = false;
 
 	//container	= false;
@@ -59,6 +59,8 @@ ItemType::ItemType()
 	//xml
 	memset(name, '\0', sizeof(name));
 	memset(descr, '\0', sizeof(descr));
+	memset(sprHash, '\0', sizeof(sprHash));
+	
 	weight = 0.00;
 	decayTo = 0;
 	decayTime = 0;
@@ -763,47 +765,21 @@ int ItemsTypes::loadOtb(const char *filename)
 							//read 4 byte flags
 							memcpy((void*)&flags, p, sizeof(flags_t)); p+= sizeof(flags_t);
 
-							if((flags & FLAG_BLOCK_SOLID) == FLAG_BLOCK_SOLID)
-								sType->blockSolid = true;
-
-							if((flags & FLAG_BLOCK_PROJECTILE) == FLAG_BLOCK_PROJECTILE)
-								sType->blockProjectile = true;
-
-							if((flags & FLAG_BLOCK_PATHFIND) == FLAG_BLOCK_PATHFIND)
-								sType->blockPathFind = true;
-
-							if((flags & FLAG_BLOCK_PICKUPABLE) == FLAG_BLOCK_PICKUPABLE)
-								sType->blockPickupable = true;
-
-							if((flags & FLAG_USEABLE) == FLAG_USEABLE)
-								sType->useable = true;
-
-							if((flags & FLAG_PICKUPABLE) == FLAG_PICKUPABLE)
-								sType->pickupable = true;
-
-							if((flags & FLAG_MOVEABLE) == FLAG_MOVEABLE)
-								sType->moveable = true;
-
-							if((flags & FLAG_STACKABLE) == FLAG_STACKABLE)
-								sType->stackable = true;							
-
-							if((flags & FLAG_FLOORCHANGEDOWN) == FLAG_FLOORCHANGEDOWN)
-								sType->floorChangeDown = true;
-
-							if((flags & FLAG_FLOORCHANGENORTH) == FLAG_FLOORCHANGENORTH)
-								sType->floorChangeNorth = true;
-
-							if((flags & FLAG_FLOORCHANGEEAST) == FLAG_FLOORCHANGEEAST)
-								sType->floorChangeEast = true;
-
-							if((flags & FLAG_FLOORCHANGESOUTH) == FLAG_FLOORCHANGESOUTH)
-								sType->floorChangeSouth = true;
-
-							if((flags & FLAG_FLOORCHANGEWEST) == FLAG_FLOORCHANGEWEST)
-								sType->floorChangeWest = true;
-
-							if((flags & FLAG_ALWAYSONTOP) == FLAG_ALWAYSONTOP)
-								sType->alwaysOnTop = true;
+							sType->blockSolid = ((flags & FLAG_BLOCK_SOLID) == FLAG_BLOCK_SOLID);
+							sType->blockProjectile = ((flags & FLAG_BLOCK_PROJECTILE) == FLAG_BLOCK_PROJECTILE);
+							sType->blockPathFind = ((flags & FLAG_BLOCK_PATHFIND) == FLAG_BLOCK_PATHFIND);
+							sType->blockPickupable = ((flags & FLAG_BLOCK_PICKUPABLE) == FLAG_BLOCK_PICKUPABLE);
+							sType->useable = ((flags & FLAG_USEABLE) == FLAG_USEABLE);
+							sType->pickupable = ((flags & FLAG_PICKUPABLE) == FLAG_PICKUPABLE);
+							sType->moveable = ((flags & FLAG_MOVEABLE) == FLAG_MOVEABLE);
+							sType->stackable = ((flags & FLAG_STACKABLE) == FLAG_STACKABLE);
+							sType->floorChangeDown = ((flags & FLAG_FLOORCHANGEDOWN) == FLAG_FLOORCHANGEDOWN);
+							sType->floorChangeNorth = ((flags & FLAG_FLOORCHANGENORTH) == FLAG_FLOORCHANGENORTH);
+							sType->floorChangeEast = ((flags & FLAG_FLOORCHANGEEAST) == FLAG_FLOORCHANGEEAST);
+							sType->floorChangeSouth = ((flags & FLAG_FLOORCHANGESOUTH) == FLAG_FLOORCHANGESOUTH);
+							sType->floorChangeWest = ((flags & FLAG_FLOORCHANGEWEST) == FLAG_FLOORCHANGEWEST);
+							sType->alwaysOnTop = ((flags & FLAG_ALWAYSONTOP) == FLAG_ALWAYSONTOP);
+							sType->readable = ((flags & FLAG_READABLE) == FLAG_READABLE);
 
 							if(p >= data + len) //no attributes
 								break;
@@ -1058,6 +1034,9 @@ int ItemsTypes::saveOtb(const char *filename)
 				if(it->second->alwaysOnTop)
 					flags |= FLAG_ALWAYSONTOP;
 
+				if(it->second->readable)
+					flags |= FLAG_READABLE;
+
 				f->setFlags(flags);
 				
 				//
@@ -1092,6 +1071,9 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				if(it->second->moveable)
 					flags |= FLAG_MOVEABLE;
+
+				if(it->second->readable)
+					flags |= FLAG_READABLE;
 
 				f->setFlags(flags);
 
@@ -1132,6 +1114,9 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				if(it->second->stackable)
 					flags |= FLAG_STACKABLE;
+
+				if(it->second->readable)
+					flags |= FLAG_READABLE;
 
 				f->setFlags(flags);
 
@@ -1174,6 +1159,9 @@ int ItemsTypes::saveOtb(const char *filename)
 				if(it->second->stackable)
 					flags |= FLAG_STACKABLE;
 
+				if(it->second->readable)
+					flags |= FLAG_READABLE;
+
 				f->setFlags(flags);
 
 				//
@@ -1210,6 +1198,9 @@ int ItemsTypes::saveOtb(const char *filename)
 				if(it->second->moveable)
 					flags |= FLAG_MOVEABLE;
 
+				if(it->second->readable)
+					flags |= FLAG_READABLE;
+
 				f->setFlags(flags);
 
 				//
@@ -1243,6 +1234,9 @@ int ItemsTypes::saveOtb(const char *filename)
 				if(it->second->moveable)
 					flags |= FLAG_MOVEABLE;
 
+				if(it->second->readable)
+					flags |= FLAG_READABLE;
+
 				f->setFlags(flags);
 
 				//
@@ -1264,7 +1258,10 @@ int ItemsTypes::saveOtb(const char *filename)
 
 			case ITEM_GROUP_TELEPORT:
 			{
-				f->setFlags(0);
+				if(it->second->readable)
+					flags |= FLAG_READABLE;
+
+				f->setFlags(flags);
 
 				//
 				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
@@ -1282,7 +1279,10 @@ int ItemsTypes::saveOtb(const char *filename)
 
 			case ITEM_GROUP_MAGICFIELD:
 			{
-				f->setFlags(0);
+				if(it->second->readable)
+					flags |= FLAG_READABLE;
+
+				f->setFlags(flags);
 
 				//
 				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
@@ -1309,6 +1309,9 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				if(it->second->moveable)
 					flags |= FLAG_MOVEABLE;
+
+				if(it->second->readable)
+					flags |= FLAG_READABLE;
 
 				f->setFlags(flags);
 
@@ -1344,6 +1347,9 @@ int ItemsTypes::saveOtb(const char *filename)
 				if(it->second->moveable)
 					flags |= FLAG_MOVEABLE;
 
+				if(it->second->readable)
+					flags |= FLAG_READABLE;
+
 				f->setFlags(flags);
 
 				//
@@ -1364,6 +1370,9 @@ int ItemsTypes::saveOtb(const char *filename)
 			{
 				if(it->second->blockSolid)
 					flags |= FLAG_BLOCK_SOLID;
+
+				if(it->second->readable)
+					flags |= FLAG_READABLE;
 
 				f->setFlags(flags);
 
@@ -1395,6 +1404,9 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				if(it->second->useable)
 					flags |= FLAG_MOVEABLE;
+
+				if(it->second->readable)
+					flags |= FLAG_READABLE;
 
 				f->setFlags(flags);
 
@@ -1462,6 +1474,9 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				if(it->second->alwaysOnTop)
 					flags |= FLAG_ALWAYSONTOP;
+
+				if(it->second->readable)
+					flags |= FLAG_READABLE;
 
 				f->setFlags(flags);
 				

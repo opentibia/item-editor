@@ -46,18 +46,4 @@ int ItemLoader::setFlags(flags_t flags)
 	return ERROR_NONE;
 }
 
-/*
-int ItemLoader::getProps(unsigned char attr, void* data, unsigned short &size)
-{
-	//
-}
-*/
-
-/*
-int ItemLoader::getFlags(unsigned long &flags)
-{
-	data = f->getProps(node, len);
-	memcpy(&props, data, len);
-}
-*/
 
