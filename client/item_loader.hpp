@@ -23,10 +23,16 @@
 
 #include "fileloader.hpp"
 
+typedef unsigned char attribute_t;
+typedef unsigned short datasize_t;
+typedef unsigned long flags_t;
+
 class ItemLoader : public FileLoader {
 public:
-	int setFlags(unsigned long flags);
-	int setProps(unsigned char attr, void* data, unsigned short size);
+	int setFlags(flags_t flags);
+	int setProps(attribute_t attr, void* data, datasize_t size);
+	//int getFlags(unsigned long &flags);
+	//int getProps(unsigned char attr, void* data, unsigned short &size);
 };
 
 #endif

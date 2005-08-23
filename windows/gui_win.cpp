@@ -254,7 +254,7 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 			break;
 		case ID_TOOLS_VERIFYITEMS:
 			g_itemsTypes->loadOtb("C:\\tmp.otb");
-			//loadTreeItemTypes(h);
+			loadTreeItemTypes(h);
 			break;
 		case ID_TOOLS_FINDMISSINGITEMS:
 			break;
@@ -1032,10 +1032,9 @@ void GUIWin::updateControls(HWND h)
 
 void GUIWin::setControlState(HWND h, unsigned long flagsEdit, unsigned long flagsOpt, unsigned long flagsCombo, unsigned long flagsButton)
 {
-
-	EnableWindow(GetDlgItem(h, IDC_EDITNAME),getFlagState(flagsEdit, IDC_EDITNAME_FLAG));
-	EnableWindow(GetDlgItem(h, IDC_EDITDESCR),getFlagState(flagsEdit, IDC_EDITDSECR_FLAG));
-	EnableWindow(GetDlgItem(h, IDC_EDITCID),getFlagState(flagsEdit, IDC_EDITCID_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_EDIT_NAME),getFlagState(flagsEdit, IDC_EDITNAME_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_EDIT_DESCR),getFlagState(flagsEdit, IDC_EDITDSECR_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_EDIT_CID),getFlagState(flagsEdit, IDC_EDITCID_FLAG));
 
 	EnableWindow(GetDlgItem(h, IDC_EDIT_DECAYTO),getFlagState(flagsEdit, IDC_EDIT_DECAYTO_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_EDIT_DECAYTIME),getFlagState(flagsEdit, IDC_EDIT_DECAYTIME_FLAG));

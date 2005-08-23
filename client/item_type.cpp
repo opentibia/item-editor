@@ -730,67 +730,274 @@ int ItemsTypes::loadOtb(const char *filename)
 	node = f->getChildNode(node, type);
 
 	const unsigned char* data;
-	unsigned char props[1024];
 	while(node != NO_NODE) {
 		data = f->getProps(node, len);
-		memcpy(&props, data, len);
 		if(data == NULL && f->getError() != ERROR_NONE)
 			return f->getError();
-
-		ItemType* sType = new ItemType();
 		
-		unsigned long flags;
+		flags_t flags;
 		if(data != NULL) {
-			switch(data[0]) {
-				case ITEM_GROUP_GROUND:
-				{
-					memcpy((void*)&flags, (void*)&data[1], sizeof(flags));
+			const unsigned char* p = &data[0];
+			ItemType* sType = new ItemType();
+			bool loadedFlags = false;
 
-					if((flags & FLAG_BLOCK_SOLID) == FLAG_BLOCK_SOLID)
-						sType->blockSolid = true;
+			while(p < data + len) {
+				sType->group = (itemgroup_t)type;
 
-					if((flags & FLAG_BLOCK_PROJECTILE) == FLAG_BLOCK_PROJECTILE)
-						sType->blockProjectile = true;
+				switch(type) {
+					case ITEM_GROUP_NONE:
+					case ITEM_GROUP_GROUND:
+					case ITEM_GROUP_CONTAINER:
+					case ITEM_GROUP_WEAPON:
+					case ITEM_GROUP_AMMUNITION:
+					case ITEM_GROUP_ARMOR:
+					case ITEM_GROUP_RUNE:
+					case ITEM_GROUP_TELEPORT:
+					case ITEM_GROUP_MAGICFIELD:
+					case ITEM_GROUP_WRITEABLE:
+					case ITEM_GROUP_KEY:
+					case ITEM_GROUP_SPLASH:
+					case ITEM_GROUP_FLUID:
+					{
+						if(!loadedFlags) {
+							//read 4 byte flags
+							memcpy((void*)&flags, p, sizeof(flags_t)); p+= sizeof(flags_t);
 
-					if((flags & FLAG_BLOCK_PATHFIND) == FLAG_BLOCK_PATHFIND)
-						sType->blockPathFind = true;
+							if((flags & FLAG_BLOCK_SOLID) == FLAG_BLOCK_SOLID)
+								sType->blockSolid = true;
 
-					if((flags & FLAG_BLOCK_PICKUPABLE) == FLAG_BLOCK_PICKUPABLE)
-						sType->blockPickupable = true;
+							if((flags & FLAG_BLOCK_PROJECTILE) == FLAG_BLOCK_PROJECTILE)
+								sType->blockProjectile = true;
 
-					if((flags & FLAG_FLOORCHANGEDOWN) == FLAG_FLOORCHANGEDOWN)
-						sType->floorChangeDown = true;
+							if((flags & FLAG_BLOCK_PATHFIND) == FLAG_BLOCK_PATHFIND)
+								sType->blockPathFind = true;
 
-					if((flags & FLAG_FLOORCHANGENORTH) == FLAG_FLOORCHANGENORTH)
-						sType->floorChangeNorth = true;
+							if((flags & FLAG_BLOCK_PICKUPABLE) == FLAG_BLOCK_PICKUPABLE)
+								sType->blockPickupable = true;
 
-					if((flags & FLAG_FLOORCHANGEEAST) == FLAG_FLOORCHANGEEAST)
-						sType->floorChangeEast = true;
+							if((flags & FLAG_USEABLE) == FLAG_USEABLE)
+								sType->useable = true;
 
-					if((flags & FLAG_FLOORCHANGESOUTH) == FLAG_FLOORCHANGESOUTH)
-						sType->floorChangeSouth = true;
+							if((flags & FLAG_PICKUPABLE) == FLAG_PICKUPABLE)
+								sType->pickupable = true;
 
-					if((flags & FLAG_FLOORCHANGEWEST) == FLAG_FLOORCHANGEWEST)
-						sType->floorChangeWest = true;
+							if((flags & FLAG_MOVEABLE) == FLAG_MOVEABLE)
+								sType->moveable = true;
 
-					if((flags & FLAG_ALWAYSONTOP) == FLAG_ALWAYSONTOP)
-						sType->alwaysOnTop = true;
+							if((flags & FLAG_STACKABLE) == FLAG_STACKABLE)
+								sType->stackable = true;							
 
-					if((flags & FLAG_USEABLE) == FLAG_USEABLE)
-						sType->useable = true;
+							if((flags & FLAG_FLOORCHANGEDOWN) == FLAG_FLOORCHANGEDOWN)
+								sType->floorChangeDown = true;
 
-					/*
-					f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
-					f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
+							if((flags & FLAG_FLOORCHANGENORTH) == FLAG_FLOORCHANGENORTH)
+								sType->floorChangeNorth = true;
 
-					if(strlen(it->second->name) > 0)
-						f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
+							if((flags & FLAG_FLOORCHANGEEAST) == FLAG_FLOORCHANGEEAST)
+								sType->floorChangeEast = true;
 
-					if(strlen(it->second->descr) > 0)
-						f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
-					*/
+							if((flags & FLAG_FLOORCHANGESOUTH) == FLAG_FLOORCHANGESOUTH)
+								sType->floorChangeSouth = true;
+
+							if((flags & FLAG_FLOORCHANGEWEST) == FLAG_FLOORCHANGEWEST)
+								sType->floorChangeWest = true;
+
+							if((flags & FLAG_ALWAYSONTOP) == FLAG_ALWAYSONTOP)
+								sType->alwaysOnTop = true;
+
+							if(p >= data + len) //no attributes
+								break;
+							loadedFlags = true;
+						}
+
+						//attribute
+						attribute_t attrib = *p; p+= sizeof(attribute_t);
+						if(p >= data + len) {
+							delete sType;
+							return ERROR_INVALID_FORMAT;
+						}
+
+						datasize_t datalen = 0;
+						//size of data
+						memcpy(&datalen, p, sizeof(datasize_t)); p+= sizeof(datalen);
+						if(p >= data + len) {
+							delete sType;
+							return ERROR_INVALID_FORMAT;
+						}
+
+						switch(attrib) {
+							case ITEM_ATTR_SERVERID:
+							{
+								if(datalen != sizeof(unsigned short))
+									return ERROR_INVALID_FORMAT;
+
+								memcpy(&sType->id, p, sizeof(datalen));
+								break;
+							}
+
+							case ITEM_ATTR_CLIENTID:
+							{
+								if(datalen != sizeof(unsigned short))
+									return ERROR_INVALID_FORMAT;
+
+								memcpy(&sType->clientid, p, sizeof(datalen));
+								break;
+							}
+							case ITEM_ATTR_NAME:
+							{
+								if(datalen > sizeof(sType->name))
+									return ERROR_INVALID_FORMAT;
+
+								memcpy(&sType->name[0], p, datalen);
+								break;
+							}
+							case ITEM_ATTR_DESCR:
+							{
+								if(datalen > sizeof(sType->descr))
+									return ERROR_INVALID_FORMAT;
+
+								memcpy(&sType->descr[0], p, datalen);
+								break;
+							}
+							case ITEM_ATTR_SPEED:
+							{
+								if(datalen != sizeof(unsigned short))
+									return ERROR_INVALID_FORMAT;
+
+								memcpy(&sType->speed, p, sizeof(datalen));
+								break;
+							}
+							case ITEM_ATTR_SLOT:
+							{
+								if(datalen != sizeof(unsigned short))
+									return ERROR_INVALID_FORMAT;
+
+								memcpy(&sType->slot_position, p, sizeof(datalen));
+								break;
+							}
+							case ITEM_ATTR_MAXITEMS:
+							{
+								if(datalen != sizeof(unsigned short))
+									return ERROR_INVALID_FORMAT;
+
+								memcpy(&sType->maxItems, p, sizeof(datalen));
+								break;
+							}
+							case ITEM_ATTR_WEIGHT:
+							{
+								if(datalen != sizeof(double))
+									return ERROR_INVALID_FORMAT;
+
+								memcpy(&sType->weight, p, sizeof(datalen));
+								break;
+							}
+							case ITEM_ATTR_WEAPON:
+							{
+								if(datalen != sizeof(weaponBlock))
+									return ERROR_INVALID_FORMAT;
+
+								weaponBlock wb;
+								memcpy(&wb, p, sizeof(weaponBlock));
+								sType->weaponType = (WeaponType)wb.weaponType;
+								sType->shootType = (subfight_t)wb.shootType;
+								sType->amuType = (amu_t)wb.amuType;
+								sType->attack = wb.attack;
+								sType->defence = wb.defence;
+								break;
+							}
+							case ITEM_ATTR_AMU:
+							{
+								if(datalen != sizeof(amuBlock))
+									return ERROR_INVALID_FORMAT;
+
+								amuBlock ab;
+								memcpy(&ab, p, sizeof(amuBlock));
+								sType->shootType = (subfight_t)ab.shootType;
+								sType->amuType = (amu_t)ab.amuType;
+								sType->attack = ab.attack;
+								break;
+							}
+							case ITEM_ATTR_ARMOR:
+							{
+								if(datalen < sizeof(armorBlock))
+									return ERROR_INVALID_FORMAT;
+
+								armorBlock ab;
+								memcpy(&ab, p, sizeof(armorBlock));
+									
+								sType->armor = ab.armor;
+								sType->weight = ab.weight;
+								sType->slot_position = (slots_t)ab.slot_position;
+
+								break;
+							}
+							case ITEM_ATTR_MAGLEVEL:
+							{
+								if(datalen < sizeof(unsigned short))
+									return ERROR_INVALID_FORMAT;
+								
+								memcpy(&sType->runeMagLevel, p, sizeof(datalen));
+								
+								break;
+							}
+							case ITEM_ATTR_MAGFIELDTYPE:
+							{
+								if(datalen < sizeof(unsigned char))
+									return ERROR_INVALID_FORMAT;
+								
+								memcpy(&sType->magicfieldtype, p, sizeof(datalen));
+
+								break;
+							}
+							case ITEM_ATTR_WRITEABLE:
+							{
+								if(datalen < sizeof(writeableBlock))
+									return ERROR_INVALID_FORMAT;
+
+								struct writeableBlock wb;
+								memcpy(&wb, p, sizeof(datalen));
+
+								sType->readOnlyId = wb.readOnlyId;
+
+								break;
+							}
+							case ITEM_ATTR_ROTATETO:
+							{
+								if(datalen < sizeof(unsigned short))
+									return ERROR_INVALID_FORMAT;
+
+								memcpy(&sType->rotateTo, p, sizeof(datalen));
+
+								break;
+							}
+							case ITEM_ATTR_DECAY:
+							{
+								if(datalen != sizeof(decayBlock))
+									return ERROR_INVALID_FORMAT;
+
+								decayBlock db;
+								memcpy(&db, p, sizeof(decayBlock));
+								sType->decayTime = db.decayTime;
+								sType->decayTo = db.decayTo;
+								break;
+							}
+
+							default:
+								delete sType;
+								return ERROR_INVALID_FORMAT;
+						}
+						
+						p+= datalen;
+						break;
+					}
+
+					default:
+						return ERROR_INVALID_FORMAT;
+						break;
 				}
 			}
+
+			addType(sType->id, sType);
 		}
 
 		node = f->getNextNode(node, type);
@@ -813,7 +1020,7 @@ int ItemsTypes::saveOtb(const char *filename)
 	for(it = item.begin(); it != item.end(); it++){
 		f->startNode(it->second->group);
 
-		int flags = 0;
+		flags_t flags = 0;
 
 		switch(it->second->group) {
 			case ITEM_GROUP_GROUND:
@@ -829,6 +1036,9 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				if(it->second->blockPickupable)
 					flags |= FLAG_BLOCK_PICKUPABLE;
+
+				if(it->second->useable)
+					flags |= FLAG_USEABLE;
 
 				if(it->second->floorChangeDown)
 					flags |= FLAG_FLOORCHANGEDOWN;
@@ -847,9 +1057,6 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				if(it->second->alwaysOnTop)
 					flags |= FLAG_ALWAYSONTOP;
-
-				if(it->second->useable)
-					flags |= FLAG_USEABLE;
 
 				f->setFlags(flags);
 				
@@ -877,14 +1084,14 @@ int ItemsTypes::saveOtb(const char *filename)
 			}			
 			case ITEM_GROUP_CONTAINER:
 			{
+				if(it->second->useable)
+					flags |= FLAG_USEABLE;
+
 				if(it->second->pickupable)
 					flags |= FLAG_PICKUPABLE;
 
 				if(it->second->moveable)
 					flags |= FLAG_MOVEABLE;
-
-				if(it->second->useable)
-					flags |= FLAG_USEABLE;
 
 				f->setFlags(flags);
 
@@ -914,13 +1121,13 @@ int ItemsTypes::saveOtb(const char *filename)
 			}
 			case ITEM_GROUP_WEAPON:
 			{
+				if(it->second->useable)
+					flags |= FLAG_MOVEABLE;
+
 				if(it->second->pickupable)
 					flags |= FLAG_PICKUPABLE;
 
 				if(it->second->moveable)
-					flags |= FLAG_MOVEABLE;
-				
-				if(it->second->useable)
 					flags |= FLAG_MOVEABLE;
 
 				if(it->second->stackable)
@@ -955,13 +1162,13 @@ int ItemsTypes::saveOtb(const char *filename)
 
 			case ITEM_GROUP_AMMUNITION:
 			{
+				if(it->second->useable)
+					flags |= FLAG_MOVEABLE;
+
 				if(it->second->pickupable)
 					flags |= FLAG_PICKUPABLE;
 
 				if(it->second->moveable)
-					flags |= FLAG_MOVEABLE;
-				
-				if(it->second->useable)
 					flags |= FLAG_MOVEABLE;
 
 				if(it->second->stackable)
@@ -994,13 +1201,13 @@ int ItemsTypes::saveOtb(const char *filename)
 
 			case ITEM_GROUP_ARMOR:
 			{
+				if(it->second->useable)
+					flags |= FLAG_MOVEABLE;
+
 				if(it->second->pickupable)
 					flags |= FLAG_PICKUPABLE;
 
 				if(it->second->moveable)
-					flags |= FLAG_MOVEABLE;
-				
-				if(it->second->useable)
 					flags |= FLAG_MOVEABLE;
 
 				f->setFlags(flags);
@@ -1016,22 +1223,24 @@ int ItemsTypes::saveOtb(const char *filename)
 					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
 				//
 
-				f->setProps(ITEM_ATTR_ARMOR, &it->second->armor, sizeof(unsigned short));
-				f->setProps(ITEM_ATTR_WEIGHT, &it->second->weight, sizeof(double));
-				f->setProps(ITEM_ATTR_SLOT, &it->second->slot_position, sizeof(unsigned short));
+				armorBlock ab;
+				ab.armor = it->second->armor;
+				ab.slot_position = it->second->slot_position;
+				ab.weight = it->second->weight;
+				f->setProps(ITEM_ATTR_ARMOR, &ab, sizeof(armorBlock));
 				
 				break;
 			}
 
 			case ITEM_GROUP_RUNE:
 			{
+				if(it->second->useable)
+					flags |= FLAG_MOVEABLE;
+
 				if(it->second->pickupable)
 					flags |= FLAG_PICKUPABLE;
 
 				if(it->second->moveable)
-					flags |= FLAG_MOVEABLE;
-				
-				if(it->second->useable)
 					flags |= FLAG_MOVEABLE;
 
 				f->setFlags(flags);
@@ -1055,6 +1264,8 @@ int ItemsTypes::saveOtb(const char *filename)
 
 			case ITEM_GROUP_TELEPORT:
 			{
+				f->setFlags(0);
+
 				//
 				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
 				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
@@ -1071,6 +1282,8 @@ int ItemsTypes::saveOtb(const char *filename)
 
 			case ITEM_GROUP_MAGICFIELD:
 			{
+				f->setFlags(0);
+
 				//
 				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
 				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
@@ -1088,13 +1301,13 @@ int ItemsTypes::saveOtb(const char *filename)
 
 			case ITEM_GROUP_WRITEABLE:
 			{
+				if(it->second->useable)
+					flags |= FLAG_MOVEABLE;
+
 				if(it->second->pickupable)
 					flags |= FLAG_PICKUPABLE;
 
 				if(it->second->moveable)
-					flags |= FLAG_MOVEABLE;
-				
-				if(it->second->useable)
 					flags |= FLAG_MOVEABLE;
 
 				f->setFlags(flags);
@@ -1122,13 +1335,13 @@ int ItemsTypes::saveOtb(const char *filename)
 
 			case ITEM_GROUP_KEY:
 			{
+				if(it->second->useable)
+					flags |= FLAG_MOVEABLE;
+
 				if(it->second->pickupable)
 					flags |= FLAG_PICKUPABLE;
 
 				if(it->second->moveable)
-					flags |= FLAG_MOVEABLE;
-				
-				if(it->second->useable)
 					flags |= FLAG_MOVEABLE;
 
 				f->setFlags(flags);
@@ -1220,6 +1433,18 @@ int ItemsTypes::saveOtb(const char *filename)
 				if(it->second->blockPickupable)
 					flags |= FLAG_BLOCK_PICKUPABLE;
 
+				if(it->second->useable)
+					flags |= FLAG_USEABLE;
+
+				if(it->second->pickupable)
+					flags |= FLAG_PICKUPABLE;
+
+				if(it->second->moveable)
+					flags |= FLAG_MOVEABLE;
+
+				if(it->second->stackable)
+					flags |= FLAG_STACKABLE;
+
 				if(it->second->floorChangeDown)
 					flags |= FLAG_FLOORCHANGEDOWN;
 
@@ -1238,18 +1463,6 @@ int ItemsTypes::saveOtb(const char *filename)
 				if(it->second->alwaysOnTop)
 					flags |= FLAG_ALWAYSONTOP;
 
-				if(it->second->useable)
-					flags |= FLAG_USEABLE;
-
-				if(it->second->moveable)
-					flags |= FLAG_MOVEABLE;
-
-				if(it->second->pickupable)
-					flags |= FLAG_PICKUPABLE;
-
-				if(it->second->stackable)
-					flags |= FLAG_STACKABLE;
-
 				f->setFlags(flags);
 				
 				//
@@ -1266,17 +1479,6 @@ int ItemsTypes::saveOtb(const char *filename)
 				if(it->second->moveable || it->second->pickupable) {
 					f->setProps(ITEM_ATTR_WEIGHT, &it->second->weight, sizeof(double));
 				}
-
-				/*//
-				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
-				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
-
-				if(strlen(it->second->name) > 0)
-					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
-
-				if(strlen(it->second->descr) > 0)
-					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
-				//*/
 
 				f->setProps(ITEM_ATTR_ROTATETO, &it->second->rotateTo, sizeof(unsigned short));
 

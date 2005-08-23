@@ -43,7 +43,7 @@ FileLoader::~FileLoader()
 bool FileLoader::openFile(const char* filename, bool write)
 {
 	if(write) {
-		m_file = fopen(filename, "w+");
+		m_file = fopen(filename, "wb");
 		if(m_file) {
 				unsigned long version = 0;
 				writeData(&version, sizeof(version), false);
@@ -117,8 +117,8 @@ const unsigned char* FileLoader::getProps(const NODE node, unsigned long &size)
 		m_buffer[position] = byte;
 		position++;
 	}
-	size = position;
 
+	size = position;
 	return m_buffer;
 }
 
@@ -292,7 +292,7 @@ inline bool FileLoader::readByte(int &value)
 inline bool FileLoader::writeData(void* data, int size, bool unescape)
 {
 	for(int i = 0; i < size; ++i) {
-		char c = *(((char*)data) + i);
+		unsigned char c = *(((unsigned char*)data) + i);
 
 		if(unescape && (c == NODE_START || c == NODE_END || c == ESCAPE_CHAR)) {
 			unsigned char escape = ESCAPE_CHAR;

@@ -20,14 +20,14 @@
 
 #include "item_loader.hpp"
 
-int ItemLoader::setProps(unsigned char attr, void* data, unsigned short size)
+int ItemLoader::setProps(attribute_t attr, void* data, datasize_t size)
 {
-	//size
-	if(!writeData(&size, sizeof(size), true))
+	//attribute
+	if(!writeData(&attr, sizeof(attribute_t), true))
 		return getError();
 
-	//attribute
-	if(!writeData(&attr, sizeof(attr), true))
+	//size
+	if(!writeData(&size, sizeof(datasize_t), true))
 		return getError();
 
 	//data
@@ -37,12 +37,27 @@ int ItemLoader::setProps(unsigned char attr, void* data, unsigned short size)
 	return ERROR_NONE;
 }
 
-int ItemLoader::setFlags(unsigned long flags)
+int ItemLoader::setFlags(flags_t flags)
 {
 	//data
-	if(!writeData(&flags, sizeof(flags), true))
+	if(!writeData(&flags, sizeof(flags_t), true))
 		return getError();
 
 	return ERROR_NONE;
 }
+
+/*
+int ItemLoader::getProps(unsigned char attr, void* data, unsigned short &size)
+{
+	//
+}
+*/
+
+/*
+int ItemLoader::getFlags(unsigned long &flags)
+{
+	data = f->getProps(node, len);
+	memcpy(&props, data, len);
+}
+*/
 

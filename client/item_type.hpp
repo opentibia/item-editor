@@ -65,18 +65,18 @@ enum itemattrib_t {
 enum itemflags_t {
  FLAG_BLOCK_SOLID = 1,
  FLAG_BLOCK_PROJECTILE = 2, 
- FLAG_BLOCK_PATHFIND =  4, 
+ FLAG_BLOCK_PATHFIND = 4, 
  FLAG_BLOCK_PICKUPABLE = 8,
  FLAG_USEABLE = 16,
- FLAG_FLOORCHANGEDOWN = 32,
- FLAG_FLOORCHANGENORTH = 64,
- FLAG_FLOORCHANGEEAST = 128,
- FLAG_FLOORCHANGESOUTH = 256,
- FLAG_FLOORCHANGEWEST = 512,
- FLAG_ALWAYSONTOP = 1024,
- FLAG_PICKUPABLE = 2048,
- FLAG_MOVEABLE = 4096,
- FLAG_STACKABLE = 8192,
+ FLAG_PICKUPABLE = 32,
+ FLAG_MOVEABLE = 64,
+ FLAG_STACKABLE = 128,
+ FLAG_FLOORCHANGEDOWN = 256,
+ FLAG_FLOORCHANGENORTH = 512,
+ FLAG_FLOORCHANGEEAST = 1024,
+ FLAG_FLOORCHANGESOUTH = 2048,
+ FLAG_FLOORCHANGEWEST = 4096,
+ FLAG_ALWAYSONTOP = 8192
 };
 
 struct decayBlock{
@@ -96,6 +96,12 @@ struct amuBlock {
 	unsigned char amuType;
 	unsigned char shootType;
 	unsigned char attack;
+};
+
+struct armorBlock {
+	unsigned short armor;
+	double weight;
+	unsigned short slot_position;
 };
 
 struct writeableBlock {
@@ -199,8 +205,8 @@ public:
 	char name[128];
 	char descr[128];
 	double weight;
-	int	decayTo;
-	int	decayTime;
+	int decayTo;
+	int decayTime;
 	slots_t slot_position;
 	bool floorChangeDown;
 	bool floorChangeNorth;
