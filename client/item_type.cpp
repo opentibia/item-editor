@@ -1434,7 +1434,7 @@ int ItemsTypes::saveOtb(const char *filename)
 				}
 				case ITEM_ATTR_SPRITEHASH:
 				{
-					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));
+					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, sizeof(it->second->sprHash));
 					break;
 				}
 			}
