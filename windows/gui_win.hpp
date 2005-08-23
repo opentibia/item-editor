@@ -116,6 +116,8 @@ protected:
 	static LRESULT onDragEnd(HWND h);
 	static LRESULT onClientIdChange(HWND h, HWND hEdit);
 	static LRESULT onImportOld(HWND h);
+	static LRESULT onSaveOtb(HWND h);
+	static LRESULT onLoadOtb(HWND h);
 	static LRESULT onContextMenu(HWND h, unsigned long lParam);
 	static LRESULT onContextMenuClick(HWND h, unsigned long newgroup);
 

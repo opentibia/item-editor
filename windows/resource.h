@@ -10,8 +10,11 @@
 #define IDC_EDITOR_TREE                 1006
 #define IDC_ITEM_PIC                    1007
 #define IDC_EDITNAME                    1008
+#define IDC_EDIT_NAME                   1008
 #define IDC_EDITDESCR                   1010
+#define IDC_EDIT_DESCR                  1010
 #define IDC_EDITCID                     1012
+#define IDC_EDIT_CID                    1012
 #define IDC_SPINCID                     1013
 #define IDC_SID                         1014
 #define IDC_OPT_BLOCKING                1016
@@ -65,13 +68,15 @@
 #define ID_MENUG_NONE                   40022
 #define ID_MENUG_GROUND                 40023
 #define ID_MENUG_ARMOR                  40024
+#define ID_FILE_LOADOTB                 40027
+#define ID_FILE_NEWIT                   40031
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        113
-#define _APS_NEXT_COMMAND_VALUE         40027
+#define _APS_NEXT_COMMAND_VALUE         40032
 #define _APS_NEXT_CONTROL_VALUE         1047
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

@@ -250,11 +250,17 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 			return onImportOld(h);
 			break;
 		case ID_FILE_SAVEAS:
-			g_itemsTypes->saveOtb("C:\\tmp.otb");
+			return onSaveOtb(h);
+			break;
+		case ID_FILE_LOADOTB:
+			return onLoadOtb(h);
+			break;
+		case ID_FILE_NEWIT:
+			g_itemsTypes->clear();
+			loadTreeItemTypes(h);
+			return TRUE;
 			break;
 		case ID_TOOLS_VERIFYITEMS:
-			g_itemsTypes->loadOtb("C:\\tmp.otb");
-			loadTreeItemTypes(h);
 			break;
 		case ID_TOOLS_FINDMISSINGITEMS:
 			break;
@@ -454,14 +460,65 @@ LRESULT GUIWin::onImportOld(HWND h)
 	if(ret == 0)
 		return TRUE;
 	
-	curItem = NULL;
-	curItemServerId = 0;
-
+	g_itemsTypes->clear();
 	g_itemsTypes->loadFromDat(fileTibiaDat);
 	g_itemsTypes->loadFromXml(fileItemsXml);
 	
 	loadTreeItemTypes(h);
 
+	return TRUE;
+}
+
+LRESULT GUIWin::onSaveOtb(HWND h)
+{
+	if(!saveCurrentItem(h)){
+		return TRUE;
+	}
+
+	OPENFILENAME opf;
+	char fileItemsOtb[512];
+	long ret;
+	memset(&opf, 0, sizeof(opf));
+	fileItemsOtb[0] = 0;
+	opf.lStructSize = sizeof(OPENFILENAME);
+	opf.hwndOwner = h;
+	opf.nFilterIndex = 1;
+	opf.nMaxFile = 511;
+	opf.Flags = OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_NOLONGNAMES;
+
+	opf.lpstrFile = fileItemsOtb;
+	opf.lpstrFilter = "OTB files\0*.otb\0\0";
+	ret = GetSaveFileName(&opf);
+	if(ret == 0)
+		return TRUE;
+
+	g_itemsTypes->saveOtb(fileItemsOtb);
+	return TRUE;
+}
+
+LRESULT GUIWin::onLoadOtb(HWND h)
+{
+
+	OPENFILENAME opf;
+	char fileItemsOtb[512];
+	long ret;
+	memset(&opf, 0, sizeof(opf));
+	fileItemsOtb[0] = 0;
+	opf.lStructSize = sizeof(OPENFILENAME);
+	opf.hwndOwner = h;
+	opf.nFilterIndex = 1;
+	opf.nMaxFile = 511;
+	opf.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_NOLONGNAMES;
+
+	opf.lpstrFile = fileItemsOtb;
+	opf.lpstrFilter = "OTB files\0*.otb\0\0";
+	ret = GetOpenFileName(&opf);
+	if(ret == 0)
+		return TRUE;
+
+	g_itemsTypes->clear();
+	g_itemsTypes->loadOtb(fileItemsOtb);
+	loadTreeItemTypes(h);
 	return TRUE;
 }
 
@@ -1072,6 +1129,8 @@ void GUIWin::setControlState(HWND h, unsigned long flagsEdit, unsigned long flag
 
 void GUIWin::loadTreeItemTypes(HWND h)
 {
+	curItem = NULL;
+	curItemServerId = 0;
 	//delete all items in the tree
 	TreeView_DeleteAllItems(m_hwndTree);
 	//create groups
@@ -1081,6 +1140,8 @@ void GUIWin::loadTreeItemTypes(HWND h)
 	for(it = g_itemsTypes->getTypes(); it != g_itemsTypes->getEnd(); it++){
 		insertTreeItemType(m_hwndTree, it->second);
 	}
+	loadItem(h);
+	updateControls(h);
 }
 
 void GUIWin::setContextMenuGroup(itemgroup_t group)
