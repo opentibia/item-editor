@@ -958,6 +958,16 @@ int ItemsTypes::loadOtb(const char *filename)
 								break;
 							}
 
+							case ITEM_ATTR_SPRITEHASH:
+							{
+								if(datalen != sizeof(sType->sprHash))
+									return ERROR_INVALID_FORMAT;
+
+								memcpy(&sType->sprHash, p, sizeof(datalen));
+								
+								break;
+							}
+
 							default:
 								delete sType;
 								return ERROR_INVALID_FORMAT;
@@ -1048,6 +1058,9 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				if(strlen(it->second->descr) > 0)
 					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+
+				if(strlen(it->second->sprHash) > 0)
+					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, sizeof(it->second->sprHash));
 				//
 
 				f->setProps(ITEM_ATTR_SPEED, &it->second->speed, sizeof(unsigned short));
@@ -1086,6 +1099,9 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				if(strlen(it->second->descr) > 0)
 					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+
+				if(strlen(it->second->sprHash) > 0)
+					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));
 				//
 
 				f->setProps(ITEM_ATTR_WEIGHT, &it->second->weight, sizeof(double));
@@ -1129,6 +1145,9 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				if(strlen(it->second->descr) > 0)
 					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+
+				if(strlen(it->second->sprHash) > 0)
+					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));					
 				//
 
 				f->setProps(ITEM_ATTR_WEIGHT, &it->second->weight, sizeof(double));
@@ -1173,6 +1192,9 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				if(strlen(it->second->descr) > 0)
 					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+
+				if(strlen(it->second->sprHash) > 0)
+					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));					
 				//
 
 				f->setProps(ITEM_ATTR_WEIGHT, &it->second->weight, sizeof(double));
@@ -1212,6 +1234,9 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				if(strlen(it->second->descr) > 0)
 					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+
+				if(strlen(it->second->sprHash) > 0)
+					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));
 				//
 
 				armorBlock ab;
@@ -1248,6 +1273,9 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				if(strlen(it->second->descr) > 0)
 					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+
+				if(strlen(it->second->sprHash) > 0)
+					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));
 				//
 
 				f->setProps(ITEM_ATTR_MAGLEVEL, &it->second->runeMagLevel, sizeof(unsigned short));
@@ -1272,6 +1300,9 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				if(strlen(it->second->descr) > 0)
 					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+
+				if(strlen(it->second->sprHash) > 0)
+					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));
 				//
 
 				break;
@@ -1293,6 +1324,9 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				if(strlen(it->second->descr) > 0)
 					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+
+				if(strlen(it->second->sprHash) > 0)
+					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));
 				//
 				
 				f->setProps(ITEM_ATTR_MAGFIELDTYPE, &it->second->magicfieldtype, sizeof(unsigned char));
@@ -1324,6 +1358,9 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				if(strlen(it->second->descr) > 0)
 					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+
+				if(strlen(it->second->sprHash) > 0)
+					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));
 				//
 
 				if(it->second->readOnlyId) {
@@ -1361,6 +1398,9 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				if(strlen(it->second->descr) > 0)
 					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+
+				if(strlen(it->second->sprHash) > 0)
+					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));
 				//
 
 				break;
@@ -1385,6 +1425,9 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				if(strlen(it->second->descr) > 0)
 					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+
+				if(strlen(it->second->sprHash) > 0)
+					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));
 				//
 
 				if(it->second->decayTo != 0) {
@@ -1419,6 +1462,9 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				if(strlen(it->second->descr) > 0)
 					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+
+				if(strlen(it->second->sprHash) > 0)
+					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));
 				//
 
 				if(it->second->decayTo != 0) {
@@ -1489,6 +1535,9 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				if(strlen(it->second->descr) > 0)
 					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+
+				if(strlen(it->second->sprHash) > 0)
+					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));
 				//
 
 				if(it->second->moveable || it->second->pickupable) {
