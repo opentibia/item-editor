@@ -251,7 +251,7 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 			break;
 		case ID_FILE_SAVEAS:
 			g_itemsTypes->saveOtb("C:\\tmp.otb");
-		break;
+			break;
 		case ID_TOOLS_VERIFYITEMS:
 			g_itemsTypes->loadOtb("C:\\tmp.otb");
 			//loadTreeItemTypes(h);
@@ -531,6 +531,16 @@ LRESULT GUIWin::onInitDialog(HWND h)
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Poison Arrow", DIST_POISONARROW);
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Burst Arrow", DIST_BURSTARROW);
 
+	//editor types
+	createItemCombo(GetDlgItem(h, IDC_COMBO_EDITOR), "Grounds", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_EDITOR), "Building", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_EDITOR), "Hangable", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_EDITOR), "Interior", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_EDITOR), "Nature", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_EDITOR), "Accessories", 0);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_EDITOR), "Exterior", 0);
+
+
 	//initialize menu entryes
 	menuGroups[ITEM_GROUP_GROUND] = ID_MENUG_GROUND;
 	menuGroups[ITEM_GROUP_CONTAINER] = ID_MENUG_CONTAINER;
@@ -729,8 +739,9 @@ bool GUIWin::saveCurrentItem(HWND h)
 	iType->pickupable = getCheckButton(h, IDC_OPT_PICKUP);
 	iType->rotable = getCheckButton(h, IDC_OPT_ROTABLE);
 	iType->blockProjectile = getCheckButton(h, IDC_OPT_BLOCKPROJECTILE);
-	iType->oneTimeWrite = getCheckButton(h, IDC_OPT_WRITE1TIME);
-
+	iType->readable = getCheckButton(h, IDC_OPT_READABLE);
+	iType->blockPathFind = getCheckButton(h, IDC_OPT_BLOCKPATHFIND);
+	iType->blockPickupable = getCheckButton(h, IDC_OPT_BLOCKPICKUP);
 
 	iType->slot_position = (enum slots_t)getComboValue(h, IDC_COMBO_SLOT);
 	iType->weaponType = (enum WeaponType)getComboValue(h, IDC_COMBO_SKILL);
@@ -816,7 +827,9 @@ void GUIWin::loadItem(HWND h)
 		setCheckButton(h, IDC_OPT_PICKUP, iType->pickupable);
 		setCheckButton(h, IDC_OPT_ROTABLE, iType->rotable);
 		setCheckButton(h, IDC_OPT_BLOCKPROJECTILE, iType->blockProjectile);
-		setCheckButton(h, IDC_OPT_WRITE1TIME, iType->oneTimeWrite);
+		setCheckButton(h, IDC_OPT_READABLE, iType->readable);
+		setCheckButton(h, IDC_OPT_BLOCKPATHFIND, iType->blockPathFind);
+		setCheckButton(h, IDC_OPT_BLOCKPICKUP, iType->blockPickupable);
 
 		setComboValue(h, IDC_COMBO_SLOT, iType->slot_position);
 		setComboValue(h, IDC_COMBO_SKILL, iType->weaponType);
@@ -870,7 +883,9 @@ void GUIWin::loadItem(HWND h)
 		setCheckButton(h, IDC_OPT_PICKUP, false);
 		setCheckButton(h, IDC_OPT_ROTABLE, false);
 		setCheckButton(h, IDC_OPT_BLOCKPROJECTILE, false);
-		setCheckButton(h, IDC_OPT_WRITE1TIME, false);
+		setCheckButton(h, IDC_OPT_READABLE, false);
+		setCheckButton(h, IDC_OPT_BLOCKPATHFIND, false);
+		setCheckButton(h, IDC_OPT_BLOCKPICKUP, false);
 
 		setComboValue(h, IDC_COMBO_SLOT, SLOT_DEFAULT);
 		setComboValue(h, IDC_COMBO_SKILL, WEAPON_NONE);
@@ -1041,13 +1056,16 @@ void GUIWin::setControlState(HWND h, unsigned long flagsEdit, unsigned long flag
 	EnableWindow(GetDlgItem(h, IDC_OPT_PICKUP),getFlagState(flagsOpt, IDC_OPT_PICKUP_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_OPT_ROTABLE),getFlagState(flagsOpt, IDC_OPT_ROTABLE_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_OPT_BLOCKPROJECTILE),getFlagState(flagsOpt, IDC_OPT_BLOCKPROJECTILE_FLAG));
-	EnableWindow(GetDlgItem(h, IDC_OPT_WRITE1TIME),getFlagState(flagsOpt, IDC_OPT_WRITE1TIME_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_OPT_READABLE),getFlagState(flagsOpt, IDC_OPT_READABLE_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_OPT_BLOCKPATHFIND),getFlagState(flagsOpt, IDC_OPT_BLOCKPATHFIND_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_OPT_BLOCKPICKUP),getFlagState(flagsOpt, IDC_OPT_BLOCKPICKUP_FLAG));
 
 	EnableWindow(GetDlgItem(h, IDC_COMBO_SLOT),getFlagState(flagsCombo, IDC_COMBO_SLOT_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_COMBO_SKILL),getFlagState(flagsCombo, IDC_COMBO_SKILL_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_COMBO_AMU),getFlagState(flagsCombo, IDC_COMBO_AMU_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_COMBO_SHOOT),getFlagState(flagsCombo, IDC_COMBO_SHOOT_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_COMBO_FLOOR),getFlagState(flagsCombo, IDC_COMBO_FLOOR_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_COMBO_EDITOR),getFlagState(flagsCombo, IDC_COMBO_EDITOR_FLAG));
 
 	EnableWindow(GetDlgItem(h, IDC_SET_CLIENT_OPT),getFlagState(flagsButton, IDC_SET_CLIENT_OPT_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_SAVE_ITEM),getFlagState(flagsButton, IDC_SAVE_ITEM_FLAG));

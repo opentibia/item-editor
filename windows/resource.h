@@ -38,8 +38,11 @@
 #define IDC_EDIT_READONLYID             1039
 #define IDC_SET_CLIENT_OPT              1040
 #define IDC_EDIT_SPEED                  1041
-#define IDC_OPT_WRITE1TIME              1045
+#define IDC_OPT_BLOCKPATHFIND           1042
+#define IDC_OPT_BLOCKPICKUP             1043
+#define IDC_OPT_READABLE                1045
 #define IDC_SAVE_ITEM                   1046
+#define IDC_COMBO_EDITOR                1049
 #define ID_FILE_IMPORTXML               40001
 #define ID_FILE_IMPORTOLD               40001
 #define ID_FILE_IMPORTDAT               40002
@@ -68,7 +71,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        113
-#define _APS_NEXT_COMMAND_VALUE         40026
+#define _APS_NEXT_COMMAND_VALUE         40027
 #define _APS_NEXT_CONTROL_VALUE         1047
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
