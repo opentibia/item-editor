@@ -74,7 +74,7 @@ ItemType::ItemType()
 	speed = 0;
 
 	//container
-	maxItems = 20;
+	maxItems = 8;
 	
 	//weapon
 	amuType = AMU_NONE;
@@ -417,11 +417,11 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 				sType->weight = atof(tmp);
 			}
 
-			if((tmp = readXmlProp("decayTo", props)) != 0){
+			if((tmp = readXmlProp("decayto", props)) != 0){
 				sType->decayTo = atoi(tmp);
 			}
 
-			if((tmp = readXmlProp("decayTime", props)) != 0){
+			if((tmp = readXmlProp("decaytime", props)) != 0){
 				sType->decayTime = atoi(tmp);
 			}
 
@@ -474,7 +474,7 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 				else if (!strcmp(tmp, "hand"))
 					sType->slot_position = SLOT_HAND;
 				
-				sType->slot_position = SLOT_HAND;
+				//sType->slot_position = SLOT_HAND;
 			}
 			
 			// now set special properties...
@@ -1267,7 +1267,7 @@ int ItemsTypes::saveOtb(const char *filename)
 					f->setProps(ITEM_ATTR_WEIGHT, &it->second->weight, sizeof(double));
 				}
 
-				//
+				/*//
 				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
 				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
 
@@ -1276,7 +1276,7 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				if(strlen(it->second->descr) > 0)
 					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
-				//
+				//*/
 
 				f->setProps(ITEM_ATTR_ROTATETO, &it->second->rotateTo, sizeof(unsigned short));
 
