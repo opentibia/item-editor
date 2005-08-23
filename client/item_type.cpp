@@ -807,7 +807,7 @@ int ItemsTypes::loadOtb(const char *filename)
 								if(datalen != sizeof(unsigned short))
 									return ERROR_INVALID_FORMAT;
 
-								memcpy(&sType->id, p, sizeof(datalen));
+								memcpy(&sType->id, p, sizeof(unsigned short));
 								break;
 							}
 
@@ -816,7 +816,7 @@ int ItemsTypes::loadOtb(const char *filename)
 								if(datalen != sizeof(unsigned short))
 									return ERROR_INVALID_FORMAT;
 
-								memcpy(&sType->clientid, p, sizeof(datalen));
+								memcpy(&sType->clientid, p, sizeof(unsigned short));
 								break;
 							}
 							case ITEM_ATTR_NAME:
@@ -824,7 +824,7 @@ int ItemsTypes::loadOtb(const char *filename)
 								if(datalen > sizeof(sType->name))
 									return ERROR_INVALID_FORMAT;
 
-								memcpy(&sType->name[0], p, datalen);
+								memcpy(&sType->name[0], p, sizeof(sType->name));
 								break;
 							}
 							case ITEM_ATTR_DESCR:
@@ -832,7 +832,7 @@ int ItemsTypes::loadOtb(const char *filename)
 								if(datalen > sizeof(sType->descr))
 									return ERROR_INVALID_FORMAT;
 
-								memcpy(&sType->descr[0], p, datalen);
+								memcpy(&sType->descr[0], p, sizeof(sType->descr));
 								break;
 							}
 							case ITEM_ATTR_SPEED:
@@ -840,7 +840,7 @@ int ItemsTypes::loadOtb(const char *filename)
 								if(datalen != sizeof(unsigned short))
 									return ERROR_INVALID_FORMAT;
 
-								memcpy(&sType->speed, p, sizeof(datalen));
+								memcpy(&sType->speed, p, sizeof(unsigned short));
 								break;
 							}
 							case ITEM_ATTR_SLOT:
@@ -848,7 +848,7 @@ int ItemsTypes::loadOtb(const char *filename)
 								if(datalen != sizeof(unsigned short))
 									return ERROR_INVALID_FORMAT;
 
-								memcpy(&sType->slot_position, p, sizeof(datalen));
+								memcpy(&sType->slot_position, p, sizeof(unsigned short));
 								break;
 							}
 							case ITEM_ATTR_MAXITEMS:
@@ -856,7 +856,7 @@ int ItemsTypes::loadOtb(const char *filename)
 								if(datalen != sizeof(unsigned short))
 									return ERROR_INVALID_FORMAT;
 
-								memcpy(&sType->maxItems, p, sizeof(datalen));
+								memcpy(&sType->maxItems, p, sizeof(unsigned short));
 								break;
 							}
 							case ITEM_ATTR_WEIGHT:
@@ -864,7 +864,7 @@ int ItemsTypes::loadOtb(const char *filename)
 								if(datalen != sizeof(double))
 									return ERROR_INVALID_FORMAT;
 
-								memcpy(&sType->weight, p, sizeof(datalen));
+								memcpy(&sType->weight, p, sizeof(double));
 								break;
 							}
 							case ITEM_ATTR_WEAPON:
@@ -895,7 +895,7 @@ int ItemsTypes::loadOtb(const char *filename)
 							}
 							case ITEM_ATTR_ARMOR:
 							{
-								if(datalen < sizeof(armorBlock))
+								if(datalen != sizeof(armorBlock))
 									return ERROR_INVALID_FORMAT;
 
 								armorBlock ab;
@@ -909,29 +909,29 @@ int ItemsTypes::loadOtb(const char *filename)
 							}
 							case ITEM_ATTR_MAGLEVEL:
 							{
-								if(datalen < sizeof(unsigned short))
+								if(datalen != sizeof(unsigned short))
 									return ERROR_INVALID_FORMAT;
 								
-								memcpy(&sType->runeMagLevel, p, sizeof(datalen));
+								memcpy(&sType->runeMagLevel, p, sizeof(unsigned short));
 								
 								break;
 							}
 							case ITEM_ATTR_MAGFIELDTYPE:
 							{
-								if(datalen < sizeof(unsigned char))
+								if(datalen != sizeof(unsigned char))
 									return ERROR_INVALID_FORMAT;
 								
-								memcpy(&sType->magicfieldtype, p, sizeof(datalen));
+								memcpy(&sType->magicfieldtype, p, sizeof(unsigned char));
 
 								break;
 							}
 							case ITEM_ATTR_WRITEABLE:
 							{
-								if(datalen < sizeof(writeableBlock))
+								if(datalen != sizeof(writeableBlock))
 									return ERROR_INVALID_FORMAT;
 
 								struct writeableBlock wb;
-								memcpy(&wb, p, sizeof(datalen));
+								memcpy(&wb, p, sizeof(writeableBlock));
 
 								sType->readOnlyId = wb.readOnlyId;
 
@@ -939,10 +939,10 @@ int ItemsTypes::loadOtb(const char *filename)
 							}
 							case ITEM_ATTR_ROTATETO:
 							{
-								if(datalen < sizeof(unsigned short))
+								if(datalen != sizeof(unsigned short))
 									return ERROR_INVALID_FORMAT;
 
-								memcpy(&sType->rotateTo, p, sizeof(datalen));
+								memcpy(&sType->rotateTo, p, sizeof(unsigned short));
 
 								break;
 							}
@@ -963,7 +963,7 @@ int ItemsTypes::loadOtb(const char *filename)
 								if(datalen != sizeof(sType->sprHash))
 									return ERROR_INVALID_FORMAT;
 
-								memcpy(&sType->sprHash, p, sizeof(datalen));
+								memcpy(&sType->sprHash, p, sizeof(sType->sprHash));
 								
 								break;
 							}
