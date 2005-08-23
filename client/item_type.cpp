@@ -1480,7 +1480,9 @@ int ItemsTypes::saveOtb(const char *filename)
 					f->setProps(ITEM_ATTR_WEIGHT, &it->second->weight, sizeof(double));
 				}
 
-				f->setProps(ITEM_ATTR_ROTATETO, &it->second->rotateTo, sizeof(unsigned short));
+				if(it->second->rotateTo != 0) {
+					f->setProps(ITEM_ATTR_ROTATETO, &it->second->rotateTo, sizeof(unsigned short));
+				}
 
 				if(it->second->decayTo != 0) {
 					struct decayBlock db;
