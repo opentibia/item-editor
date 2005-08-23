@@ -1007,6 +1007,18 @@ int ItemsTypes::saveOtb(const char *filename)
 		f->startNode(it->second->group);
 
 		flags_t flags = 0;
+		std::list<itemattrib_t> saveAttr;
+		
+		saveAttr.push_back(ITEM_ATTR_SERVERID);
+		saveAttr.push_back(ITEM_ATTR_CLIENTID);
+
+		if(strlen(it->second->name) > 0)
+			saveAttr.push_back(ITEM_ATTR_NAME);
+
+		if(strlen(it->second->descr) > 0)
+			saveAttr.push_back(ITEM_ATTR_DESCR);
+		
+		saveAttr.push_back(ITEM_ATTR_SPRITEHASH);
 
 		switch(it->second->group) {
 			case ITEM_GROUP_GROUND:
@@ -1047,29 +1059,10 @@ int ItemsTypes::saveOtb(const char *filename)
 				if(it->second->readable)
 					flags |= FLAG_READABLE;
 
-				f->setFlags(flags);
-				
-				//
-				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
-				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
+				saveAttr.push_back(ITEM_ATTR_SPEED);
 
-				if(strlen(it->second->name) > 0)
-					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
-
-				if(strlen(it->second->descr) > 0)
-					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
-
-				if(strlen(it->second->sprHash) > 0)
-					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, sizeof(it->second->sprHash));
-				//
-
-				f->setProps(ITEM_ATTR_SPEED, &it->second->speed, sizeof(unsigned short));
-
-				if(it->second->decayTo != 0) {
-					struct decayBlock db;
-					db.decayTo = it->second->decayTo;
-					db.decayTime = it->second->decayTime;
-					f->setProps(ITEM_ATTR_DECAY, &db, sizeof(db));
+				if(it->second->decayTo != 0) {					
+					saveAttr.push_back(ITEM_ATTR_DECAY);
 				}
 				
 				break;
@@ -1088,31 +1081,12 @@ int ItemsTypes::saveOtb(const char *filename)
 				if(it->second->readable)
 					flags |= FLAG_READABLE;
 
-				f->setFlags(flags);
-
-				//
-				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
-				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
-
-				if(strlen(it->second->name) > 0)
-					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
-
-				if(strlen(it->second->descr) > 0)
-					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
-
-				if(strlen(it->second->sprHash) > 0)
-					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));
-				//
-
-				f->setProps(ITEM_ATTR_WEIGHT, &it->second->weight, sizeof(double));
-				f->setProps(ITEM_ATTR_MAXITEMS, &it->second->maxItems, sizeof(unsigned short));
-				f->setProps(ITEM_ATTR_SLOT, &it->second->slot_position, sizeof(unsigned short));
+				saveAttr.push_back(ITEM_ATTR_WEIGHT);
+				saveAttr.push_back(ITEM_ATTR_MAXITEMS);
+				saveAttr.push_back(ITEM_ATTR_SLOT);
 
 				if(it->second->decayTo != 0) {
-					struct decayBlock db;
-					db.decayTo = it->second->decayTo;
-					db.decayTime = it->second->decayTime;
-					f->setProps(ITEM_ATTR_DECAY, &db, sizeof(db));
+					saveAttr.push_back(ITEM_ATTR_DECAY);
 				}
 
 				break;
@@ -1133,33 +1107,10 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				if(it->second->readable)
 					flags |= FLAG_READABLE;
-
-				f->setFlags(flags);
-
-				//
-				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
-				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
-
-				if(strlen(it->second->name) > 0)
-					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
-
-				if(strlen(it->second->descr) > 0)
-					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
-
-				if(strlen(it->second->sprHash) > 0)
-					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));					
-				//
-
-				f->setProps(ITEM_ATTR_WEIGHT, &it->second->weight, sizeof(double));
-				f->setProps(ITEM_ATTR_SLOT, &it->second->slot_position, sizeof(unsigned short));
-
-				weaponBlock wb;
-				wb.weaponType = it->second->weaponType;
-				wb.shootType = it->second->shootType;
-				wb.amuType = it->second->amuType;
-				wb.attack = it->second->attack;
-				wb.defence = it->second->defence;
-				f->setProps(ITEM_ATTR_WEAPON, &wb, sizeof(wb));
+				
+				saveAttr.push_back(ITEM_ATTR_WEIGHT);
+				saveAttr.push_back(ITEM_ATTR_SLOT);
+				saveAttr.push_back(ITEM_ATTR_WEAPON);
 
 				break;
 			}
@@ -1181,30 +1132,9 @@ int ItemsTypes::saveOtb(const char *filename)
 				if(it->second->readable)
 					flags |= FLAG_READABLE;
 
-				f->setFlags(flags);
-
-				//
-				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
-				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
-
-				if(strlen(it->second->name) > 0)
-					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
-
-				if(strlen(it->second->descr) > 0)
-					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
-
-				if(strlen(it->second->sprHash) > 0)
-					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));					
-				//
-
-				f->setProps(ITEM_ATTR_WEIGHT, &it->second->weight, sizeof(double));
-				f->setProps(ITEM_ATTR_SLOT, &it->second->slot_position, sizeof(unsigned short));
-
-				amuBlock ab;
-				ab.shootType = it->second->shootType;
-				ab.amuType = it->second->amuType;
-				ab.attack = it->second->attack;
-				f->setProps(ITEM_ATTR_AMU, &ab, sizeof(ab));
+				saveAttr.push_back(ITEM_ATTR_WEIGHT);
+				saveAttr.push_back(ITEM_ATTR_SLOT);
+				saveAttr.push_back(ITEM_ATTR_AMU);
 
 				break;
 			}
@@ -1223,28 +1153,8 @@ int ItemsTypes::saveOtb(const char *filename)
 				if(it->second->readable)
 					flags |= FLAG_READABLE;
 
-				f->setFlags(flags);
+				saveAttr.push_back(ITEM_ATTR_ARMOR);
 
-				//
-				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
-				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
-
-				if(strlen(it->second->name) > 0)
-					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
-
-				if(strlen(it->second->descr) > 0)
-					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
-
-				if(strlen(it->second->sprHash) > 0)
-					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));
-				//
-
-				armorBlock ab;
-				ab.armor = it->second->armor;
-				ab.slot_position = it->second->slot_position;
-				ab.weight = it->second->weight;
-				f->setProps(ITEM_ATTR_ARMOR, &ab, sizeof(armorBlock));
-				
 				break;
 			}
 
@@ -1262,24 +1172,8 @@ int ItemsTypes::saveOtb(const char *filename)
 				if(it->second->readable)
 					flags |= FLAG_READABLE;
 
-				f->setFlags(flags);
-
-				//
-				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
-				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
-
-				if(strlen(it->second->name) > 0)
-					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
-
-				if(strlen(it->second->descr) > 0)
-					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
-
-				if(strlen(it->second->sprHash) > 0)
-					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));
-				//
-
-				f->setProps(ITEM_ATTR_MAGLEVEL, &it->second->runeMagLevel, sizeof(unsigned short));
-				f->setProps(ITEM_ATTR_WEIGHT, &it->second->weight, sizeof(double));
+				saveAttr.push_back(ITEM_ATTR_MAGLEVEL);
+				saveAttr.push_back(ITEM_ATTR_WEIGHT);
 
 				break;
 			}
@@ -1289,22 +1183,6 @@ int ItemsTypes::saveOtb(const char *filename)
 				if(it->second->readable)
 					flags |= FLAG_READABLE;
 
-				f->setFlags(flags);
-
-				//
-				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
-				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
-
-				if(strlen(it->second->name) > 0)
-					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
-
-				if(strlen(it->second->descr) > 0)
-					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
-
-				if(strlen(it->second->sprHash) > 0)
-					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));
-				//
-
 				break;
 			}
 
@@ -1312,24 +1190,9 @@ int ItemsTypes::saveOtb(const char *filename)
 			{
 				if(it->second->readable)
 					flags |= FLAG_READABLE;
-
-				f->setFlags(flags);
-
-				//
-				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
-				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
-
-				if(strlen(it->second->name) > 0)
-					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
-
-				if(strlen(it->second->descr) > 0)
-					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
-
-				if(strlen(it->second->sprHash) > 0)
-					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));
-				//
 				
-				f->setProps(ITEM_ATTR_MAGFIELDTYPE, &it->second->magicfieldtype, sizeof(unsigned char));
+				saveAttr.push_back(ITEM_ATTR_MAGFIELDTYPE);
+
 				break;
 			}
 
@@ -1347,27 +1210,8 @@ int ItemsTypes::saveOtb(const char *filename)
 				if(it->second->readable)
 					flags |= FLAG_READABLE;
 
-				f->setFlags(flags);
-
-				//
-				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
-				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
-
-				if(strlen(it->second->name) > 0)
-					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
-
-				if(strlen(it->second->descr) > 0)
-					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
-
-				if(strlen(it->second->sprHash) > 0)
-					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));
-				//
-
 				if(it->second->readOnlyId) {
-					struct writeableBlock wb;
-					wb.readOnlyId = it->second->readOnlyId;
-
-					f->setProps(ITEM_ATTR_WRITEABLE, &wb, sizeof(wb));
+					saveAttr.push_back(ITEM_ATTR_WRITEABLE);
 				}
 
 				break;
@@ -1387,22 +1231,6 @@ int ItemsTypes::saveOtb(const char *filename)
 				if(it->second->readable)
 					flags |= FLAG_READABLE;
 
-				f->setFlags(flags);
-
-				//
-				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
-				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
-
-				if(strlen(it->second->name) > 0)
-					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
-
-				if(strlen(it->second->descr) > 0)
-					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
-
-				if(strlen(it->second->sprHash) > 0)
-					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));
-				//
-
 				break;
 			}
 
@@ -1414,27 +1242,8 @@ int ItemsTypes::saveOtb(const char *filename)
 				if(it->second->readable)
 					flags |= FLAG_READABLE;
 
-				f->setFlags(flags);
-
-				//
-				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
-				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
-
-				if(strlen(it->second->name) > 0)
-					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
-
-				if(strlen(it->second->descr) > 0)
-					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
-
-				if(strlen(it->second->sprHash) > 0)
-					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));
-				//
-
 				if(it->second->decayTo != 0) {
-					struct decayBlock db;
-					db.decayTo = it->second->decayTo;
-					db.decayTime = it->second->decayTime;
-					f->setProps(ITEM_ATTR_DECAY, &db, sizeof(db));
+					saveAttr.push_back(ITEM_ATTR_DECAY);
 				}
 
 				break;
@@ -1451,27 +1260,8 @@ int ItemsTypes::saveOtb(const char *filename)
 				if(it->second->readable)
 					flags |= FLAG_READABLE;
 
-				f->setFlags(flags);
-
-				//
-				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
-				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
-
-				if(strlen(it->second->name) > 0)
-					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
-
-				if(strlen(it->second->descr) > 0)
-					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
-
-				if(strlen(it->second->sprHash) > 0)
-					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));
-				//
-
 				if(it->second->decayTo != 0) {
-					struct decayBlock db;
-					db.decayTo = it->second->decayTo;
-					db.decayTime = it->second->decayTime;
-					f->setProps(ITEM_ATTR_DECAY, &db, sizeof(db));
+					saveAttr.push_back(ITEM_ATTR_DECAY);
 				}
 
 				break;
@@ -1524,35 +1314,128 @@ int ItemsTypes::saveOtb(const char *filename)
 				if(it->second->readable)
 					flags |= FLAG_READABLE;
 
-				f->setFlags(flags);
-				
-				//
-				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
-				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
-
-				if(strlen(it->second->name) > 0)
-					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
-
-				if(strlen(it->second->descr) > 0)
-					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
-
-				if(strlen(it->second->sprHash) > 0)
-					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));
-				//
-
 				if(it->second->moveable || it->second->pickupable) {
-					f->setProps(ITEM_ATTR_WEIGHT, &it->second->weight, sizeof(double));
+					saveAttr.push_back(ITEM_ATTR_WEIGHT);
 				}
 
 				if(it->second->rotateTo != 0) {
-					f->setProps(ITEM_ATTR_ROTATETO, &it->second->rotateTo, sizeof(unsigned short));
+					saveAttr.push_back(ITEM_ATTR_ROTATETO);
 				}
 
 				if(it->second->decayTo != 0) {
+					saveAttr.push_back(ITEM_ATTR_DECAY);
+				}
+			}
+		}
+
+		f->setFlags(flags);
+		
+		std::list<itemattrib_t>::iterator attIt;
+		for(attIt = saveAttr.begin(); attIt != saveAttr.end(); ++attIt) {
+			switch(*attIt) {
+				case ITEM_ATTR_SERVERID:
+				{
+					f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
+					break;
+				}
+				case ITEM_ATTR_CLIENTID:
+				{
+					f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
+					break;
+				}
+				case ITEM_ATTR_NAME:
+				{
+					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
+					break;
+				}
+				case ITEM_ATTR_DESCR:
+				{
+					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+					break;
+				}
+				case ITEM_ATTR_SPEED:
+				{
+					f->setProps(ITEM_ATTR_SPEED, &it->second->speed, sizeof(unsigned short));
+					break;
+				}
+				case ITEM_ATTR_SLOT:
+				{
+					f->setProps(ITEM_ATTR_SLOT, &it->second->slot_position, sizeof(unsigned short));
+					break;
+				}
+				case ITEM_ATTR_MAXITEMS:
+				{
+					f->setProps(ITEM_ATTR_MAXITEMS, &it->second->maxItems, sizeof(unsigned short));
+					break;
+				}
+				case ITEM_ATTR_WEIGHT:
+				{
+					f->setProps(ITEM_ATTR_WEIGHT, &it->second->weight, sizeof(double));
+					break;
+				}
+				case ITEM_ATTR_WEAPON:
+				{
+					weaponBlock wb;
+					wb.weaponType = it->second->weaponType;
+					wb.shootType = it->second->shootType;
+					wb.amuType = it->second->amuType;
+					wb.attack = it->second->attack;
+					wb.defence = it->second->defence;
+					f->setProps(ITEM_ATTR_WEAPON, &wb, sizeof(wb));
+					break;
+				}
+				case ITEM_ATTR_AMU:
+				{
+					amuBlock ab;
+					ab.shootType = it->second->shootType;
+					ab.amuType = it->second->amuType;
+					ab.attack = it->second->attack;
+					f->setProps(ITEM_ATTR_AMU, &ab, sizeof(ab));
+					break;
+				}
+				case ITEM_ATTR_ARMOR:
+				{
+					armorBlock ab;
+					ab.armor = it->second->armor;
+					ab.slot_position = it->second->slot_position;
+					ab.weight = it->second->weight;
+					f->setProps(ITEM_ATTR_ARMOR, &ab, sizeof(armorBlock));
+					break;
+				}
+				case ITEM_ATTR_MAGLEVEL:
+				{
+					f->setProps(ITEM_ATTR_MAGLEVEL, &it->second->runeMagLevel, sizeof(unsigned short));
+					break;
+				}
+				case ITEM_ATTR_MAGFIELDTYPE:
+				{
+					f->setProps(ITEM_ATTR_MAGFIELDTYPE, &it->second->magicfieldtype, sizeof(unsigned char));
+					break;
+				}
+				case ITEM_ATTR_WRITEABLE:
+				{
+					struct writeableBlock wb;
+					wb.readOnlyId = it->second->readOnlyId;
+					f->setProps(ITEM_ATTR_WRITEABLE, &wb, sizeof(wb));
+					break;
+				}
+				case ITEM_ATTR_ROTATETO:
+				{
+					f->setProps(ITEM_ATTR_ROTATETO, &it->second->rotateTo, sizeof(unsigned short));
+					break;
+				}
+				case ITEM_ATTR_DECAY:
+				{
 					struct decayBlock db;
 					db.decayTo = it->second->decayTo;
 					db.decayTime = it->second->decayTime;
 					f->setProps(ITEM_ATTR_DECAY, &db, sizeof(db));
+					break;
+				}
+				case ITEM_ATTR_SPRITEHASH:
+				{
+					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, strlen(it->second->sprHash));
+					break;
 				}
 			}
 		}

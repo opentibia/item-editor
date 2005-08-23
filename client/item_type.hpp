@@ -24,6 +24,7 @@
 #include "expat.h"
 #include "item_loader.hpp"
 #include <map>
+#include <list>
 
 enum itemgroup_t{
 	ITEM_GROUP_NONE = 0,
@@ -44,7 +45,8 @@ enum itemgroup_t{
 
 /////////OTB specific//////////////
 enum itemattrib_t {
-	ITEM_ATTR_SERVERID = 0x10,
+	ITEM_ATTR_FIRST = 0x10,
+	ITEM_ATTR_SERVERID = ITEM_ATTR_FIRST,
 	ITEM_ATTR_CLIENTID,
 	ITEM_ATTR_NAME,
 	ITEM_ATTR_DESCR,
@@ -60,7 +62,8 @@ enum itemattrib_t {
 	ITEM_ATTR_WRITEABLE,
 	ITEM_ATTR_ROTATETO,
 	ITEM_ATTR_DECAY,
-	ITEM_ATTR_SPRITEHASH
+	ITEM_ATTR_SPRITEHASH,
+	ITEM_ATTR_LAST
 };
 
 enum itemflags_t {
