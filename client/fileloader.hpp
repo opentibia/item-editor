@@ -72,7 +72,28 @@ protected:
 	inline bool checks(const NODE node);
 	inline bool safeSeek(unsigned long pos);
 	inline bool safeTell(long &pos);
-	inline bool writeData(void* data, int size, bool unescape);
+	//inline bool writeData(void* data, int size, bool unescape);
+	inline bool FileLoader::writeData(void* data, int size, bool unescape){
+		for(int i = 0; i < size; ++i) {
+			unsigned char c = *(((unsigned char*)data) + i);
+			if(unescape && (c == NODE_START || c == NODE_END || c == ESCAPE_CHAR)) {
+				unsigned char escape = ESCAPE_CHAR;
+				int value = fwrite(&escape, 1, 1, m_file);
+				if(value != 1) {
+					m_lastError = ERROR_COULDNOTWRITE;
+					return false;
+				}
+			}
+			int value = fwrite(&c, 1, 1, m_file);
+			if(value != 1) {
+				m_lastError = ERROR_COULDNOTWRITE;
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 
 	FILE *m_file;
 	FILELOADER_ERRORS m_lastError;

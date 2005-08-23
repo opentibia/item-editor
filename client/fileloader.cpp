@@ -288,7 +288,7 @@ inline bool FileLoader::readByte(int &value)
 	else
 		return true;
 }
-
+/*
 inline bool FileLoader::writeData(void* data, int size, bool unescape)
 {
 	for(int i = 0; i < size; ++i) {
@@ -312,7 +312,7 @@ inline bool FileLoader::writeData(void* data, int size, bool unescape)
 
 	return true;
 }
-
+*/
 inline bool FileLoader::checks(const NODE node)
 {
 	if(!m_file){
