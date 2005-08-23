@@ -100,7 +100,6 @@ struct amuBlock {
 
 struct writeableBlock {
 	unsigned short readOnlyId;
-	bool oneTimeWrite;
 };
 
 //////////////////////////
@@ -193,6 +192,7 @@ public:
 	bool moveable;
 	bool pickupable;
 	bool rotable;
+	bool readable;
 
 	int rotateTo;
 	
@@ -236,7 +236,6 @@ public:
 	
 	//writeable
 	int readOnlyId;
-	bool oneTimeWrite;
 	
 	//key
 	//bool iskey;

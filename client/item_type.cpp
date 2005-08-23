@@ -52,6 +52,7 @@ ItemType::ItemType()
 	moveable	= true;
 	pickupable	= false;
 	rotable = false;
+	readable = false;
 	
 	rotateTo = 0;
 
@@ -88,22 +89,11 @@ ItemType::ItemType()
 	//rune
 	runeMagLevel = -1;
 	
-	//teleport
-	//isteleport = false;
-	
 	//magicfield
-	//ismagicfield = false;
 	magicfieldtype = 0;
 	
 	//writeable
 	readOnlyId = 0;
-	oneTimeWrite = false;
-	
-	//key
-	//iskey = false;
-	
-	//splash
-	//issplash = false;
 
 }
 
@@ -239,10 +229,12 @@ bool ItemsTypes::loadFromDat(const char *filename)
 				break;
 			case 0x07: // writtable objects
 				sType->group = ITEM_GROUP_WRITEABLE;
+				sType->readable = true;
 				fgetc(fp); //max characters that can be written in it (0 unlimited)
 				fgetc(fp); //max number of  newlines ? 0, 2, 4, 7
 				break;
 			case 0x08: // writtable objects that can't be edited
+				sType->readable = true;
 				fgetc(fp); //always 0 max characters that can be written in it (0 unlimited) 
 				fgetc(fp); //always 4 max number of  newlines ? 
 				break;
@@ -259,7 +251,10 @@ bool ItemsTypes::loadFromDat(const char *filename)
 				//7.4 (change no data ?? ) action that can be performed (doors-> open, hole->open, book->read) not all included ex. wall torches
 				break;  
 			case 0x1D:  // line spot ...
-				fgetc(fp); // 86 -> openable holes, 77-> can be used to go down, 76 can be used to go up, 82 -> stairs up, 79 switch,    
+				int tmp;
+				tmp = fgetc(fp); // 86 -> openable holes, 77-> can be used to go down, 76 can be used to go up, 82 -> stairs up, 79 switch,    
+				if(tmp == 0x58)
+					sType->readable = true;
 				fgetc(fp); // always 4                  
 				break;         
 			case 0x1B:  // walls 2 types of them same material (total 4 pairs)                  
@@ -289,7 +284,7 @@ bool ItemsTypes::loadFromDat(const char *filename)
 		int ydiv        = fgetc(fp);
 		int animcount   = fgetc(fp);
 
-  	fseek(fp, width*height*blendframes*xdiv*ydiv*animcount*2, SEEK_CUR);
+  		fseek(fp, width*height*blendframes*xdiv*ydiv*animcount*2, SEEK_CUR);
 		++id;
 	}
 
@@ -384,11 +379,22 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 			sType = g_itemsTypes->getType(id);
 			if(!sType) {
 				sType = new ItemType();
-				if(id < 100)
-					id = id + 20000;
-				sType->id = id;
-				sType->clientid = id;
-				g_itemsTypes->addType(id, sType);
+
+				if(id < ItemType::minClientId){
+					sType->id = id + 20000;
+				}
+				else{
+					sType->id = id;
+				}
+
+				if(id > ItemType::maxClientId || id < ItemType::minClientId){
+					sType->clientid = 0;
+				}
+				else{
+					sType->clientid = id;
+				}
+					
+				g_itemsTypes->addType(sType->id, sType);
 			}
 		}
 		else
@@ -643,10 +649,9 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 				//oneTimeWrite
 				else if(!strcmp(type, "write1time")) {
 					sType->group = ITEM_GROUP_WRITEABLE;
-
+					sType->readable = true;;
 					if((tmp = readXmlProp("readonlyid", props)) != 0) {
 						sType->readOnlyId = atoi(tmp);
-						sType->oneTimeWrite = true;
 					}
 				}
 				//key
@@ -1037,10 +1042,9 @@ int ItemsTypes::saveOtb(const char *filename)
 					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
 				//
 
-				if(it->second->oneTimeWrite) {
+				if(it->second->readOnlyId) {
 					struct writeableBlock wb;
-					wb.oneTimeWrite = it->second->oneTimeWrite;
-					wb.readOnlyId =it->second->readOnlyId;
+					wb.readOnlyId = it->second->readOnlyId;
 
 					f->setProps(ITEM_ATTR_WRITEABLE, &wb, sizeof(wb));
 				}
@@ -1218,4 +1222,5 @@ int ItemsTypes::saveOtb(const char *filename)
 
 	delete f;
 	f = NULL;
+	return 1;
 }
