@@ -22,7 +22,7 @@
 #define __OTITEMEDITOR_ITEM_TYPE_H__
 
 #include "expat.h"
-#include "fileloader.hpp"
+#include "item_loader.hpp"
 #include <map>
 
 enum itemgroup_t{
@@ -52,6 +52,13 @@ enum itemattrib_t {
 	ITEM_ATTR_SLOT,
 	ITEM_ATTR_MAXITEMS,
 	ITEM_ATTR_WEIGHT,
+	ITEM_ATTR_WEAPON,
+	ITEM_ATTR_AMU,
+	ITEM_ATTR_ARMOR,
+	ITEM_ATTR_MAGLEVEL,
+	ITEM_ATTR_MAGFIELDTYPE,
+	ITEM_ATTR_WRITEABLE,
+	ITEM_ATTR_ROTATETO,
 	ITEM_ATTR_DECAY
 };
 
@@ -69,12 +76,33 @@ enum itemflags_t {
  FLAG_ALWAYSONTOP = 1024,
  FLAG_PICKUPABLE = 2048,
  FLAG_MOVEABLE = 4096,
+ FLAG_STACKABLE = 8192,
 };
 
 struct decayBlock{
 	int decayTo;
 	int decayTime;
 };
+
+struct weaponBlock {
+	unsigned char weaponType;
+	unsigned char amuType;
+	unsigned char shootType;
+	unsigned short attack;
+	unsigned short defence;
+};
+
+struct amuBlock {
+	unsigned char amuType;
+	unsigned char shootType;
+	unsigned short attack;
+};
+
+struct writeableBlock {
+	unsigned short readOnlyId;
+	bool oneTimeWrite;
+};
+
 //////////////////////////
 
 enum slots_t {
@@ -207,9 +235,8 @@ public:
 	int magicfieldtype;
 	
 	//writeable
-	bool isWriteable;
-	int readonlyId;
-	bool write1time;
+	int readOnlyId;
+	bool oneTimeWrite;
 	
 	//key
 	//bool iskey;

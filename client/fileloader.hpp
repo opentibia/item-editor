@@ -47,7 +47,7 @@ enum FILELOADER_ERRORS{
 class FileLoader{
 public:
 	FileLoader();
-	~FileLoader();
+	virtual ~FileLoader();
 
 	bool openFile(const char* filename, bool write);
 	const unsigned char* getProps(const NODE, unsigned long &size);
@@ -56,13 +56,12 @@ public:
 
 	void startNode(unsigned char type);
 	void endNode();
-	int setFlags(unsigned long flags);
-	int setProps(unsigned short attr, void* data, unsigned short size);
+	int setProps(void* data, unsigned short size);
 
 	int getError(){return m_lastError;}
 	void clearError(){m_lastError = ERROR_NONE;}
 
-private:
+protected:
 	enum SPECIAL_BYTES{
 		NODE_START = 0xFE,
 		NODE_END = 0xFF,

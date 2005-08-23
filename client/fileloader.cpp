@@ -122,25 +122,8 @@ const unsigned char* FileLoader::getProps(const NODE node, unsigned long &size)
 	return m_buffer;
 }
 
-int FileLoader::setFlags(unsigned long flags)
+int FileLoader::setProps(void* data, unsigned short size)
 {
-	//data
-	if(!writeData(&flags, sizeof(flags), true))
-		return getError();
-
-	return ERROR_NONE;
-}
-
-int FileLoader::setProps(unsigned short attr, void* data, unsigned short size)
-{
-	//size
-	if(!writeData(&size, sizeof(size), true))
-		return getError();
-
-	//attribute
-	if(!writeData(&attr, sizeof(attr), true))
-		return getError();
-
 	//data
 	if(!writeData(data, size, true))
 		return getError();
@@ -311,9 +294,7 @@ inline bool FileLoader::writeData(void* data, int size, bool unescape)
 	for(int i = 0; i < size; ++i) {
 		char c = *(((char*)data) + i);
 
-		if( c == NODE_START ||
-			  c == NODE_END ||
-				c == ESCAPE_CHAR) {
+		if(unescape && (c == NODE_START || c == NODE_END || c == ESCAPE_CHAR)) {
 			unsigned char escape = ESCAPE_CHAR;
 			int value = fwrite(&escape, 1, 1, m_file);
 			if(value != 1) {

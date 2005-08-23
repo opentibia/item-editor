@@ -96,9 +96,8 @@ ItemType::ItemType()
 	magicfieldtype = 0;
 	
 	//writeable
-	isWriteable = false;
-	readonlyId = 0;
-	write1time = false;
+	readOnlyId = 0;
+	oneTimeWrite = false;
 	
 	//key
 	//iskey = false;
@@ -240,13 +239,10 @@ bool ItemsTypes::loadFromDat(const char *filename)
 				break;
 			case 0x07: // writtable objects
 				sType->group = ITEM_GROUP_WRITEABLE;
-				sType->isWriteable = true;
 				fgetc(fp); //max characters that can be written in it (0 unlimited)
 				fgetc(fp); //max number of  newlines ? 0, 2, 4, 7
 				break;
 			case 0x08: // writtable objects that can't be edited
-				sType->group = ITEM_GROUP_WRITEABLE;
-				sType->isWriteable = false;
 				fgetc(fp); //always 0 max characters that can be written in it (0 unlimited) 
 				fgetc(fp); //always 4 max number of  newlines ? 
 				break;
@@ -644,14 +640,13 @@ void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const ch
 					/*else
 	       		std::cout << "missing field type for field: " << id << std::endl;*/
 				}
-				//write1time
+				//oneTimeWrite
 				else if(!strcmp(type, "write1time")) {
 					sType->group = ITEM_GROUP_WRITEABLE;
 
 					if((tmp = readXmlProp("readonlyid", props)) != 0) {
-						sType->readonlyId = atoi(tmp);
-						sType->write1time = true;
-						sType->isWriteable = true;
+						sType->readOnlyId = atoi(tmp);
+						sType->oneTimeWrite = true;
 					}
 				}
 				//key
@@ -717,7 +712,7 @@ ItemType* ItemsTypes::getType(int id)
 
 int ItemsTypes::loadOtb(const char *filename)
 {
-	FileLoader *f = new FileLoader();
+	ItemLoader *f = new ItemLoader();
 	if(!f->openFile(filename, false)) {
 		return f->getError();
 	}
@@ -732,11 +727,12 @@ int ItemsTypes::loadOtb(const char *filename)
 		node = f->getNextNode(node, type);
 	}
 	
+	return ERROR_NONE;
 }
 
 int ItemsTypes::saveOtb(const char *filename)
 {
-	FileLoader *f = new FileLoader();
+	ItemLoader *f = new ItemLoader();
 	if(!f->openFile(filename, true)) {
 		return f->getError();
 	}
@@ -759,14 +755,11 @@ int ItemsTypes::saveOtb(const char *filename)
 				if(it->second->blockProjectile)
 					flags |= FLAG_BLOCK_PROJECTILE;
 
-				if(it->second->blockProjectile)
+				if(it->second->blockPathFind)
 					flags |= FLAG_BLOCK_PATHFIND;
 
 				if(it->second->blockPickupable)
 					flags |= FLAG_BLOCK_PICKUPABLE;
-				
-				if(it->second->useable)
-					flags |= FLAG_USEABLE;
 
 				if(it->second->floorChangeDown)
 					flags |= FLAG_FLOORCHANGEDOWN;
@@ -785,6 +778,9 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				if(it->second->alwaysOnTop)
 					flags |= FLAG_ALWAYSONTOP;
+
+				if(it->second->useable)
+					flags |= FLAG_USEABLE;
 
 				f->setFlags(flags);
 				
@@ -807,16 +803,17 @@ int ItemsTypes::saveOtb(const char *filename)
 				f->setProps(ITEM_ATTR_DECAY, &db, sizeof(db));
 				
 				break;
-			}
-			
+			}			
 			case ITEM_GROUP_CONTAINER:
 			{
-
 				if(it->second->pickupable)
 					flags |= FLAG_PICKUPABLE;
 
 				if(it->second->moveable)
 					flags |= FLAG_MOVEABLE;
+
+				if(it->second->useable)
+					flags |= FLAG_USEABLE;
 
 				f->setFlags(flags);
 
@@ -842,27 +839,376 @@ int ItemsTypes::saveOtb(const char *filename)
 
 				break;
 			}
-			
 			case ITEM_GROUP_WEAPON:
 			{
-				//sType->weaponType
-				//sType->amuType
-				//sType->shootType
-				//attack
-				//defense
+				if(it->second->pickupable)
+					flags |= FLAG_PICKUPABLE;
+
+				if(it->second->moveable)
+					flags |= FLAG_MOVEABLE;
+				
+				if(it->second->useable)
+					flags |= FLAG_MOVEABLE;
+
+				if(it->second->stackable)
+					flags |= FLAG_STACKABLE;
+
+				f->setFlags(flags);
+
+				//
+				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
+				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
+
+				if(strlen(it->second->name) > 0)
+					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
+
+				if(strlen(it->second->descr) > 0)
+					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+				//
+
+				f->setProps(ITEM_ATTR_WEIGHT, &it->second->weight, sizeof(double));
+				f->setProps(ITEM_ATTR_SLOT, &it->second->slot_position, sizeof(unsigned short));
+
+				weaponBlock wb;
+				wb.weaponType = it->second->weaponType;
+				wb.shootType = it->second->shootType;
+				wb.amuType = it->second->amuType;
+				wb.attack = it->second->attack;
+				wb.defence = it->second->defence;
+				f->setProps(ITEM_ATTR_WEAPON, &wb, sizeof(wb));
+
+				break;
 			}
-			/*ITEM_GROUP_NONE,
-			,
-			,
-			ITEM_GROUP_AMMUNITION,
-			ITEM_GROUP_ARMOR,
-			ITEM_GROUP_RUNE,
-			ITEM_GROUP_TELEPORT,
-			ITEM_GROUP_MAGICFIELD,
-			ITEM_GROUP_WRITEABLE,
-			ITEM_GROUP_KEY,
-			ITEM_GROUP_SPLASH,
-			ITEM_GROUP_FLUID,*/			
+
+			case ITEM_GROUP_AMMUNITION:
+			{
+				if(it->second->pickupable)
+					flags |= FLAG_PICKUPABLE;
+
+				if(it->second->moveable)
+					flags |= FLAG_MOVEABLE;
+				
+				if(it->second->useable)
+					flags |= FLAG_MOVEABLE;
+
+				if(it->second->stackable)
+					flags |= FLAG_STACKABLE;
+
+				f->setFlags(flags);
+
+				//
+				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
+				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
+
+				if(strlen(it->second->name) > 0)
+					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
+
+				if(strlen(it->second->descr) > 0)
+					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+				//
+
+				f->setProps(ITEM_ATTR_WEIGHT, &it->second->weight, sizeof(double));
+				f->setProps(ITEM_ATTR_SLOT, &it->second->slot_position, sizeof(unsigned short));
+
+				amuBlock ab;
+				ab.shootType = it->second->shootType;
+				ab.amuType = it->second->amuType;
+				ab.attack = it->second->attack;
+				f->setProps(ITEM_ATTR_AMU, &ab, sizeof(ab));
+
+				break;
+			}
+
+			case ITEM_GROUP_ARMOR:
+			{
+				if(it->second->pickupable)
+					flags |= FLAG_PICKUPABLE;
+
+				if(it->second->moveable)
+					flags |= FLAG_MOVEABLE;
+				
+				if(it->second->useable)
+					flags |= FLAG_MOVEABLE;
+
+				f->setFlags(flags);
+
+				//
+				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
+				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
+
+				if(strlen(it->second->name) > 0)
+					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
+
+				if(strlen(it->second->descr) > 0)
+					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+				//
+
+				f->setProps(ITEM_ATTR_ARMOR, &it->second->armor, sizeof(unsigned short));
+				f->setProps(ITEM_ATTR_WEIGHT, &it->second->weight, sizeof(double));
+				f->setProps(ITEM_ATTR_SLOT, &it->second->slot_position, sizeof(unsigned short));
+				
+				break;
+			}
+
+			case ITEM_GROUP_RUNE:
+			{
+				if(it->second->pickupable)
+					flags |= FLAG_PICKUPABLE;
+
+				if(it->second->moveable)
+					flags |= FLAG_MOVEABLE;
+				
+				if(it->second->useable)
+					flags |= FLAG_MOVEABLE;
+
+				f->setFlags(flags);
+
+				//
+				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
+				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
+
+				if(strlen(it->second->name) > 0)
+					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
+
+				if(strlen(it->second->descr) > 0)
+					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+				//
+
+				f->setProps(ITEM_ATTR_MAGLEVEL, &it->second->runeMagLevel, sizeof(unsigned short));
+				f->setProps(ITEM_ATTR_WEIGHT, &it->second->weight, sizeof(double));
+
+				break;
+			}
+
+			case ITEM_GROUP_TELEPORT:
+			{
+				//
+				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
+				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
+
+				if(strlen(it->second->name) > 0)
+					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
+
+				if(strlen(it->second->descr) > 0)
+					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+				//
+
+				break;
+			}
+
+			case ITEM_GROUP_MAGICFIELD:
+			{
+				//
+				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
+				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
+
+				if(strlen(it->second->name) > 0)
+					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
+
+				if(strlen(it->second->descr) > 0)
+					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+				//
+				
+				f->setProps(ITEM_ATTR_MAGFIELDTYPE, &it->second->magicfieldtype, sizeof(unsigned char));
+				break;
+			}
+
+			case ITEM_GROUP_WRITEABLE:
+			{
+				if(it->second->pickupable)
+					flags |= FLAG_PICKUPABLE;
+
+				if(it->second->moveable)
+					flags |= FLAG_MOVEABLE;
+				
+				if(it->second->useable)
+					flags |= FLAG_MOVEABLE;
+
+				f->setFlags(flags);
+
+				//
+				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
+				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
+
+				if(strlen(it->second->name) > 0)
+					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
+
+				if(strlen(it->second->descr) > 0)
+					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+				//
+
+				if(it->second->oneTimeWrite) {
+					struct writeableBlock wb;
+					wb.oneTimeWrite = it->second->oneTimeWrite;
+					wb.readOnlyId =it->second->readOnlyId;
+
+					f->setProps(ITEM_ATTR_WRITEABLE, &wb, sizeof(wb));
+				}
+
+				break;
+			}
+
+			case ITEM_GROUP_KEY:
+			{
+				if(it->second->pickupable)
+					flags |= FLAG_PICKUPABLE;
+
+				if(it->second->moveable)
+					flags |= FLAG_MOVEABLE;
+				
+				if(it->second->useable)
+					flags |= FLAG_MOVEABLE;
+
+				f->setFlags(flags);
+
+				//
+				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
+				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
+
+				if(strlen(it->second->name) > 0)
+					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
+
+				if(strlen(it->second->descr) > 0)
+					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+				//
+
+				break;
+			}
+
+			case ITEM_GROUP_SPLASH:
+			{
+				if(it->second->blockSolid)
+					flags |= FLAG_BLOCK_SOLID;
+
+				f->setFlags(flags);
+
+				//
+				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
+				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
+
+				if(strlen(it->second->name) > 0)
+					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
+
+				if(strlen(it->second->descr) > 0)
+					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+				//
+
+				struct decayBlock db;
+				db.decayTo = it->second->decayTo;
+				db.decayTime = it->second->decayTime;
+				f->setProps(ITEM_ATTR_DECAY, &db, sizeof(db));
+
+				break;
+			}
+
+			case ITEM_GROUP_FLUID:
+			{
+				if(it->second->blockSolid)
+					flags |= FLAG_BLOCK_SOLID;
+
+				if(it->second->useable)
+					flags |= FLAG_MOVEABLE;
+
+				f->setFlags(flags);
+
+				//
+				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
+				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
+
+				if(strlen(it->second->name) > 0)
+					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
+
+				if(strlen(it->second->descr) > 0)
+					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+				//
+
+				struct decayBlock db;
+				db.decayTo = it->second->decayTo;
+				db.decayTime = it->second->decayTime;
+				f->setProps(ITEM_ATTR_DECAY, &db, sizeof(db));
+
+				break;
+			}
+
+			case ITEM_GROUP_NONE:
+			{
+				if(it->second->blockSolid)
+					flags |= FLAG_BLOCK_SOLID;
+
+				if(it->second->blockProjectile)
+					flags |= FLAG_BLOCK_PROJECTILE;
+
+				if(it->second->blockPathFind)
+					flags |= FLAG_BLOCK_PATHFIND;
+
+				if(it->second->blockPickupable)
+					flags |= FLAG_BLOCK_PICKUPABLE;
+
+				if(it->second->floorChangeDown)
+					flags |= FLAG_FLOORCHANGEDOWN;
+
+				if(it->second->floorChangeNorth)
+					flags |= FLAG_FLOORCHANGENORTH;
+
+				if(it->second->floorChangeEast)
+					flags |= FLAG_FLOORCHANGEEAST;
+
+				if(it->second->floorChangeSouth)
+					flags |= FLAG_FLOORCHANGESOUTH;
+
+				if(it->second->floorChangeWest)
+					flags |= FLAG_FLOORCHANGEWEST;
+
+				if(it->second->alwaysOnTop)
+					flags |= FLAG_ALWAYSONTOP;
+
+				if(it->second->useable)
+					flags |= FLAG_USEABLE;
+
+				if(it->second->moveable)
+					flags |= FLAG_MOVEABLE;
+
+				if(it->second->pickupable)
+					flags |= FLAG_PICKUPABLE;
+
+				if(it->second->stackable)
+					flags |= FLAG_STACKABLE;
+
+				f->setFlags(flags);
+				
+				//
+				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
+				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
+
+				if(strlen(it->second->name) > 0)
+					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
+
+				if(strlen(it->second->descr) > 0)
+					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+				//
+
+				if(it->second->moveable || it->second->pickupable) {
+					f->setProps(ITEM_ATTR_WEIGHT, &it->second->weight, sizeof(double));
+				}
+
+				//
+				f->setProps(ITEM_ATTR_SERVERID, &it->second->id, sizeof(unsigned short));
+				f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
+
+				if(strlen(it->second->name) > 0)
+					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
+
+				if(strlen(it->second->descr) > 0)
+					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
+				//
+
+				f->setProps(ITEM_ATTR_ROTATETO, &it->second->rotateTo, sizeof(unsigned short));
+
+				struct decayBlock db;
+				db.decayTo = it->second->decayTo;
+				db.decayTime = it->second->decayTime;
+				f->setProps(ITEM_ATTR_DECAY, &db, sizeof(db));
+			}
 		}
 
 		f->endNode();

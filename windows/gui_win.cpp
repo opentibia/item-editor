@@ -254,6 +254,7 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 		break;
 		case ID_TOOLS_VERIFYITEMS:
 			g_itemsTypes->loadOtb("C:\\tmp.otb");
+			//loadTreeItemTypes(h);
 			break;
 		case ID_TOOLS_FINDMISSINGITEMS:
 			break;
@@ -710,7 +711,7 @@ bool GUIWin::saveCurrentItem(HWND h)
 	if(!getEditTextInt(h, IDC_EDIT_SPEED, iType->speed)){
 		return false;
 	}
-	if(!getEditTextInt(h, IDC_EDIT_READONLYID, iType->readonlyId)){
+	if(!getEditTextInt(h, IDC_EDIT_READONLYID, iType->readOnlyId)){
 		return false;
 	}
 	if(!getEditTextInt(h, IDC_EDIT_ROTATETO, iType->rotateTo)){
@@ -728,7 +729,7 @@ bool GUIWin::saveCurrentItem(HWND h)
 	iType->pickupable = getCheckButton(h, IDC_OPT_PICKUP);
 	iType->rotable = getCheckButton(h, IDC_OPT_ROTABLE);
 	iType->blockProjectile = getCheckButton(h, IDC_OPT_BLOCKPROJECTILE);
-	iType->write1time = getCheckButton(h, IDC_OPT_WRITE1TIME);
+	iType->oneTimeWrite = getCheckButton(h, IDC_OPT_WRITE1TIME);
 
 
 	iType->slot_position = (enum slots_t)getComboValue(h, IDC_COMBO_SLOT);
@@ -803,7 +804,7 @@ void GUIWin::loadItem(HWND h)
 		setEditTextInt(h, IDC_EDIT_ARM, iType->armor);
 		setEditTextInt(h, IDC_EDIT_MAXITEMS, iType->maxItems);
 		setEditTextInt(h, IDC_EDIT_SPEED, iType->speed);
-		setEditTextInt(h, IDC_EDIT_READONLYID, iType->readonlyId);
+		setEditTextInt(h, IDC_EDIT_READONLYID, iType->readOnlyId);
 		setEditTextInt(h, IDC_EDIT_ROTATETO, iType->rotateTo);
 		setEditTextDouble(h, IDC_EDIT_WEIGHT, iType->weight);
 
@@ -815,7 +816,7 @@ void GUIWin::loadItem(HWND h)
 		setCheckButton(h, IDC_OPT_PICKUP, iType->pickupable);
 		setCheckButton(h, IDC_OPT_ROTABLE, iType->rotable);
 		setCheckButton(h, IDC_OPT_BLOCKPROJECTILE, iType->blockProjectile);
-		setCheckButton(h, IDC_OPT_WRITE1TIME, iType->write1time);
+		setCheckButton(h, IDC_OPT_WRITE1TIME, iType->oneTimeWrite);
 
 		setComboValue(h, IDC_COMBO_SLOT, iType->slot_position);
 		setComboValue(h, IDC_COMBO_SKILL, iType->weaponType);
