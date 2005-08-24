@@ -81,7 +81,8 @@ enum itemflags_t {
  FLAG_FLOORCHANGESOUTH = 2048,
  FLAG_FLOORCHANGEWEST = 4096,
  FLAG_ALWAYSONTOP = 8192,
- FLAG_READABLE = 16384
+ FLAG_READABLE = 16384,
+ FLAG_ROTABLE = 32768
 };
 
 struct decayBlock{
@@ -175,14 +176,19 @@ struct xmlProp {
 	char *value;
 };
 
+class SpriteType;
+
 class ItemType
 {
 public:
 	ItemType();
+	ItemType::ItemType(unsigned short id, const SpriteType *stype);
 	~ItemType(){}
 
 	static long minClientId;
 	static long maxClientId;
+	static long minServerId;
+	static long maxServerId;
 	
 	itemgroup_t group;
 	int id;
@@ -194,10 +200,6 @@ public:
 	bool blockProjectile;
 	bool blockPathFind;
 
-	//bool groundtile;
-	//bool container;
-	//bool fluid;
-	//bool isammo;
 	bool alwaysOnTop;
 	bool stackable;
 	bool useable;
@@ -241,20 +243,14 @@ public:
 	int runeMagLevel;
 	
 	//teleport
-	//bool isteleport;
 	
 	//magicfield
-	//bool ismagicfield;
 	int magicfieldtype;
 	
 	//writeable
 	int readOnlyId;
-	
-	//key
-	//bool iskey;
-	
-	//splash
-	//bool issplash;
+
+	bool compareOptions(const SpriteType *stype);
 };
 
 typedef std::map<unsigned short, ItemType*> ItemMap;

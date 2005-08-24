@@ -119,6 +119,7 @@ protected:
 	static LRESULT onSaveOtb(HWND h);
 	static LRESULT onLoadOtb(HWND h);
 	static LRESULT onAutoFindImages(HWND h);
+	static LRESULT onCreateMissing(HWND h);
 	static LRESULT onContextMenu(HWND h, unsigned long lParam);
 	static LRESULT onContextMenuClick(HWND h, unsigned long newgroup);
 
@@ -151,7 +152,7 @@ protected:
 	static bool saveCurrentItem(HWND h);
 	static void loadItem(HWND h);
 	static void updateControls(HWND h);
-	static void loadTreeItemTypes(HWND h);
+	static void loadTreeItemTypes(HWND h, bool notFound = false);
 	static void changeGroup(HWND h, HTREEITEM htItem, HTREEITEM newParent);
 
 	static long curItemClientId;

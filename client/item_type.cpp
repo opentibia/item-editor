@@ -23,6 +23,7 @@
 
 
 #include "item_type.hpp"
+#include "item_sprite.hpp"
 
 const char* readXmlProp(const char* propName, const xmlProp *props);
 extern ItemsTypes *g_itemsTypes;
@@ -30,6 +31,8 @@ extern void getImageHash(unsigned short cid, void* output);
 
 long ItemType::minClientId = 0;
 long ItemType::maxClientId = 0;
+long ItemType::minServerId = 0;
+long ItemType::maxServerId = 0;
 
 ItemType::ItemType()
 {
@@ -100,6 +103,116 @@ ItemType::ItemType()
 	readOnlyId = 0;
 
 }
+
+ItemType::ItemType(unsigned short _id, const SpriteType *stype)
+{
+	group = stype->group;
+	id = _id;
+	clientid = stype->id;
+	foundNewImage = false;
+
+	blockSolid = stype->blockSolid;
+	blockPickupable = stype->blockPickupable;
+	blockProjectile = stype->blockProjectile;
+	blockPathFind = stype->blockPathFind;
+
+	alwaysOnTop = stype->alwaysOnTop;
+	stackable = stype->stackable ;
+	useable = stype->useable;
+	moveable = stype->moveable;
+	pickupable = stype->pickupable;
+	rotable = stype->rotable;
+	readable = stype->readable;
+	speed = stype->speed;
+	
+	
+	rotateTo = 0;
+
+	//xml
+	memset(name, '\0', sizeof(name));
+	memset(descr, '\0', sizeof(descr));
+	memset(sprHash, '\0', sizeof(sprHash));
+	
+	weight = 0.00;
+	decayTo = 0;
+	decayTime = 0;
+	slot_position = SLOT_HAND;
+
+	floorChangeDown = false;
+	floorChangeNorth = false;
+	floorChangeSouth = false;
+	floorChangeEast = false;
+	floorChangeWest = false;
+
+	//ground
+	speed = 0;
+
+	//container
+	maxItems = 8;
+	
+	//weapon
+	amuType = AMU_NONE;
+	weaponType = WEAPON_NONE;
+	shootType = DIST_NONE;
+	attack = 0;
+	defence = 0;
+	
+	//armor
+	armor = 0;
+	
+	//rune
+	runeMagLevel = -1;
+	
+	//magicfield
+	magicfieldtype = 0;
+	
+	//writeable
+	readOnlyId = 0;
+
+}
+
+bool ItemType::compareOptions(const SpriteType *stype)
+{
+	if(!stype)
+		return false;
+
+	switch(stype->group){
+	case ITEM_GROUP_GROUND:
+	case ITEM_GROUP_CONTAINER:
+	case ITEM_GROUP_SPLASH:
+	case ITEM_GROUP_FLUID:
+		if(group != stype->group)
+			return false;
+	}
+	
+	if(blockSolid != stype->blockSolid)
+		return false;
+	
+	if(blockPathFind != stype->blockPathFind)
+		return false;
+
+	if(stackable != stype->stackable)
+		return false;
+
+	if(useable != stype->useable)
+		return false;
+
+	if(moveable != stype->moveable)
+		return false;
+
+	if(pickupable != stype->pickupable)
+		return false;
+
+	if(rotable != stype->rotable)
+		return false;
+
+	if(speed != stype->speed)
+		return false;
+
+	return true;
+}
+
+
 
 ItemsTypes::ItemsTypes()
 {
@@ -262,7 +375,7 @@ bool ItemsTypes::loadFromDat(const char *filename)
 				tmp = fgetc(fp); // 86 -> openable holes, 77-> can be used to go down, 76 can be used to go up, 82 -> stairs up, 79 switch,    
 				if(tmp == 0x58)
 					sType->readable = true;
-				fgetc(fp); // always 4                  
+				fgetc(fp); // always 4
 				break;         
 			case 0x1B:  // walls 2 types of them same material (total 4 pairs)                  
 				break;
@@ -706,6 +819,14 @@ bool ItemsTypes::addType(int id, ItemType* type)
 {
 	if(!getType(id)) {
 		item[id] = type;
+
+		if(id < 20000){
+			if(type->id > ItemType::maxServerId || ItemType::maxServerId == 0)
+				ItemType::maxServerId = type->id;
+
+			if(type->id != 0 && (type->id < ItemType::minServerId || ItemType::minServerId == 0))
+				ItemType::minServerId = type->id;
+		}
 		return true;
 	}
 
@@ -783,6 +904,7 @@ int ItemsTypes::loadOtb(const char *filename)
 							sType->floorChangeWest = ((flags & FLAG_FLOORCHANGEWEST) == FLAG_FLOORCHANGEWEST);
 							sType->alwaysOnTop = ((flags & FLAG_ALWAYSONTOP) == FLAG_ALWAYSONTOP);
 							sType->readable = ((flags & FLAG_READABLE) == FLAG_READABLE);
+							sType->rotable = ((flags & FLAG_ROTABLE) == FLAG_ROTABLE);
 
 							if(p >= data + len) //no attributes
 								break;
@@ -1040,7 +1162,8 @@ int ItemsTypes::saveOtb(const char *filename)
 		switch(it->second->group) {
 			case ITEM_GROUP_GROUND:
 			{
-				saveAttr.push_back(ITEM_ATTR_SPEED);				
+				
+				saveAttr.push_back(ITEM_ATTR_SPEED);
 				break;
 			}			
 			case ITEM_GROUP_CONTAINER:
@@ -1054,7 +1177,6 @@ int ItemsTypes::saveOtb(const char *filename)
 			{				
 				saveAttr.push_back(ITEM_ATTR_SLOT);
 				saveAttr.push_back(ITEM_ATTR_WEAPON);
-
 				break;
 			}
 
@@ -1062,7 +1184,6 @@ int ItemsTypes::saveOtb(const char *filename)
 			{
 				saveAttr.push_back(ITEM_ATTR_SLOT);
 				saveAttr.push_back(ITEM_ATTR_AMU);
-
 				break;
 			}
 
@@ -1077,7 +1198,6 @@ int ItemsTypes::saveOtb(const char *filename)
 			case ITEM_GROUP_RUNE:
 			{
 				saveAttr.push_back(ITEM_ATTR_MAGLEVEL);
-
 				break;
 			}
 
@@ -1168,6 +1288,54 @@ int ItemsTypes::saveOtb(const char *filename)
 		if(it->second->readable)
 			flags |= FLAG_READABLE;
 
+		if(it->second->blockSolid)
+			flags |= FLAG_BLOCK_SOLID;
+		
+		if(it->second->blockProjectile)
+			flags |= FLAG_BLOCK_PROJECTILE;
+		
+		if(it->second->blockPathFind)
+			flags |= FLAG_BLOCK_PATHFIND;
+		
+		if(it->second->blockPickupable)
+			flags |= FLAG_BLOCK_PICKUPABLE;
+		
+		if(it->second->useable)
+			flags |= FLAG_USEABLE;
+		
+		if(it->second->pickupable)
+			flags |= FLAG_PICKUPABLE;
+		
+		if(it->second->moveable)
+			flags |= FLAG_MOVEABLE;
+		
+		if(it->second->stackable)
+			flags |= FLAG_STACKABLE;
+		
+		if(it->second->floorChangeDown)
+			flags |= FLAG_FLOORCHANGEDOWN;
+		
+		if(it->second->floorChangeNorth)
+			flags |= FLAG_FLOORCHANGENORTH;
+		
+		if(it->second->floorChangeEast)
+			flags |= FLAG_FLOORCHANGEEAST;
+		
+		if(it->second->floorChangeSouth)
+			flags |= FLAG_FLOORCHANGESOUTH;
+		
+		if(it->second->floorChangeWest)
+			flags |= FLAG_FLOORCHANGEWEST;
+		
+		if(it->second->alwaysOnTop)
+			flags |= FLAG_ALWAYSONTOP;
+		
+		if(it->second->readable)
+			flags |= FLAG_READABLE;
+
+		if(it->second->rotable)
+			flags |= FLAG_ROTABLE;
+		
 		f->setFlags(flags);
 		
 		std::list<itemattrib_t>::iterator attIt;

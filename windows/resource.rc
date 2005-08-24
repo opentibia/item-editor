@@ -41,9 +41,12 @@ BEGIN
     POPUP "Tools"
     BEGIN
         MENUITEM "Verify items",                ID_TOOLS_VERIFYITEMS
-        MENUITEM "Create missing client items", ID_TOOLS_FINDMISSINGITEMS
+        MENUITEM "Create missing client items", ID_TOOLS_CREATEMISSING
         MENUITEM "Go to item...",               ID_TOOLS_GOTOITEM
+        MENUITEM SEPARATOR
         MENUITEM "Autofind client id",          ID_TOOLS_AUTOFIND
+        MENUITEM "Show not found images",       ID_TOOLS_SHOWNOTFOUN
+        MENUITEM "Show all",                    ID_TOOLS_SHOWALL
     END
     POPUP "Help"
     BEGIN

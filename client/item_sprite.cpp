@@ -45,17 +45,18 @@ SpriteType::SpriteType()
 {
 	id = 0;
 	
-	groundtile = false;
-	blocking = false;
+	group = ITEM_GROUP_NONE;
+	blockSolid = false;
+	blockPickupable = true;
+	blockPathFind = false;
 	alwaysOnTop = false;
-	container = false;
 	stackable = false;
 	useable = false;
-	notMoveable = false;
+	moveable = true;
 	pickupable = false;
-	fluid = false;
 	rotable = false;
-	//blockingProjectile = false;
+	readable = false;
+
 	speed = 0;
 
 	height = 32;
@@ -195,7 +196,6 @@ bool ItemsSprites::loadFromSpr(const char *filename)
 	return true;
 }
 
-// ---------- THIS FUNCTION IS FROM OTSERV PROJECT (Thx)--------------
 bool ItemsSprites::loadFromDat(const char *filename)
 {
 	if(datLoaded)
@@ -235,12 +235,10 @@ bool ItemsSprites::loadFromDat(const char *filename)
 			{
 			case 0x00:
 				//is groundtile
-				fread(&read_short, 2, 1, fp); 
+				fread(&read_short, 2, 1, fp);
 				speed = read_short;
 				sType->speed = speed;
-				sType->groundtile = true;
-				if(speed == 0)
-					sType->blocking = true;
+				sType->group = ITEM_GROUP_GROUND;
 
 				break;
 			case 0x01: // all OnTop
@@ -250,7 +248,7 @@ bool ItemsSprites::loadFromDat(const char *filename)
 				break;
 			case 0x03:
 				//is a container
-				sType->container = true;
+				sType->group = ITEM_GROUP_CONTAINER;
 				break;
 			case 0x04:
 				//is stackable
@@ -261,16 +259,15 @@ bool ItemsSprites::loadFromDat(const char *filename)
 				sType->useable = true;
 				break;
 			case 0x0A:
-				//is multitype !!! wrong definition (only water splash on floor)
-				sType->fluid = true;
+				sType->group = ITEM_GROUP_SPLASH;
 				break;
 			case 0x0B:
 				//is blocking
-				sType->blocking = true;
+				sType->blockSolid = true;
 				break;
 			case 0x0C:
-				//is on moveable
-				sType->notMoveable = true;
+				//is no moveable
+				sType->moveable = false;
 				break;
 			case 0x0F:
 				//can be equipped
@@ -286,12 +283,13 @@ bool ItemsSprites::loadFromDat(const char *filename)
 			case 0x06: // ladder up (id 1386)   why a group for just 1 item ???   
 				break;
 			case 0x09: //can contain fluids
-				sType->fluid = true;
+				sType->group = ITEM_GROUP_FLUID;
 				break;
 			case 0x0D: // blocks missiles (walls, magic wall etc)
-				//sType->blockingProjectile = true;
+				sType->blockProjectile = true;
 				break;
 			case 0x0E: // blocks monster movement (flowers, parcels etc)
+				sType->blockPathFind = true;
 				break;
 			case 0x11: // can see what is under (ladder holes, stairs holes etc)
 				break;
@@ -303,14 +301,18 @@ bool ItemsSprites::loadFromDat(const char *filename)
 			case 0x14: // player color templates
 				break;
 			case 0x07: // writtable objects
+				//sType->group = ITEM_GROUP_WRITEABLE;
+				sType->readable = true;
 				fgetc(fp); //max characters that can be written in it (0 unlimited)
 				fgetc(fp); //max number of  newlines ? 0, 2, 4, 7
 				break;
 			case 0x08: // writtable objects that can't be edited 
+				sType->readable = true;
 				fgetc(fp); //always 0 max characters that can be written in it (0 unlimited) 
 				fgetc(fp); //always 4 max number of  newlines ? 
 				break;
 			case 0x13: // mostly blocking items, but also items that can pile up in level (boxes, chairs etc)
+				sType->blockPickupable = false;
 				fgetc(fp); //always 8
 				fgetc(fp); //always 0
 				break;
@@ -322,8 +324,11 @@ bool ItemsSprites::loadFromDat(const char *filename)
 				//7.4 (change no data ?? ) action that can be performed (doors-> open, hole->open, book->read) not all included ex. wall torches
 				break;  
 			case 0x1D:  // line spot ...
-				fgetc(fp); // 86 -> openable holes, 77-> can be used to go down, 76 can be used to go up, 82 -> stairs up, 79 switch,    
-				fgetc(fp); // always 4                  
+				int tmp;
+				tmp = fgetc(fp); // 86 -> openable holes, 77-> can be used to go down, 76 can be used to go up, 82 -> stairs up, 79 switch,    
+				if(tmp == 0x58)
+					sType->readable = true;
+				fgetc(fp); // always 4
 				break;         
 			case 0x1B:  // walls 2 types of them same material (total 4 pairs)                  
 				break;

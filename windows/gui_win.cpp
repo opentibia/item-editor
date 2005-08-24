@@ -298,7 +298,14 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 			break;
 		case ID_TOOLS_VERIFYITEMS:
 			break;
-		case ID_TOOLS_FINDMISSINGITEMS:
+		case ID_TOOLS_CREATEMISSING:
+			return onCreateMissing(h);
+			break;
+		case ID_TOOLS_SHOWNOTFOUN:
+			loadTreeItemTypes(h, true);
+			break;
+		case ID_TOOLS_SHOWALL:
+			loadTreeItemTypes(h);
 			break;
 		case ID_HELP_ABOUT:
 			break;
@@ -576,10 +583,11 @@ LRESULT GUIWin::onAutoFindImages(HWND h)
 		ItemMap::iterator it;
 		for(it = g_itemsTypes->getTypes(); it != g_itemsTypes->getEnd(); it++){
 			if(it->second->foundNewImage == false && memcmp(hash, it->second->sprHash, 16) == 0){
-				it->second->foundNewImage = true;
-				it->second->clientid = i;
-				n++;
-				//break;
+				if(it->second->compareOptions(g_itemsSprites->getSprite(i))){
+					it->second->foundNewImage = true;
+					it->second->clientid = i;
+					n++;
+				}
 			}
 		}
 	}
@@ -592,8 +600,41 @@ LRESULT GUIWin::onAutoFindImages(HWND h)
 	autoFindPerformed = true;
 	loadTreeItemTypes(h);
 
-	loadItem(h);
-	updateControls(h);
+	return TRUE;
+}
+
+LRESULT GUIWin::onCreateMissing(HWND h)
+{
+	if(!saveCurrentItem(h)){
+		return TRUE;
+	}
+
+	if(ItemType::minServerId == 0 || ItemType::maxServerId == 0){
+		MessageBox(h, "Wrong items set.", NULL, MB_OK | MB_ICONERROR);
+		return TRUE;
+	}
+
+	char *usedSprites;
+	usedSprites = new char[SpriteType::maxClientId + 1];
+	memset(usedSprites, 0, SpriteType::maxClientId + 1);
+	ItemMap::iterator it;
+	for(it = g_itemsTypes->getTypes(); it != g_itemsTypes->getEnd(); it++){
+		if(it->second->clientid >= SpriteType::minClientId && it->second->clientid <= SpriteType::maxClientId){
+			usedSprites[it->second->clientid] = 1;
+		}
+	}
+
+	ItemType *new_it;
+	int n = ItemType::maxServerId + 1;
+	for(int i = SpriteType::minClientId; i <= SpriteType::maxClientId; i++){
+		if(usedSprites[i] == 0){
+			new_it = new ItemType(n, g_itemsSprites->getSprite(i));
+			g_itemsTypes->addType(n, new_it);
+			n++;
+		}
+	}
+
+	loadTreeItemTypes(h);
 	return TRUE;
 }
 
@@ -921,7 +962,7 @@ bool GUIWin::saveCurrentItem(HWND h)
 	getItemTypeName(iType, name);
 
 	itemInfo.pszText = name;
-	itemInfo.cchTextMax = strlen(iType->name);
+	itemInfo.cchTextMax = strlen(name);
 	SendMessage(m_hwndTree, TVM_SETITEM, 0, (long)&itemInfo);
 
 	return true;
@@ -1200,7 +1241,7 @@ void GUIWin::setControlState(HWND h, unsigned long flagsEdit, unsigned long flag
 	EnableWindow(GetDlgItem(h, IDC_SAVE_ITEM),getFlagState(flagsButton, IDC_SAVE_ITEM_FLAG));
 }
 
-void GUIWin::loadTreeItemTypes(HWND h)
+void GUIWin::loadTreeItemTypes(HWND h, bool notFound)
 {
 	curItem = NULL;
 	curItemServerId = 0;
@@ -1211,6 +1252,10 @@ void GUIWin::loadTreeItemTypes(HWND h)
 	//load itemType map
 	ItemMap::iterator it;
 	for(it = g_itemsTypes->getTypes(); it != g_itemsTypes->getEnd(); it++){
+		if(notFound){
+			if(it->second->foundNewImage == true)
+				continue;
+		}
 		insertTreeItemType(m_hwndTree, it->second);
 	}
 	loadItem(h);

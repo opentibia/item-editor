@@ -22,6 +22,7 @@
 #define __OTITEMEDITOR_ITEM_SPRITE_H__
 
 #include <map>
+#include "item_type.hpp"
 
 typedef void* InternalSprite;
 
@@ -49,16 +50,21 @@ public:
 	unsigned short id;
 	
 	//item info
-	bool groundtile;
-	bool blocking;
+	itemgroup_t group;
+	
+	bool blockSolid;
+	bool blockPickupable;
+	bool blockProjectile;
+	bool blockPathFind;
+
 	bool alwaysOnTop;
-	bool container;
 	bool stackable;
 	bool useable;
-	bool notMoveable;
+	bool moveable;
 	bool pickupable;
-	bool fluid;
 	bool rotable;
+	bool readable;
+
 	int speed;
 
 	//sprite info
@@ -94,8 +100,7 @@ public:
 	InternalSprite getSpriteInternalFormat(unsigned short item_id, unsigned short frame);
 
 	SpriteType* getSprite(int id);
-	//const SpriteType& operator[](int id);
-
+	
 protected:
 	bool datLoaded;
 	bool sprLoaded;
