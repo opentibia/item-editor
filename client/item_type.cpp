@@ -1022,98 +1022,36 @@ int ItemsTypes::saveOtb(const char *filename)
 
 		if(strlen(it->second->descr) > 0)
 			saveAttr.push_back(ITEM_ATTR_DESCR);
+
+		if(it->second->moveable || it->second->pickupable) {
+			saveAttr.push_back(ITEM_ATTR_WEIGHT);
+		}
 		
+		if(it->second->decayTo != 0) {
+			saveAttr.push_back(ITEM_ATTR_DECAY);
+		}
+
+		if(it->second->rotateTo != 0) {
+			saveAttr.push_back(ITEM_ATTR_ROTATETO);
+		}
+
 		saveAttr.push_back(ITEM_ATTR_SPRITEHASH);
 
 		switch(it->second->group) {
 			case ITEM_GROUP_GROUND:
 			{
-				if(it->second->blockSolid)
-					flags |= FLAG_BLOCK_SOLID;
-
-				if(it->second->blockProjectile)
-					flags |= FLAG_BLOCK_PROJECTILE;
-
-				if(it->second->blockPathFind)
-					flags |= FLAG_BLOCK_PATHFIND;
-
-				if(it->second->blockPickupable)
-					flags |= FLAG_BLOCK_PICKUPABLE;
-
-				if(it->second->useable)
-					flags |= FLAG_USEABLE;
-
-				if(it->second->floorChangeDown)
-					flags |= FLAG_FLOORCHANGEDOWN;
-
-				if(it->second->floorChangeNorth)
-					flags |= FLAG_FLOORCHANGENORTH;
-
-				if(it->second->floorChangeEast)
-					flags |= FLAG_FLOORCHANGEEAST;
-
-				if(it->second->floorChangeSouth)
-					flags |= FLAG_FLOORCHANGESOUTH;
-
-				if(it->second->floorChangeWest)
-					flags |= FLAG_FLOORCHANGEWEST;
-
-				if(it->second->alwaysOnTop)
-					flags |= FLAG_ALWAYSONTOP;
-
-				if(it->second->readable)
-					flags |= FLAG_READABLE;
-
-				saveAttr.push_back(ITEM_ATTR_SPEED);
-
-				if(it->second->decayTo != 0) {					
-					saveAttr.push_back(ITEM_ATTR_DECAY);
-				}
-				
+				saveAttr.push_back(ITEM_ATTR_SPEED);				
 				break;
 			}			
 			case ITEM_GROUP_CONTAINER:
 			{
-				if(it->second->useable)
-					flags |= FLAG_USEABLE;
-
-				if(it->second->pickupable)
-					flags |= FLAG_PICKUPABLE;
-
-				if(it->second->moveable)
-					flags |= FLAG_MOVEABLE;
-
-				if(it->second->readable)
-					flags |= FLAG_READABLE;
-
-				saveAttr.push_back(ITEM_ATTR_WEIGHT);
-				saveAttr.push_back(ITEM_ATTR_MAXITEMS);
 				saveAttr.push_back(ITEM_ATTR_SLOT);
-
-				if(it->second->decayTo != 0) {
-					saveAttr.push_back(ITEM_ATTR_DECAY);
-				}
+				saveAttr.push_back(ITEM_ATTR_MAXITEMS);
 
 				break;
 			}
 			case ITEM_GROUP_WEAPON:
-			{
-				if(it->second->useable)
-					flags |= FLAG_MOVEABLE;
-
-				if(it->second->pickupable)
-					flags |= FLAG_PICKUPABLE;
-
-				if(it->second->moveable)
-					flags |= FLAG_MOVEABLE;
-
-				if(it->second->stackable)
-					flags |= FLAG_STACKABLE;
-
-				if(it->second->readable)
-					flags |= FLAG_READABLE;
-				
-				saveAttr.push_back(ITEM_ATTR_WEIGHT);
+			{				
 				saveAttr.push_back(ITEM_ATTR_SLOT);
 				saveAttr.push_back(ITEM_ATTR_WEAPON);
 
@@ -1122,22 +1060,6 @@ int ItemsTypes::saveOtb(const char *filename)
 
 			case ITEM_GROUP_AMMUNITION:
 			{
-				if(it->second->useable)
-					flags |= FLAG_MOVEABLE;
-
-				if(it->second->pickupable)
-					flags |= FLAG_PICKUPABLE;
-
-				if(it->second->moveable)
-					flags |= FLAG_MOVEABLE;
-
-				if(it->second->stackable)
-					flags |= FLAG_STACKABLE;
-
-				if(it->second->readable)
-					flags |= FLAG_READABLE;
-
-				saveAttr.push_back(ITEM_ATTR_WEIGHT);
 				saveAttr.push_back(ITEM_ATTR_SLOT);
 				saveAttr.push_back(ITEM_ATTR_AMU);
 
@@ -1146,18 +1068,7 @@ int ItemsTypes::saveOtb(const char *filename)
 
 			case ITEM_GROUP_ARMOR:
 			{
-				if(it->second->useable)
-					flags |= FLAG_MOVEABLE;
-
-				if(it->second->pickupable)
-					flags |= FLAG_PICKUPABLE;
-
-				if(it->second->moveable)
-					flags |= FLAG_MOVEABLE;
-
-				if(it->second->readable)
-					flags |= FLAG_READABLE;
-
+				saveAttr.push_back(ITEM_ATTR_SLOT);
 				saveAttr.push_back(ITEM_ATTR_ARMOR);
 
 				break;
@@ -1165,37 +1076,18 @@ int ItemsTypes::saveOtb(const char *filename)
 
 			case ITEM_GROUP_RUNE:
 			{
-				if(it->second->useable)
-					flags |= FLAG_MOVEABLE;
-
-				if(it->second->pickupable)
-					flags |= FLAG_PICKUPABLE;
-
-				if(it->second->moveable)
-					flags |= FLAG_MOVEABLE;
-
-				if(it->second->readable)
-					flags |= FLAG_READABLE;
-
 				saveAttr.push_back(ITEM_ATTR_MAGLEVEL);
-				saveAttr.push_back(ITEM_ATTR_WEIGHT);
 
 				break;
 			}
 
 			case ITEM_GROUP_TELEPORT:
 			{
-				if(it->second->readable)
-					flags |= FLAG_READABLE;
-
 				break;
 			}
 
 			case ITEM_GROUP_MAGICFIELD:
 			{
-				if(it->second->readable)
-					flags |= FLAG_READABLE;
-				
 				saveAttr.push_back(ITEM_ATTR_MAGFIELDTYPE);
 
 				break;
@@ -1203,18 +1095,6 @@ int ItemsTypes::saveOtb(const char *filename)
 
 			case ITEM_GROUP_WRITEABLE:
 			{
-				if(it->second->useable)
-					flags |= FLAG_MOVEABLE;
-
-				if(it->second->pickupable)
-					flags |= FLAG_PICKUPABLE;
-
-				if(it->second->moveable)
-					flags |= FLAG_MOVEABLE;
-
-				if(it->second->readable)
-					flags |= FLAG_READABLE;
-
 				if(it->second->readOnlyId) {
 					saveAttr.push_back(ITEM_ATTR_WRITEABLE);
 				}
@@ -1224,114 +1104,69 @@ int ItemsTypes::saveOtb(const char *filename)
 
 			case ITEM_GROUP_KEY:
 			{
-				if(it->second->useable)
-					flags |= FLAG_MOVEABLE;
-
-				if(it->second->pickupable)
-					flags |= FLAG_PICKUPABLE;
-
-				if(it->second->moveable)
-					flags |= FLAG_MOVEABLE;
-
-				if(it->second->readable)
-					flags |= FLAG_READABLE;
-
 				break;
 			}
 
 			case ITEM_GROUP_SPLASH:
 			{
-				if(it->second->blockSolid)
-					flags |= FLAG_BLOCK_SOLID;
-
-				if(it->second->readable)
-					flags |= FLAG_READABLE;
-
-				if(it->second->decayTo != 0) {
-					saveAttr.push_back(ITEM_ATTR_DECAY);
-				}
-
 				break;
 			}
 
 			case ITEM_GROUP_FLUID:
 			{
-				if(it->second->blockSolid)
-					flags |= FLAG_BLOCK_SOLID;
-
-				if(it->second->useable)
-					flags |= FLAG_MOVEABLE;
-
-				if(it->second->readable)
-					flags |= FLAG_READABLE;
-
-				if(it->second->decayTo != 0) {
-					saveAttr.push_back(ITEM_ATTR_DECAY);
-				}
-
 				break;
 			}
 
 			case ITEM_GROUP_NONE:
 			{
-				if(it->second->blockSolid)
-					flags |= FLAG_BLOCK_SOLID;
-
-				if(it->second->blockProjectile)
-					flags |= FLAG_BLOCK_PROJECTILE;
-
-				if(it->second->blockPathFind)
-					flags |= FLAG_BLOCK_PATHFIND;
-
-				if(it->second->blockPickupable)
-					flags |= FLAG_BLOCK_PICKUPABLE;
-
-				if(it->second->useable)
-					flags |= FLAG_USEABLE;
-
-				if(it->second->pickupable)
-					flags |= FLAG_PICKUPABLE;
-
-				if(it->second->moveable)
-					flags |= FLAG_MOVEABLE;
-
-				if(it->second->stackable)
-					flags |= FLAG_STACKABLE;
-
-				if(it->second->floorChangeDown)
-					flags |= FLAG_FLOORCHANGEDOWN;
-
-				if(it->second->floorChangeNorth)
-					flags |= FLAG_FLOORCHANGENORTH;
-
-				if(it->second->floorChangeEast)
-					flags |= FLAG_FLOORCHANGEEAST;
-
-				if(it->second->floorChangeSouth)
-					flags |= FLAG_FLOORCHANGESOUTH;
-
-				if(it->second->floorChangeWest)
-					flags |= FLAG_FLOORCHANGEWEST;
-
-				if(it->second->alwaysOnTop)
-					flags |= FLAG_ALWAYSONTOP;
-
-				if(it->second->readable)
-					flags |= FLAG_READABLE;
-
-				if(it->second->moveable || it->second->pickupable) {
-					saveAttr.push_back(ITEM_ATTR_WEIGHT);
-				}
-
-				if(it->second->rotateTo != 0) {
-					saveAttr.push_back(ITEM_ATTR_ROTATETO);
-				}
-
-				if(it->second->decayTo != 0) {
-					saveAttr.push_back(ITEM_ATTR_DECAY);
-				}
+				break;
 			}
 		}
+
+		if(it->second->blockSolid)
+			flags |= FLAG_BLOCK_SOLID;
+
+		if(it->second->blockProjectile)
+			flags |= FLAG_BLOCK_PROJECTILE;
+
+		if(it->second->blockPathFind)
+			flags |= FLAG_BLOCK_PATHFIND;
+
+		if(it->second->blockPickupable)
+			flags |= FLAG_BLOCK_PICKUPABLE;
+
+		if(it->second->useable)
+			flags |= FLAG_USEABLE;
+
+		if(it->second->pickupable)
+			flags |= FLAG_PICKUPABLE;
+
+		if(it->second->moveable)
+			flags |= FLAG_MOVEABLE;
+
+		if(it->second->stackable)
+			flags |= FLAG_STACKABLE;
+
+		if(it->second->floorChangeDown)
+			flags |= FLAG_FLOORCHANGEDOWN;
+
+		if(it->second->floorChangeNorth)
+			flags |= FLAG_FLOORCHANGENORTH;
+
+		if(it->second->floorChangeEast)
+			flags |= FLAG_FLOORCHANGEEAST;
+
+		if(it->second->floorChangeSouth)
+			flags |= FLAG_FLOORCHANGESOUTH;
+
+		if(it->second->floorChangeWest)
+			flags |= FLAG_FLOORCHANGEWEST;
+
+		if(it->second->alwaysOnTop)
+			flags |= FLAG_ALWAYSONTOP;
+
+		if(it->second->readable)
+			flags |= FLAG_READABLE;
 
 		f->setFlags(flags);
 		
