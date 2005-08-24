@@ -93,7 +93,8 @@ public:
 	
 	InternalSprite getSpriteInternalFormat(unsigned short item_id, unsigned short frame);
 
-	const SpriteType& operator[](int id);
+	SpriteType* getSprite(int id);
+	//const SpriteType& operator[](int id);
 
 protected:
 	bool datLoaded;

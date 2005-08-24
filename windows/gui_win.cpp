@@ -50,17 +50,19 @@ void getImageHash(unsigned short cid, void*output)
 	MD5_CTX m_md5;
 	unsigned long spriteBase;
 	unsigned long spriteSize;
-	const SpriteType& it = (*g_itemsSprites)[cid];
+	const SpriteType *it = g_itemsSprites->getSprite(cid);
+	if(!it)
+		return;
 
-	spriteSize = it.width*it.height*it.blendframes;
+	spriteSize = it->width*it->height*it->blendframes;
 	spriteBase = 0;
 	
 	//hash sprite
 	MD5Init(&m_md5, 0);
-	for(long frame = 0; frame < it.blendframes; frame++) {
-		for(long cy = 0; cy < it.height; cy++) {
-			for(long cx = 0; cx < it.width; cx++) {
-				unsigned long frameindex = spriteBase + cx + cy*it.width + frame*it.width*it.height;
+	for(long frame = 0; frame < it->blendframes; frame++) {
+		for(long cy = 0; cy < it->height; cy++) {
+			for(long cx = 0; cx < it->width; cx++) {
+				unsigned long frameindex = spriteBase + cx + cy*it->width + frame*it->width*it->height;
 				InternalSprite sprite = g_itemsSprites->getSpriteInternalFormat(cid,frameindex);
 				if(sprite)
 					MD5Update(&m_md5, (const unsigned char*)sprite, 32*32*4);
@@ -427,6 +429,7 @@ LRESULT GUIWin::onClientIdChange(HWND h, HWND hEdit)
 	long len = SendMessage(hEdit, WM_GETTEXTLENGTH, 0, 0);
 	tmp = new char[len+1];
 	SendMessage(hEdit, WM_GETTEXT , len, (LPARAM)tmp);
+	tmp[len] = 0;
 	if(sscanf(tmp, "%d", &new_id) == 1){
 		if(new_id <= SpriteType::maxClientId && new_id >= SpriteType::minClientId){
 			curItemClientId = new_id;
@@ -1274,19 +1277,21 @@ GUIDraw::~GUIDraw(){
 bool GUIDraw::drawSprite(HDC desthdc, long x, long y, long maxx, long maxy, unsigned long itemid, bool drawFrame /*= false*/)
 {
 
-	const SpriteType& it = (*g_itemsSprites)[itemid];
+	const SpriteType *it = g_itemsSprites->getSprite(itemid);
+	if(!it)
+		return false;
 
 	unsigned long spriteBase;
 	unsigned long spriteSize;
 
-	spriteSize = it.width*it.height*it.blendframes;
+	spriteSize = it->width*it->height*it->blendframes;
 	spriteBase = 0;
 	
 	//draw sprite
-	for(long frame = 0; frame < it.blendframes; frame++) {
-		for(long cy = 0; cy < it.height; cy++) {
-			for(long cx = 0; cx < it.width; cx++) {
-				unsigned long frameindex = spriteBase + cx + cy*it.width + frame*it.width*it.height;
+	for(long frame = 0; frame < it->blendframes; frame++) {
+		for(long cy = 0; cy < it->height; cy++) {
+			for(long cx = 0; cx < it->width; cx++) {
+				unsigned long frameindex = spriteBase + cx + cy*it->width + frame*it->width*it->height;
 				InternalSprite sprite = g_itemsSprites->getSpriteInternalFormat(itemid,frameindex);
 				HBITMAP itembmp = getBitmap(sprite);
 				if(sprite){

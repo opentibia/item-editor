@@ -824,7 +824,7 @@ int ItemsTypes::loadOtb(const char *filename)
 							}
 							case ITEM_ATTR_NAME:
 							{
-								if(datalen > sizeof(sType->name))
+								if(datalen >= sizeof(sType->name))
 									return ERROR_INVALID_FORMAT;
 
 								memcpy(sType->name, p, datalen);
@@ -833,7 +833,7 @@ int ItemsTypes::loadOtb(const char *filename)
 							}
 							case ITEM_ATTR_DESCR:
 							{
-								if(datalen > sizeof(sType->descr))
+								if(datalen >= sizeof(sType->descr))
 									return ERROR_INVALID_FORMAT;
 
 								memcpy(sType->descr, p, datalen);

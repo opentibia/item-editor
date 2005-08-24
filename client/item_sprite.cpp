@@ -437,11 +437,12 @@ InternalSprite ItemsSprites::getSpriteInternalFormat(unsigned short item_id, uns
 	}	
 }
 
-const SpriteType& ItemsSprites::operator[](int id)
+//const SpriteType& ItemsSprites::operator[](int id)
+SpriteType* ItemsSprites::getSprite(int id)
 {
 	ItemMap::iterator it = item.find(id);
 	if ((it != item.end()) && (it->second != NULL))
-		return *it->second;
+		return it->second;
 	   
-	return m_dummy;
+	return NULL;
 }
