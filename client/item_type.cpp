@@ -61,6 +61,15 @@ ItemType::ItemType()
 	
 	rotateTo = 0;
 
+	//
+	//canWalkThrough = false;
+	//ladderUp = false;
+	//canSeeThrough = false;
+	//wallObject = false;
+	miniMapColor = 0;
+	subParam07 = 0;
+	subParam08 = 0;
+
 	//xml
 	memset(name, '\0', sizeof(name));
 	memset(descr, '\0', sizeof(descr));
@@ -280,116 +289,187 @@ bool ItemsTypes::loadFromDat(const char *filename)
 		{                                                            
 			switch (optbyte)
 			{
-			case 0x00:
-				//is groundtile
-				fread(&read_short, 2, 1, fp); 
-				speed = read_short;
-				sType->speed = speed;
-				sType->group = ITEM_GROUP_GROUND;
-				break;
+				case 0x00:
+				{
+					//is groundtile
+					fread(&read_short, 2, 1, fp); 
+					speed = read_short;
+					sType->speed = speed;
+					sType->group = ITEM_GROUP_GROUND;
+					break;
+				}
+				case 0x01: // all OnTop
+				{
+					sType->alwaysOnTop = true;
+					break;
+				}
+				case 0x02: // can walk trough (open doors, arces, bug pen fence ??)
+				{
+					//sType->canWalkThrough = true;
+					break;
+				}
+				case 0x03: //is a container
+				{
+					sType->group = ITEM_GROUP_CONTAINER;
+					break;
+				}
+				case 0x04: //is stackable
+				{
+					sType->stackable = true;
+					break;
+				}
+				case 0x05: //is useable
+				{
+					sType->useable = true;
+					break;
+				}
+				case 0x0A: //liquid with states
+				{
+					sType->group = ITEM_GROUP_SPLASH;
+					break;
+				}
+				case 0x0B: //is blocking
+				{
+					sType->blockSolid = true;
+					break;
+				}
+				case 0x0C: //is not moveable
+				{
+					sType->moveable = false;
+					break;
+				}
+				case 0x0F: //can be equipped
+				{
+					sType->pickupable = true;
+					break;
+				}
+				case 0x10: //makes light (skip 4 bytes)
+				{
+					//sType->makeLight = true;
 
-			case 0x01: // all OnTop
-				sType->alwaysOnTop = true;
-				break;
-			case 0x02: // can walk trough (open doors, arces, bug pen fence ??)
-				break;
-			case 0x03:
-				//is a container
-				sType->group = ITEM_GROUP_CONTAINER;
-				break;
-			case 0x04:
-				//is stackable
-				sType->stackable = true;
-				break;
-			case 0x05:
-				//is useable
-				sType->useable = true;
-				break;
-			case 0x0A:
-				sType->group = ITEM_GROUP_SPLASH;
-				break;
-			case 0x0B:
-				//is blocking
-				sType->blockSolid = true;
-				break;
-			case 0x0C:
-				//is not moveable
-				sType->moveable = false;
-				break;
-			case 0x0F:
-				//can be equipped
-				sType->pickupable = true;
-				break;
-			case 0x10:
-				//makes light (skip 4 bytes)
-				fgetc(fp); //number of tiles around
-				fgetc(fp); // always 0
-				fgetc(fp); // 215 items, 208 fe non existant items other values
-				fgetc(fp); // always 0
-				break;
-			case 0x06: // ladder up (id 1386)   why a group for just 1 item ???   
-				break;
-			case 0x09: //can contain fluids
-				sType->group = ITEM_GROUP_FLUID;
-				break;
-			case 0x0D: // blocks missiles (walls, magic wall etc)
-				sType->blockProjectile = true;
-				break;
-			case 0x0E: // blocks monster movement (flowers, parcels etc)
-				sType->blockPathFind = true;
-				break;
-			case 0x11: // can see what is under (ladder holes, stairs holes etc)
-				break;
-			case 0x12: // ground tiles that don't cause level change
-				//sType->floorchange = false;
-				break;
-			case 0x18: // cropses that don't decay
-				break;
-			case 0x14: // player color templates
-				break;
-			case 0x07: // writtable objects
-				sType->group = ITEM_GROUP_WRITEABLE;
-				sType->readable = true;
-				fgetc(fp); //max characters that can be written in it (0 unlimited)
-				fgetc(fp); //max number of  newlines ? 0, 2, 4, 7
-				break;
-			case 0x08: // writtable objects that can't be edited
-				sType->readable = true;
-				fgetc(fp); //always 0 max characters that can be written in it (0 unlimited) 
-				fgetc(fp); //always 4 max number of  newlines ? 
-				break;
-			case 0x13: // mostly blocking items, but also items that can pile up in level (boxes, chairs etc)
-				sType->blockPickupable = false;
-				fgetc(fp); //always 8
-				fgetc(fp); //always 0
-				break;
-			case 0x16: // ground, blocking items and mayby some more 
-				fgetc(fp); //12, 186, 210, 129 and other.. 
-				fgetc(fp); //always 0
-				break;
-			case 0x1A: 
-				//7.4 (change no data ?? ) action that can be performed (doors-> open, hole->open, book->read) not all included ex. wall torches
-				break;  
-			case 0x1D:  // line spot ...
-				int tmp;
-				tmp = fgetc(fp); // 86 -> openable holes, 77-> can be used to go down, 76 can be used to go up, 82 -> stairs up, 79 switch,    
-				if(tmp == 0x58)
+					unsigned short radius;
+					fread(&radius, sizeof(radius), sizeof(radius), fp);
+					//sType->lightRadius = radius;
+
+					unsigned short color;
+					fread(&color, sizeof(color), sizeof(color), fp); // 215 items, 208 fe non existant items other values.
+					//sType->lightColor = color;
+
+					break;
+				}
+				case 0x06: // ladder up (id 1386)   why a group for just 1 item ???   
+				{
+					//sType->ladderUp = true;
+					break;
+				}
+				case 0x09: //can contain fluids
+				{
+					sType->group = ITEM_GROUP_FLUID;
+					break;
+				}
+				case 0x0D: //"visibility"- for drawing visible view
+				{
+					sType->blockProjectile = true;
+					break;
+				}
+				case 0x0E: // blocks monster movement (flowers, parcels etc)
+				{
+					sType->blockPathFind = true;
+					break;
+				}
+				case 0x11: // can see what is under (ladder holes, stairs holes etc)
+				{
+					//sType->canSeeThrough = true;
+					break;
+				}
+				case 0x12: // ground tiles that don't cause level change
+				{
+					//sType->floorchange = false;
+					break;
+				}
+				case 0x18: //draw with height offset for all parts (2x2) of the sprite
+				{
+					break;
+				}
+				case 0x14: //sprite-drawing related
+				{
+					//sType->hasParameter14 = true;
+					break;
+				}
+				case 0x07: // writtable objects
+				{
+					sType->group = ITEM_GROUP_WRITEABLE;
 					sType->readable = true;
-				fgetc(fp); // always 4
-				break;         
-			case 0x1B:  // walls 2 types of them same material (total 4 pairs)                  
-				break;
-			case 0x19:  // wall items                 
-				break;    
-			case 0x17:  // seems like decorables with 4 states of turning (exception first 4 are unique statues)                 
-				sType->rotable = true;
-				break;
-			case 0x1C:  // ?? ...                 
-				break;            
-			default:
-				//std::cout << "unknown byte: " << (unsigned short)optbyte << std::endl;
-				return false;
-				break;
+
+					unsigned short us;
+					fread(&us, sizeof(us), 1, fp); //unknown, values like 80, 200, 512, 1024, 2000
+					sType->subParam07 = us;
+					break;
+				}
+				case 0x08: // writtable objects that can't be edited
+				{
+					sType->readable = true;
+					unsigned short us;
+					fread(&us, sizeof(us), 1, fp); //unknown, all have the value 1024
+					sType->subParam08 = us;
+					break;
+				}
+				case 0x13: //items that have height
+				{
+					sType->blockPickupable = false;
+
+					unsigned short heightdisp;
+					fread(&heightdisp, sizeof(heightdisp), 1, fp);
+					//sType->heightdisplacement = heightdisp;
+					break;
+				}
+				case 0x16:  //minimap drawing
+				{
+					unsigned short color;
+					fread(&color, sizeof(color), 1, fp);
+					sType->miniMapColor = color;
+
+					break;
+				}
+				case 0x1A: //unknown
+				{
+					//sType->hasParameter1A = true;
+					break;  
+				}
+				case 0x1D:  // line spot ...
+				{
+					int tmp;
+					tmp = fgetc(fp); // 86 -> openable holes, 77-> can be used to go down, 76 can be used to go up, 82 -> stairs up, 79 switch,    
+					if(tmp == 0x58)
+						sType->readable = true;
+					fgetc(fp); // always 4
+					break;         
+				}
+				case 0x1B:  // walls 2 types of them same material (total 4 pairs)                  
+				{
+					break;
+				}
+				case 0x19:  // wall items
+				{
+					//sType->wallObject = true;
+					break;    
+				}
+				case 0x17:  // seems like decorables with 4 states of turning (exception first 4 are unique statues)                 
+				{
+					sType->rotable = true;
+					break;
+				}
+				case 0x1C: // monster has animation even when iddle (rot, wasp, slime, fe)
+				{
+					//sType->hasAnimation = true;
+					break;            
+				}
+				default:
+				{
+					//std::cout << "unknown byte: " << (unsigned short)optbyte << std::endl;
+					return false;
+					break;
+				}
 			}
 		}
 
@@ -1095,10 +1175,38 @@ int ItemsTypes::loadOtb(const char *filename)
 								break;
 							}
 
+							case ITEM_ATTR_MINIMAPCOLOR:
+							{
+								if(datalen != sizeof(unsigned short))
+									return ERROR_INVALID_FORMAT;
+
+								memcpy(&sType->miniMapColor, p, sizeof(unsigned short));
+								break;
+							}
+							case ITEM_ATTR_07:
+							{
+								if(datalen != sizeof(unsigned short))
+									return ERROR_INVALID_FORMAT;
+
+								memcpy(&sType->subParam07, p, sizeof(unsigned short));
+
+								break;
+							}
+							case ITEM_ATTR_08:
+							{
+								if(datalen != sizeof(unsigned short))
+									return ERROR_INVALID_FORMAT;
+
+								memcpy(&sType->subParam08, p, sizeof(unsigned short));
+
+								break;
+							}
+
 							default:
 								delete sType;
 								return ERROR_INVALID_FORMAT;
 						}
+
 						
 						p+= datalen;
 						break;
@@ -1159,10 +1267,19 @@ int ItemsTypes::saveOtb(const char *filename)
 
 		saveAttr.push_back(ITEM_ATTR_SPRITEHASH);
 
+		if(it->second->subParam07 != 0) {
+			saveAttr.push_back(ITEM_ATTR_07);
+		}
+
+		if(it->second->subParam08 != 0) {
+			saveAttr.push_back(ITEM_ATTR_08);
+		}
+
+		saveAttr.push_back(ITEM_ATTR_MINIMAPCOLOR);
+
 		switch(it->second->group) {
 			case ITEM_GROUP_GROUND:
-			{
-				
+			{				
 				saveAttr.push_back(ITEM_ATTR_SPEED);
 				break;
 			}			
@@ -1443,6 +1560,21 @@ int ItemsTypes::saveOtb(const char *filename)
 				case ITEM_ATTR_SPRITEHASH:
 				{
 					f->setProps(ITEM_ATTR_SPRITEHASH, &it->second->sprHash, sizeof(it->second->sprHash));
+					break;
+				}
+				case ITEM_ATTR_MINIMAPCOLOR:
+				{
+					f->setProps(ITEM_ATTR_MINIMAPCOLOR, &it->second->miniMapColor, sizeof(it->second->miniMapColor));
+					break;
+				}
+				case ITEM_ATTR_07:
+				{
+					f->setProps(ITEM_ATTR_07, &it->second->subParam07, sizeof(it->second->subParam07));
+					break;
+				}
+				case ITEM_ATTR_08:
+				{
+					f->setProps(ITEM_ATTR_08, &it->second->subParam08, sizeof(it->second->subParam08));
 					break;
 				}
 			}
