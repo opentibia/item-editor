@@ -348,11 +348,11 @@ bool ItemsTypes::loadFromDat(const char *filename)
 					//sType->makeLight = true;
 
 					unsigned short radius;
-					fread(&radius, sizeof(radius), sizeof(radius), fp);
+					fread(&radius, sizeof(radius), 1, fp);
 					//sType->lightRadius = radius;
 
 					unsigned short color;
-					fread(&color, sizeof(color), sizeof(color), fp); // 215 items, 208 fe non existant items other values.
+					fread(&color, sizeof(color), 1, fp); // 215 items, 208 fe non existant items other values.
 					//sType->lightColor = color;
 
 					break;
@@ -484,7 +484,7 @@ bool ItemsTypes::loadFromDat(const char *filename)
 		int ydiv        = fgetc(fp);
 		int animcount   = fgetc(fp);
 
-  		fseek(fp, width*height*blendframes*xdiv*ydiv*animcount*2, SEEK_CUR);
+		fseek(fp, width*height*blendframes*xdiv*ydiv*animcount*2, SEEK_CUR);
 		++id;
 	}
 
