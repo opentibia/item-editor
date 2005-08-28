@@ -42,7 +42,7 @@
 #define IDC_SET_CLIENT_OPT              1040
 #define IDC_EDIT_SPEED                  1041
 #define IDC_OPT_BLOCKPATHFIND           1042
-#define IDC_OPT_BLOCKPICKUP             1043
+#define IDC_OPT_HASHEIGHT               1043
 #define IDC_OPT_READABLE                1045
 #define IDC_SAVE_ITEM                   1046
 #define IDC_COMBO_EDITOR                1049

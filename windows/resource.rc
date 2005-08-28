@@ -41,8 +41,9 @@ BEGIN
     POPUP "Tools"
     BEGIN
         MENUITEM "Verify items",                ID_TOOLS_VERIFYITEMS
-        MENUITEM "Create missing client items", ID_TOOLS_CREATEMISSING
         MENUITEM "Go to item...",               ID_TOOLS_GOTOITEM
+        MENUITEM SEPARATOR
+        MENUITEM "Create missing client items", ID_TOOLS_CREATEMISSING
         MENUITEM SEPARATOR
         MENUITEM "Autofind client id",          ID_TOOLS_AUTOFIND
         MENUITEM "Show not found images",       ID_TOOLS_SHOWNOTFOUN
@@ -166,8 +167,8 @@ BEGIN
     PUSHBUTTON      "Save Item",IDC_SAVE_ITEM,326,243,55,11
     CONTROL         "Block pathfind",IDC_OPT_BLOCKPATHFIND,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,150,228,61,8
-    CONTROL         "Block pickup",IDC_OPT_BLOCKPICKUP,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,150,241,61,8
+    CONTROL         "HasHeight",IDC_OPT_HASHEIGHT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,150,241,61,8
     LTEXT           "EditorType",IDC_STATIC,307,216,36,11
     COMBOBOX        IDC_COMBO_EDITOR,343,216,50,90,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
@@ -232,9 +233,9 @@ BEGIN
     "7",            ID_MENUG_MAGICFIELD,    VIRTKEY, CONTROL, NOINVERT
     "8",            ID_MENUG_NONE,          VIRTKEY, CONTROL, NOINVERT
     "9",            ID_MENUG_RUNE,          VIRTKEY, CONTROL, NOINVERT
-    "A",            ID_MENUG_AMMUNITION,    VIRTKEY, CONTROL, NOINVERT
-    "B",            ID_MENUG_WRITEABLE,     VIRTKEY, CONTROL, NOINVERT
-    "C",            ID_MENUG_WEAPON,        VIRTKEY, CONTROL, NOINVERT
+    "E",            ID_MENUG_WEAPON,        VIRTKEY, CONTROL, NOINVERT
+    "Q",            ID_MENUG_AMMUNITION,    VIRTKEY, CONTROL, NOINVERT
+    "W",            ID_MENUG_WRITEABLE,     VIRTKEY, CONTROL, NOINVERT
 END
 
 #endif    // Neutral resources

@@ -435,7 +435,7 @@ LRESULT GUIWin::onClientIdChange(HWND h, HWND hEdit)
 	long new_id;
 	long len = SendMessage(hEdit, WM_GETTEXTLENGTH, 0, 0);
 	tmp = new char[len+1];
-	SendMessage(hEdit, WM_GETTEXT , len, (LPARAM)tmp);
+	SendMessage(hEdit, WM_GETTEXT , len + 1, (LPARAM)tmp);
 	tmp[len] = 0;
 	if(sscanf(tmp, "%d", &new_id) == 1){
 		if(new_id <= SpriteType::maxClientId && new_id >= SpriteType::minClientId){
@@ -579,7 +579,11 @@ LRESULT GUIWin::onAutoFindImages(HWND h)
 
 	n = 0;
 	for(i = SpriteType::minClientId; i <= SpriteType::maxClientId ; i++){
+		#ifdef __SPRITE_SEARCH__
+		memcpy(hash, g_itemsSprites->getSprite(i)->sprHash, 16);
+		#else
 		getImageHash(i, hash);
+		#endif
 		ItemMap::iterator it;
 		for(it = g_itemsTypes->getTypes(); it != g_itemsTypes->getEnd(); it++){
 			if(it->second->foundNewImage == false && memcmp(hash, it->second->sprHash, 16) == 0){
@@ -587,6 +591,7 @@ LRESULT GUIWin::onAutoFindImages(HWND h)
 					it->second->foundNewImage = true;
 					it->second->clientid = i;
 					n++;
+					break;
 				}
 			}
 		}
@@ -620,20 +625,40 @@ LRESULT GUIWin::onCreateMissing(HWND h)
 	ItemMap::iterator it;
 	for(it = g_itemsTypes->getTypes(); it != g_itemsTypes->getEnd(); it++){
 		if(it->second->clientid >= SpriteType::minClientId && it->second->clientid <= SpriteType::maxClientId){
-			usedSprites[it->second->clientid] = 1;
+			usedSprites[it->second->clientid]++;
 		}
 	}
 
 	ItemType *new_it;
 	int n = ItemType::maxServerId + 1;
+	bool found;
+	//FILE *f;
+	//f = fopen("noused.txt","w");
 	for(int i = SpriteType::minClientId; i <= SpriteType::maxClientId; i++){
+		found = false;
 		if(usedSprites[i] == 0){
-			new_it = new ItemType(n, g_itemsSprites->getSprite(i));
-			g_itemsTypes->addType(n, new_it);
-			n++;
+			//fprintf(f, "%d\n", i);
+			/*for(int j = SpriteType::minClientId; j <= SpriteType::maxClientId; j++){
+				if(usedSprites[j] != 0 && memcmp(g_itemsSprites->getSprite(i)->sprHash,g_itemsSprites->getSprite(j)->sprHash,16) == 0){
+					if(g_itemsSprites->getSprite(i)->compareOptions(g_itemsSprites->getSprite(j))){
+						found = true;
+						break;
+					}
+				}
+			}*/
+			//if(!found){
+				new_it = new ItemType(n, g_itemsSprites->getSprite(i));
+				g_itemsTypes->addType(n, new_it);
+				n++;
+				usedSprites[i]++;
+			//}
+		}
+		else if(usedSprites[i] > 1){
+			n = n;
 		}
 	}
-
+	//fclose(f);
+	delete usedSprites;
 	loadTreeItemTypes(h);
 	return TRUE;
 }
@@ -874,6 +899,15 @@ bool GUIWin::saveCurrentItem(HWND h)
 	else{
 		memset(iType->sprHash, 0, 16);
 	}
+	//update spr params
+	SpriteType *sType;
+	sType = g_itemsSprites->getSprite(iType->clientid);
+	if(sType){
+		iType->miniMapColor = sType->miniMapColor;
+		iType->subParam07 = sType->subParam07;
+		iType->subParam08 = sType->subParam08;
+	}
+
 
 	if(!getEditTextInt(h, IDC_EDIT_DECAYTO, iType->decayTo)){
 		return false;
@@ -916,7 +950,7 @@ bool GUIWin::saveCurrentItem(HWND h)
 	iType->blockProjectile = getCheckButton(h, IDC_OPT_BLOCKPROJECTILE);
 	iType->readable = getCheckButton(h, IDC_OPT_READABLE);
 	iType->blockPathFind = getCheckButton(h, IDC_OPT_BLOCKPATHFIND);
-	iType->blockPickupable = getCheckButton(h, IDC_OPT_BLOCKPICKUP);
+	iType->hasHeight = getCheckButton(h, IDC_OPT_HASHEIGHT);
 
 	iType->slot_position = (enum slots_t)getComboValue(h, IDC_COMBO_SLOT);
 	iType->weaponType = (enum WeaponType)getComboValue(h, IDC_COMBO_SKILL);
@@ -961,6 +995,7 @@ bool GUIWin::saveCurrentItem(HWND h)
 	itemInfo.mask = TVIF_HANDLE | TVIF_TEXT;
 	getItemTypeName(iType, name);
 
+	itemInfo.hItem = curItem;
 	itemInfo.pszText = name;
 	itemInfo.cchTextMax = strlen(name);
 	SendMessage(m_hwndTree, TVM_SETITEM, 0, (long)&itemInfo);
@@ -1000,7 +1035,7 @@ void GUIWin::loadItem(HWND h)
 		setCheckButton(h, IDC_OPT_BLOCKPROJECTILE, iType->blockProjectile);
 		setCheckButton(h, IDC_OPT_READABLE, iType->readable);
 		setCheckButton(h, IDC_OPT_BLOCKPATHFIND, iType->blockPathFind);
-		setCheckButton(h, IDC_OPT_BLOCKPICKUP, iType->blockPickupable);
+		setCheckButton(h, IDC_OPT_HASHEIGHT, iType->hasHeight);
 
 		setComboValue(h, IDC_COMBO_SLOT, iType->slot_position);
 		setComboValue(h, IDC_COMBO_SKILL, iType->weaponType);
@@ -1056,7 +1091,7 @@ void GUIWin::loadItem(HWND h)
 		setCheckButton(h, IDC_OPT_BLOCKPROJECTILE, false);
 		setCheckButton(h, IDC_OPT_READABLE, false);
 		setCheckButton(h, IDC_OPT_BLOCKPATHFIND, false);
-		setCheckButton(h, IDC_OPT_BLOCKPICKUP, false);
+		setCheckButton(h, IDC_OPT_HASHEIGHT, false);
 
 		setComboValue(h, IDC_COMBO_SLOT, SLOT_DEFAULT);
 		setComboValue(h, IDC_COMBO_SKILL, WEAPON_NONE);
@@ -1228,7 +1263,7 @@ void GUIWin::setControlState(HWND h, unsigned long flagsEdit, unsigned long flag
 	EnableWindow(GetDlgItem(h, IDC_OPT_BLOCKPROJECTILE),getFlagState(flagsOpt, IDC_OPT_BLOCKPROJECTILE_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_OPT_READABLE),getFlagState(flagsOpt, IDC_OPT_READABLE_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_OPT_BLOCKPATHFIND),getFlagState(flagsOpt, IDC_OPT_BLOCKPATHFIND_FLAG));
-	EnableWindow(GetDlgItem(h, IDC_OPT_BLOCKPICKUP),getFlagState(flagsOpt, IDC_OPT_BLOCKPICKUP_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_OPT_HASHEIGHT),getFlagState(flagsOpt, IDC_OPT_HASHEIGHT_FLAG));
 
 	EnableWindow(GetDlgItem(h, IDC_COMBO_SLOT),getFlagState(flagsCombo, IDC_COMBO_SLOT_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_COMBO_SKILL),getFlagState(flagsCombo, IDC_COMBO_SKILL_FLAG));
@@ -1245,6 +1280,9 @@ void GUIWin::loadTreeItemTypes(HWND h, bool notFound)
 {
 	curItem = NULL;
 	curItemServerId = 0;
+	for(int i = 0;i < ITEM_GROUP_LAST;i++){
+		TreeView_Expand(m_hwndTree, rootItems[i], TVE_COLLAPSE);
+	}
 	//delete all items in the tree
 	TreeView_DeleteAllItems(m_hwndTree);
 	//create groups
@@ -1347,6 +1385,7 @@ bool GUIDraw::drawSprite(HDC desthdc, long x, long y, long maxx, long maxy, unsi
 						long w_draw = min(32 ,maxx - x + cx*32);
 						long h_draw = min(32 ,maxy - y + cy*32);
 						TransparentBlt(desthdc,x_draw,y_draw,w_draw, h_draw, m_auxHDC,0,0,w_draw,h_draw,0x111111);
+						//BitBlt(desthdc,x_draw,y_draw,w_draw, h_draw, m_auxHDC,0,0,SRCCOPY);
 					}
 				}
 			}
