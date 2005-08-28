@@ -27,6 +27,7 @@
 #include <iostream>
 
 extern GUI *g_gui;
+extern void getImageHash(unsigned short cid, void* output);
 
 Sprite::Sprite()
 {
@@ -44,11 +45,12 @@ long SpriteType::maxClientId = 0;
 SpriteType::SpriteType()
 {
 	id = 0;
-	
+	memset(sprHash, '\0', sizeof(sprHash));	
 	group = ITEM_GROUP_NONE;
 	blockSolid = false;
-	blockPickupable = true;
+	hasHeight = false;
 	blockPathFind = false;
+	blockProjectile = false;
 	alwaysOnTop = false;
 	stackable = false;
 	useable = false;
@@ -58,6 +60,11 @@ SpriteType::SpriteType()
 	readable = false;
 
 	speed = 0;
+
+	miniMapColor = 0;
+	
+	subParam07 = 0;
+	subParam08 = 0;
 
 	height = 32;
 	width = 32;
@@ -70,6 +77,55 @@ SpriteType::SpriteType()
 	imageID = NULL;
 }
 
+bool SpriteType::compareOptions(const SpriteType *stype)
+{
+	if(!stype)
+		return false;
+
+	switch(stype->group){
+	case ITEM_GROUP_GROUND:
+	case ITEM_GROUP_CONTAINER:
+	case ITEM_GROUP_SPLASH:
+	case ITEM_GROUP_FLUID:
+		if(group != stype->group)
+			return false;
+	}
+	
+	if(blockSolid != stype->blockSolid)
+		return false;
+	
+	if(blockPathFind != stype->blockPathFind)
+		return false;
+
+	if(stackable != stype->stackable)
+		return false;
+
+	if(useable != stype->useable)
+		return false;
+
+	if(moveable != stype->moveable)
+		return false;
+
+	if(pickupable != stype->pickupable)
+		return false;
+
+	if(rotable != stype->rotable)
+		return false;
+
+	if(speed != stype->speed)
+		return false;
+
+	if(miniMapColor != stype->miniMapColor)
+		return false;
+	
+	if(subParam07 != stype->subParam07)
+		return false;
+
+	if(subParam08 != stype->subParam08)
+		return false;
+
+	return true;
+}
 
 ItemsSprites::ItemsSprites()
 {
@@ -206,6 +262,7 @@ bool ItemsSprites::loadFromDat(const char *filename)
 	long size;
 	int speed;
 	short read_short;
+	unsigned short us;
 	
 	fp = fopen(filename, "rb");
 	if(!fp)
@@ -244,7 +301,7 @@ bool ItemsSprites::loadFromDat(const char *filename)
 			case 0x01: // all OnTop
 				sType->alwaysOnTop = true;
 				break;
-			case 0x02: // can walk trough (open doors, arces, bug pen fence ??)
+			case 0x02: //can walk trough (open doors, arces, bug pen fence ??)
 				break;
 			case 0x03:
 				//is a container
@@ -280,7 +337,7 @@ bool ItemsSprites::loadFromDat(const char *filename)
 				fgetc(fp); // 215 items, 208 fe non existant items other values
 				fgetc(fp); // always 0
 				break;
-			case 0x06: // ladder up (id 1386)   why a group for just 1 item ???   
+			case 0x06: // ladder up (id 1386)   why a group for just 1 item ???  			
 				break;
 			case 0x09: //can contain fluids
 				sType->group = ITEM_GROUP_FLUID;
@@ -299,26 +356,30 @@ bool ItemsSprites::loadFromDat(const char *filename)
 			case 0x18: // cropses that don't decay
 				break;
 			case 0x14: // player color templates
+				id = id;
 				break;
 			case 0x07: // writtable objects
 				//sType->group = ITEM_GROUP_WRITEABLE;
 				sType->readable = true;
-				fgetc(fp); //max characters that can be written in it (0 unlimited)
-				fgetc(fp); //max number of  newlines ? 0, 2, 4, 7
+
+				fread(&us, sizeof(us), 1, fp); //unknown, values like 80, 200, 512, 1024, 2000
+				sType->subParam07 = us;
 				break;
 			case 0x08: // writtable objects that can't be edited 
 				sType->readable = true;
-				fgetc(fp); //always 0 max characters that can be written in it (0 unlimited) 
-				fgetc(fp); //always 4 max number of  newlines ? 
+
+				fread(&us, sizeof(us), 1, fp); //unknown, all have the value 1024
+				sType->subParam08 = us;
 				break;
 			case 0x13: // mostly blocking items, but also items that can pile up in level (boxes, chairs etc)
-				sType->blockPickupable = false;
+				sType->hasHeight = true;
 				fgetc(fp); //always 8
 				fgetc(fp); //always 0
 				break;
 			case 0x16: // ground, blocking items and mayby some more 
-				fgetc(fp); //12, 186, 210, 129 and other.. 
-				fgetc(fp); //always 0
+				unsigned short color;
+				fread(&color, sizeof(color), 1, fp);
+				sType->miniMapColor = color;
 				break;
 			case 0x1A: 
 				//7.4 (change no data ?? ) action that can be performed (doors-> open, hole->open, book->read) not all included ex. wall torches
@@ -330,9 +391,9 @@ bool ItemsSprites::loadFromDat(const char *filename)
 					sType->readable = true;
 				fgetc(fp); // always 4
 				break;         
-			case 0x1B:  // walls 2 types of them same material (total 4 pairs)                  
+			case 0x1B:  // walls 2 types of them same material (total 4 pairs)
 				break;
-			case 0x19:  // wall items                 
+			case 0x19:  // wall items
 				break;    
 			case 0x17:  // seems like decorables with 4 states of turning (exception first 4 are unique statues)                 
 				sType->rotable = true;
@@ -450,4 +511,14 @@ SpriteType* ItemsSprites::getSprite(int id)
 		return it->second;
 	   
 	return NULL;
+}
+
+bool ItemsSprites::loadHash()
+{
+	ItemMap::iterator it;
+	for(it = item.begin(); it != item.end();it++)
+	{
+		getImageHash(it->second->id, it->second->sprHash);
+	}
+	return true;
 }

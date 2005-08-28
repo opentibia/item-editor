@@ -43,7 +43,7 @@ ItemType::ItemType()
 
 	blockSolid	= false;
 	blockProjectile = false;
-	blockPickupable = false;
+	hasHeight = false;
 	blockPathFind = false;
 
 	//container	= false;
@@ -121,7 +121,7 @@ ItemType::ItemType(unsigned short _id, const SpriteType *stype)
 	foundNewImage = false;
 
 	blockSolid = stype->blockSolid;
-	blockPickupable = stype->blockPickupable;
+	hasHeight = stype->hasHeight;
 	blockProjectile = stype->blockProjectile;
 	blockPathFind = stype->blockPathFind;
 
@@ -133,14 +133,22 @@ ItemType::ItemType(unsigned short _id, const SpriteType *stype)
 	rotable = stype->rotable;
 	readable = stype->readable;
 	speed = stype->speed;
-	
+
+	miniMapColor = stype->miniMapColor;
+	subParam07 = stype->subParam07;
+	subParam08 = stype->subParam08;
+
+	#ifdef __SPRITE_SEARCH__
+	memcpy(sprHash, stype->sprHash, 16);
+	#else
+	getImageHash(stype->id, sprHash);
+	#endif
 	
 	rotateTo = 0;
 
 	//xml
 	memset(name, '\0', sizeof(name));
 	memset(descr, '\0', sizeof(descr));
-	memset(sprHash, '\0', sizeof(sprHash));
 	
 	weight = 0.00;
 	decayTo = 0;
@@ -152,9 +160,6 @@ ItemType::ItemType(unsigned short _id, const SpriteType *stype)
 	floorChangeSouth = false;
 	floorChangeEast = false;
 	floorChangeWest = false;
-
-	//ground
-	speed = 0;
 
 	//container
 	maxItems = 8;
@@ -218,6 +223,15 @@ bool ItemType::compareOptions(const SpriteType *stype)
 	if(speed != stype->speed)
 		return false;
 
+	if(miniMapColor != stype->miniMapColor)
+		return false;
+	
+	if(subParam07 != stype->subParam07)
+		return false;
+
+	if(subParam08 != stype->subParam08)
+		return false;
+
 	return true;
 }
 
@@ -274,7 +288,6 @@ bool ItemsTypes::loadFromDat(const char *filename)
 		ItemType *sType = getType(id);
 		if(!sType) {
 			sType = new ItemType();
-			sType->blockPickupable = true; //default for .dat
 
 			sType->id = id;
 			sType->clientid = id;
@@ -416,7 +429,7 @@ bool ItemsTypes::loadFromDat(const char *filename)
 				}
 				case 0x13: //items that have height
 				{
-					sType->blockPickupable = false;
+					sType->hasHeight = true;
 
 					unsigned short heightdisp;
 					fread(&heightdisp, sizeof(heightdisp), 1, fp);
@@ -972,7 +985,7 @@ int ItemsTypes::loadOtb(const char *filename)
 							sType->blockSolid = ((flags & FLAG_BLOCK_SOLID) == FLAG_BLOCK_SOLID);
 							sType->blockProjectile = ((flags & FLAG_BLOCK_PROJECTILE) == FLAG_BLOCK_PROJECTILE);
 							sType->blockPathFind = ((flags & FLAG_BLOCK_PATHFIND) == FLAG_BLOCK_PATHFIND);
-							sType->blockPickupable = ((flags & FLAG_BLOCK_PICKUPABLE) == FLAG_BLOCK_PICKUPABLE);
+							sType->hasHeight = ((flags & FLAG_HAS_HEIGHT) == FLAG_HAS_HEIGHT);
 							sType->useable = ((flags & FLAG_USEABLE) == FLAG_USEABLE);
 							sType->pickupable = ((flags & FLAG_PICKUPABLE) == FLAG_PICKUPABLE);
 							sType->moveable = ((flags & FLAG_MOVEABLE) == FLAG_MOVEABLE);
@@ -1217,7 +1230,6 @@ int ItemsTypes::loadOtb(const char *filename)
 						break;
 				}
 			}
-
 			addType(sType->id, sType);
 		}
 
@@ -1264,7 +1276,8 @@ int ItemsTypes::saveOtb(const char *filename)
 		if(it->second->rotateTo != 0) {
 			saveAttr.push_back(ITEM_ATTR_ROTATETO);
 		}
-
+		
+		#ifdef __SPRITE_SEARCH__
 		saveAttr.push_back(ITEM_ATTR_SPRITEHASH);
 
 		if(it->second->subParam07 != 0) {
@@ -1276,6 +1289,7 @@ int ItemsTypes::saveOtb(const char *filename)
 		}
 
 		saveAttr.push_back(ITEM_ATTR_MINIMAPCOLOR);
+		#endif
 
 		switch(it->second->group) {
 			case ITEM_GROUP_GROUND:
@@ -1362,51 +1376,6 @@ int ItemsTypes::saveOtb(const char *filename)
 
 		if(it->second->blockSolid)
 			flags |= FLAG_BLOCK_SOLID;
-
-		if(it->second->blockProjectile)
-			flags |= FLAG_BLOCK_PROJECTILE;
-
-		if(it->second->blockPathFind)
-			flags |= FLAG_BLOCK_PATHFIND;
-
-		if(it->second->blockPickupable)
-			flags |= FLAG_BLOCK_PICKUPABLE;
-
-		if(it->second->useable)
-			flags |= FLAG_USEABLE;
-
-		if(it->second->pickupable)
-			flags |= FLAG_PICKUPABLE;
-
-		if(it->second->moveable)
-			flags |= FLAG_MOVEABLE;
-
-		if(it->second->stackable)
-			flags |= FLAG_STACKABLE;
-
-		if(it->second->floorChangeDown)
-			flags |= FLAG_FLOORCHANGEDOWN;
-
-		if(it->second->floorChangeNorth)
-			flags |= FLAG_FLOORCHANGENORTH;
-
-		if(it->second->floorChangeEast)
-			flags |= FLAG_FLOORCHANGEEAST;
-
-		if(it->second->floorChangeSouth)
-			flags |= FLAG_FLOORCHANGESOUTH;
-
-		if(it->second->floorChangeWest)
-			flags |= FLAG_FLOORCHANGEWEST;
-
-		if(it->second->alwaysOnTop)
-			flags |= FLAG_ALWAYSONTOP;
-
-		if(it->second->readable)
-			flags |= FLAG_READABLE;
-
-		if(it->second->blockSolid)
-			flags |= FLAG_BLOCK_SOLID;
 		
 		if(it->second->blockProjectile)
 			flags |= FLAG_BLOCK_PROJECTILE;
@@ -1414,8 +1383,8 @@ int ItemsTypes::saveOtb(const char *filename)
 		if(it->second->blockPathFind)
 			flags |= FLAG_BLOCK_PATHFIND;
 		
-		if(it->second->blockPickupable)
-			flags |= FLAG_BLOCK_PICKUPABLE;
+		if(it->second->hasHeight)
+			flags |= FLAG_HAS_HEIGHT;
 		
 		if(it->second->useable)
 			flags |= FLAG_USEABLE;

@@ -48,12 +48,13 @@ public:
 	static long maxClientId;
 	
 	unsigned short id;
+	char sprHash[16];
 	
 	//item info
 	itemgroup_t group;
 	
 	bool blockSolid;
-	bool blockPickupable;
+	bool hasHeight;
 	bool blockProjectile;
 	bool blockPathFind;
 
@@ -67,6 +68,11 @@ public:
 
 	int speed;
 
+	unsigned short miniMapColor;
+	
+	unsigned short subParam07;
+	unsigned short subParam08;
+
 	//sprite info
 	unsigned char height;
 	unsigned char width;
@@ -77,6 +83,8 @@ public:
 	int numsprites;
 	
 	unsigned short *imageID;
+
+	bool compareOptions(const SpriteType *stype);
 };
 
 
@@ -89,6 +97,7 @@ public:
 	
 	bool loadFromDat(const char *filename);
 	bool loadFromSpr(const char *filename);
+	bool loadHash();
 	void unloadSpr();
 	void unloadDat();
 	

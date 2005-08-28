@@ -73,7 +73,7 @@ enum itemflags_t {
  FLAG_BLOCK_SOLID = 1,
  FLAG_BLOCK_PROJECTILE = 2, 
  FLAG_BLOCK_PATHFIND = 4, 
- FLAG_BLOCK_PICKUPABLE = 8,
+ FLAG_HAS_HEIGHT = 8,
  FLAG_USEABLE = 16,
  FLAG_PICKUPABLE = 32,
  FLAG_MOVEABLE = 64,
@@ -199,7 +199,7 @@ public:
 	bool foundNewImage;
 
 	bool blockSolid;
-	bool blockPickupable;
+	bool hasHeight;
 	bool blockProjectile;
 	bool blockPathFind;
 

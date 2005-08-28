@@ -64,6 +64,9 @@ bool OtItemEditorApp::OnInit()
 	if(!g_itemsSprites->loadFromSpr("tibia.spr"))
 		g_gui->messageBox("Error while loading client's tibia.spr.", MESSAGE_TYPE_FATAL_ERROR);
 
+	#ifdef __SPRITE_SEARCH__
+	g_itemsSprites->loadHash();
+	#endif
 
 	if(g_gui)
 	{
