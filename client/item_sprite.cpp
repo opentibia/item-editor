@@ -61,6 +61,7 @@ SpriteType::SpriteType()
 	
 	speed = 0;
 	lightLevel = 0;
+	lightColor = 0;
 
 	miniMapColor = 0;
 	
@@ -338,7 +339,7 @@ bool ItemsSprites::loadFromDat(const char *filename)
 
 				unsigned short lightcolor;
 				fread(&lightcolor, sizeof(lightcolor), 1, fp);
-				//sType->lightColor = lightcolor;
+				sType->lightColor = lightcolor;
 				break;
 			case 0x06: // ladder up (id 1386)   why a group for just 1 item ???  			
 				break;

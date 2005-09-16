@@ -68,6 +68,7 @@ public:
 
 	int speed;
 	int lightLevel;
+	int lightColor;
 
 	unsigned short miniMapColor;
 	

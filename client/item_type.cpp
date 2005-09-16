@@ -77,6 +77,7 @@ ItemType::ItemType()
 	floorChangeWest = false;
 
 	lightLevel = 0;
+	lightColor = 0;
 
 	//ground
 	speed = 0;
@@ -236,6 +237,9 @@ bool ItemType::compareOptions(const SpriteType *stype)
 	if(lightLevel != stype->lightLevel)
 		return false;
 
+	if(lightColor != stype->lightColor)
+		return false;
+
 	return true;
 }
 
@@ -368,7 +372,7 @@ bool ItemsTypes::loadFromDat(const char *filename)
 
 					unsigned short lightcolor;
 					fread(&lightcolor, sizeof(lightcolor), 1, fp);
-					//sType->lightColor = lightcolor;
+					sType->lightColor = lightcolor;
 
 					break;
 				}
@@ -1219,13 +1223,15 @@ int ItemsTypes::loadOtb(const char *filename)
 								break;
 							}
 
-							case ITEM_ATTR_LIGHTLEVEL:
+							case ITEM_ATTR_LIGHT:
 							{
-								if(datalen != sizeof(unsigned short))
+								if(datalen != sizeof(lightBlock))
 									return ERROR_INVALID_FORMAT;
 
-								memcpy(&sType->lightLevel, p, sizeof(unsigned short));
-
+								lightBlock lb;
+								memcpy(&lb, p, sizeof(lightBlock));
+								sType->lightLevel = lb.lightLevel;
+								sType->lightColor = lb.lightColor;
 								break;
 							}
 
@@ -1303,7 +1309,7 @@ int ItemsTypes::saveOtb(const char *filename)
 		}
 
 		if(it->second->lightLevel != 0) {
-			saveAttr.push_back(ITEM_ATTR_LIGHTLEVEL);
+			saveAttr.push_back(ITEM_ATTR_LIGHT);
 		}
 
 		saveAttr.push_back(ITEM_ATTR_MINIMAPCOLOR);
@@ -1564,9 +1570,12 @@ int ItemsTypes::saveOtb(const char *filename)
 					f->setProps(ITEM_ATTR_08, &it->second->subParam08, sizeof(it->second->subParam08));
 					break;
 				}
-				case ITEM_ATTR_LIGHTLEVEL:
+				case ITEM_ATTR_LIGHT:
 				{
-					f->setProps(ITEM_ATTR_LIGHTLEVEL, &it->second->lightLevel, sizeof(unsigned short));
+					struct lightBlock lb;
+					lb.lightLevel = it->second->lightLevel;
+					lb.lightColor = it->second->lightColor;
+					f->setProps(ITEM_ATTR_LIGHT, &lb, sizeof(lb));
 					break;
 				}
 			}

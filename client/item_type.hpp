@@ -66,7 +66,7 @@ enum itemattrib_t {
 	ITEM_ATTR_MINIMAPCOLOR,
 	ITEM_ATTR_07,
 	ITEM_ATTR_08,
-	ITEM_ATTR_LIGHTLEVEL,
+	ITEM_ATTR_LIGHT,
 	ITEM_ATTR_LAST
 };
 
@@ -116,6 +116,11 @@ struct armorBlock {
 
 struct writeableBlock {
 	unsigned short readOnlyId;
+};
+
+struct lightBlock {
+	unsigned short lightLevel;
+	unsigned short lightColor;
 };
 
 //////////////////////////
@@ -259,6 +264,7 @@ public:
 	unsigned short subParam08;
 
 	int lightLevel;
+	int lightColor;
 
 	//
 	//bool canWalkThrough;
