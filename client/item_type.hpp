@@ -66,6 +66,7 @@ enum itemattrib_t {
 	ITEM_ATTR_MINIMAPCOLOR,
 	ITEM_ATTR_07,
 	ITEM_ATTR_08,
+	ITEM_ATTR_LIGHTLEVEL,
 	ITEM_ATTR_LAST
 };
 
@@ -253,20 +254,21 @@ public:
 	//writeable
 	int readOnlyId;
 	
+	unsigned short miniMapColor;
+	unsigned short subParam07;
+	unsigned short subParam08;
+
+	int lightLevel;
+
 	//
 	//bool canWalkThrough;
 	//bool ladderUp;
 	//bool canSeeThrough;
 	//bool wallObject;
-	unsigned short miniMapColor;
 	//bool hasAnimation;
 	//bool hasParameter14;
-	unsigned short subParam07;
-	unsigned short subParam08;
 	//unsigned short heightdisplacement;
 	//bool makeLight;
-	//unsigned short lightRadius;
-	//unsigned short lightColor;
 
 	bool compareOptions(const SpriteType *stype);
 };

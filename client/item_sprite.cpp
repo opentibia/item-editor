@@ -58,8 +58,9 @@ SpriteType::SpriteType()
 	pickupable = false;
 	rotable = false;
 	readable = false;
-
+	
 	speed = 0;
+	lightLevel = 0;
 
 	miniMapColor = 0;
 	
@@ -331,11 +332,13 @@ bool ItemsSprites::loadFromDat(const char *filename)
 				sType->pickupable = true;
 				break;
 			case 0x10:
-				//makes light (skip 4 bytes)
-				fgetc(fp); //number of tiles around
-				fgetc(fp); // always 0
-				fgetc(fp); // 215 items, 208 fe non existant items other values
-				fgetc(fp); // always 0
+				unsigned short lightlevel;
+				fread(&lightlevel, sizeof(lightlevel), 1, fp);
+				sType->lightLevel = lightlevel;
+
+				unsigned short lightcolor;
+				fread(&lightcolor, sizeof(lightcolor), 1, fp);
+				//sType->lightColor = lightcolor;
 				break;
 			case 0x06: // ladder up (id 1386)   why a group for just 1 item ???  			
 				break;

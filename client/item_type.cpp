@@ -46,11 +46,6 @@ ItemType::ItemType()
 	hasHeight = false;
 	blockPathFind = false;
 
-	//container	= false;
-	//isammo = false;
-	//groundtile	= false;
-	//fluid = false;
-
 	alwaysOnTop	= false;
 	stackable	= false;
 	useable		= false;
@@ -61,11 +56,6 @@ ItemType::ItemType()
 	
 	rotateTo = 0;
 
-	//
-	//canWalkThrough = false;
-	//ladderUp = false;
-	//canSeeThrough = false;
-	//wallObject = false;
 	miniMapColor = 0;
 	subParam07 = 0;
 	subParam08 = 0;
@@ -85,6 +75,8 @@ ItemType::ItemType()
 	floorChangeSouth = false;
 	floorChangeEast = false;
 	floorChangeWest = false;
+
+	lightLevel = 0;
 
 	//ground
 	speed = 0;
@@ -111,6 +103,15 @@ ItemType::ItemType()
 	//writeable
 	readOnlyId = 0;
 
+	//
+	//canWalkThrough = false;
+	//ladderUp = false;
+	//canSeeThrough = false;
+	//wallObject = false;
+	//container	= false;
+	//isammo = false;
+	//groundtile	= false;
+	//fluid = false;
 }
 
 ItemType::ItemType(unsigned short _id, const SpriteType *stype)
@@ -230,6 +231,9 @@ bool ItemType::compareOptions(const SpriteType *stype)
 		return false;
 
 	if(subParam08 != stype->subParam08)
+		return false;
+
+	if(lightLevel != stype->lightLevel)
 		return false;
 
 	return true;
@@ -358,15 +362,13 @@ bool ItemsTypes::loadFromDat(const char *filename)
 				}
 				case 0x10: //makes light (skip 4 bytes)
 				{
-					//sType->makeLight = true;
+					unsigned short lightlevel;
+					fread(&lightlevel, sizeof(lightlevel), 1, fp);
+					sType->lightLevel = lightlevel;
 
-					unsigned short radius;
-					fread(&radius, sizeof(radius), 1, fp);
-					//sType->lightRadius = radius;
-
-					unsigned short color;
-					fread(&color, sizeof(color), 1, fp); // 215 items, 208 fe non existant items other values.
-					//sType->lightColor = color;
+					unsigned short lightcolor;
+					fread(&lightcolor, sizeof(lightcolor), 1, fp);
+					//sType->lightColor = lightcolor;
 
 					break;
 				}
@@ -1196,6 +1198,7 @@ int ItemsTypes::loadOtb(const char *filename)
 								memcpy(&sType->miniMapColor, p, sizeof(unsigned short));
 								break;
 							}
+
 							case ITEM_ATTR_07:
 							{
 								if(datalen != sizeof(unsigned short))
@@ -1205,12 +1208,23 @@ int ItemsTypes::loadOtb(const char *filename)
 
 								break;
 							}
+
 							case ITEM_ATTR_08:
 							{
 								if(datalen != sizeof(unsigned short))
 									return ERROR_INVALID_FORMAT;
 
 								memcpy(&sType->subParam08, p, sizeof(unsigned short));
+
+								break;
+							}
+
+							case ITEM_ATTR_LIGHTLEVEL:
+							{
+								if(datalen != sizeof(unsigned short))
+									return ERROR_INVALID_FORMAT;
+
+								memcpy(&sType->lightLevel, p, sizeof(unsigned short));
 
 								break;
 							}
@@ -1286,6 +1300,10 @@ int ItemsTypes::saveOtb(const char *filename)
 
 		if(it->second->subParam08 != 0) {
 			saveAttr.push_back(ITEM_ATTR_08);
+		}
+
+		if(it->second->lightLevel != 0) {
+			saveAttr.push_back(ITEM_ATTR_LIGHTLEVEL);
 		}
 
 		saveAttr.push_back(ITEM_ATTR_MINIMAPCOLOR);
@@ -1544,6 +1562,11 @@ int ItemsTypes::saveOtb(const char *filename)
 				case ITEM_ATTR_08:
 				{
 					f->setProps(ITEM_ATTR_08, &it->second->subParam08, sizeof(it->second->subParam08));
+					break;
+				}
+				case ITEM_ATTR_LIGHTLEVEL:
+				{
+					f->setProps(ITEM_ATTR_LIGHTLEVEL, &it->second->lightLevel, sizeof(unsigned short));
 					break;
 				}
 			}

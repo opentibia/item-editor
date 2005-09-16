@@ -67,6 +67,7 @@ public:
 	bool readable;
 
 	int speed;
+	int lightLevel;
 
 	unsigned short miniMapColor;
 	
