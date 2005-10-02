@@ -86,7 +86,10 @@ enum itemflags_t {
  FLAG_FLOORCHANGEWEST = 4096,
  FLAG_ALWAYSONTOP = 8192,
  FLAG_READABLE = 16384,
- FLAG_ROTABLE = 32768
+ FLAG_ROTABLE = 32768,
+ FLAG_HANGABLE = 65536,
+ FLAG_VERTICAL = 131072,
+ FLAG_HORIZONTAL = 262144
 };
 
 struct decayBlock{
@@ -265,6 +268,11 @@ public:
 
 	int lightLevel;
 	int lightColor;
+
+	bool isVertical;
+	bool isHorizontal;
+
+	bool isHangable;
 
 	//
 	//bool canWalkThrough;

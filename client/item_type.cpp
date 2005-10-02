@@ -56,6 +56,11 @@ ItemType::ItemType()
 	
 	rotateTo = 0;
 
+	isVertical = false;
+	isHorizontal = false;
+
+	isHangable = false;
+
 	miniMapColor = 0;
 	subParam07 = 0;
 	subParam08 = 0;
@@ -240,6 +245,15 @@ bool ItemType::compareOptions(const SpriteType *stype)
 	if(lightColor != stype->lightColor)
 		return false;
 
+	if(isVertical != stype->isVertical)
+		return false;
+
+	if(isHorizontal != stype->isHorizontal)
+		return false;
+
+	if(isHangable != stype->isHangable)
+		return false;
+
 	return true;
 }
 
@@ -310,22 +324,22 @@ bool ItemsTypes::loadFromDat(const char *filename)
 		{                                                            
 			switch (optbyte)
 			{
-				case 0x00:
+				case 0x00: //is groundtile
 				{
-					//is groundtile
 					fread(&read_short, 2, 1, fp); 
 					speed = read_short;
 					sType->speed = speed;
 					sType->group = ITEM_GROUP_GROUND;
 					break;
 				}
-				case 0x01: // all OnTop
+				case 0x01: //all on top
 				{
 					sType->alwaysOnTop = true;
 					break;
 				}
-				case 0x02: // can walk trough (open doors, arces, bug pen fence ??)
+				case 0x02: //can walk trough (open doors, arces, bug pen fence ??)
 				{
+					sType->alwaysOnTop = true;
 					//sType->canWalkThrough = true;
 					break;
 				}
@@ -376,7 +390,7 @@ bool ItemsTypes::loadFromDat(const char *filename)
 
 					break;
 				}
-				case 0x06: // ladder up (id 1386)   why a group for just 1 item ???   
+				case 0x06: //ladder up (id 1386)   why a group for just 1 item ???   
 				{
 					//sType->ladderUp = true;
 					break;
@@ -391,17 +405,17 @@ bool ItemsTypes::loadFromDat(const char *filename)
 					sType->blockProjectile = true;
 					break;
 				}
-				case 0x0E: // blocks monster movement (flowers, parcels etc)
+				case 0x0E: //blocks creature movement (flowers, parcels etc)
 				{
 					sType->blockPathFind = true;
 					break;
 				}
-				case 0x11: // can see what is under (ladder holes, stairs holes etc)
+				case 0x11: //can see what is under (ladder holes, stairs holes etc)
 				{
 					//sType->canSeeThrough = true;
 					break;
 				}
-				case 0x12: // ground tiles that don't cause level change
+				case 0x12: //ground tiles that don't cause level change
 				{
 					//sType->floorchange = false;
 					break;
@@ -415,7 +429,7 @@ bool ItemsTypes::loadFromDat(const char *filename)
 					//sType->hasParameter14 = true;
 					break;
 				}
-				case 0x07: // writtable objects
+				case 0x07: //writtable objects
 				{
 					sType->group = ITEM_GROUP_WRITEABLE;
 					sType->readable = true;
@@ -425,7 +439,7 @@ bool ItemsTypes::loadFromDat(const char *filename)
 					sType->subParam07 = us;
 					break;
 				}
-				case 0x08: // writtable objects that can't be edited
+				case 0x08: //writtable objects that can't be edited
 				{
 					sType->readable = true;
 					unsigned short us;
@@ -442,7 +456,7 @@ bool ItemsTypes::loadFromDat(const char *filename)
 					//sType->heightdisplacement = heightdisp;
 					break;
 				}
-				case 0x16:  //minimap drawing
+				case 0x16: //minimap drawing
 				{
 					unsigned short color;
 					fread(&color, sizeof(color), 1, fp);
@@ -450,12 +464,17 @@ bool ItemsTypes::loadFromDat(const char *filename)
 
 					break;
 				}
-				case 0x1A: //unknown
+				case 0x1A: //vertical objects (walls to hang objects on etc)
 				{
-					//sType->hasParameter1A = true;
+					sType->isHorizontal = true;
 					break;  
 				}
-				case 0x1D:  // line spot ...
+				case 0x1B: //walls 2 types of them same material (total 4 pairs)                  
+				{
+					sType->isVertical = true;
+					break;
+				}
+				case 0x1D: //line spot ...
 				{
 					int tmp;
 					tmp = fgetc(fp); // 86 -> openable holes, 77-> can be used to go down, 76 can be used to go up, 82 -> stairs up, 79 switch,    
@@ -464,21 +483,17 @@ bool ItemsTypes::loadFromDat(const char *filename)
 					fgetc(fp); // always 4
 					break;         
 				}
-				case 0x1B:  // walls 2 types of them same material (total 4 pairs)                  
+				case 0x19: //hangable objects
 				{
-					break;
-				}
-				case 0x19:  // wall items
-				{
-					//sType->wallObject = true;
+					sType->isHangable = true;
 					break;    
 				}
-				case 0x17:  // seems like decorables with 4 states of turning (exception first 4 are unique statues)                 
+				case 0x17: //seems like decorables with 4 states of turning (exception first 4 are unique statues)                 
 				{
 					sType->rotable = true;
 					break;
 				}
-				case 0x1C: // monster has animation even when iddle (rot, wasp, slime, fe)
+				case 0x1C: //monster has animation even when iddle (rot, wasp, slime, fe)
 				{
 					//sType->hasAnimation = true;
 					break;            
@@ -1004,6 +1019,9 @@ int ItemsTypes::loadOtb(const char *filename)
 							sType->alwaysOnTop = ((flags & FLAG_ALWAYSONTOP) == FLAG_ALWAYSONTOP);
 							sType->readable = ((flags & FLAG_READABLE) == FLAG_READABLE);
 							sType->rotable = ((flags & FLAG_ROTABLE) == FLAG_ROTABLE);
+							sType->isHangable = ((flags & FLAG_HANGABLE) == FLAG_HANGABLE);
+							sType->isVertical = ((flags & FLAG_VERTICAL) == FLAG_VERTICAL);
+							sType->isHorizontal = ((flags & FLAG_HORIZONTAL) == FLAG_HORIZONTAL);
 
 							if(p >= data + len) //no attributes
 								break;
@@ -1250,6 +1268,7 @@ int ItemsTypes::loadOtb(const char *filename)
 						break;
 				}
 			}
+			
 			addType(sType->id, sType);
 		}
 
@@ -1296,7 +1315,7 @@ int ItemsTypes::saveOtb(const char *filename)
 		if(it->second->rotateTo != 0) {
 			saveAttr.push_back(ITEM_ATTR_ROTATETO);
 		}
-		
+
 		#ifdef __SPRITE_SEARCH__
 		saveAttr.push_back(ITEM_ATTR_SPRITEHASH);
 
@@ -1446,6 +1465,15 @@ int ItemsTypes::saveOtb(const char *filename)
 		if(it->second->rotable)
 			flags |= FLAG_ROTABLE;
 		
+		if(it->second->isHangable)
+			flags |= FLAG_HANGABLE;
+
+		if(it->second->isVertical)
+			flags |= FLAG_VERTICAL;
+
+		if(it->second->isHorizontal)
+			flags |= FLAG_HORIZONTAL;
+
 		f->setFlags(flags);
 		
 		std::list<itemattrib_t>::iterator attIt;

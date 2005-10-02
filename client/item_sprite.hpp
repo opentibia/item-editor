@@ -67,8 +67,14 @@ public:
 	bool readable;
 
 	int speed;
+
 	int lightLevel;
 	int lightColor;
+
+	bool isVertical;
+	bool isHorizontal;
+
+	bool isHangable;
 
 	unsigned short miniMapColor;
 	
