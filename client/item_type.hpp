@@ -298,6 +298,9 @@ public:
 	bool loadFromDat(const char *filename);
 	bool loadFromXml(const char *filename);
 
+	bool importFromXml(const char *filename);
+	bool exportToXml(const char *filename);
+
 	int saveOtb(const char *filename);
 	int loadOtb(const char *filename);
 
@@ -315,6 +318,7 @@ private:
 	static int loadstatus;
 	static void XMLCALL xmlstartNode(void *userData, const char *name, const char **atts);
 	static void XMLCALL xmlendNode(void *userData, const char *name);
+	static void XMLCALL xmlstartNodeImport(void *userData, const char *name, const char **atts);
 	
 	ItemMap item;
 };

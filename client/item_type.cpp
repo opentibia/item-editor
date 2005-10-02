@@ -909,6 +909,81 @@ void XMLCALL ItemsTypes::xmlendNode(void *userData, const char *name)
 	//
 }
 
+bool ItemsTypes::importFromXml(const char *filename)
+{
+	void *buff;
+	int bytes_read;
+	int eof;
+
+	XML_Parser p = XML_ParserCreate(NULL);
+
+	eof = 0;
+	if(!p){
+		return false;
+	}
+
+	XML_SetElementHandler(p, xmlstartNodeImport, xmlendNode);
+
+	FILE *f = fopen(filename,"rb");
+	if(!f){
+		XML_ParserFree(p);
+		return false;
+	}
+
+	loadstatus = 0;
+	do{
+		buff = XML_GetBuffer(p, 1024);
+
+		bytes_read = fread(buff, 1, 1024, f);
+		if(bytes_read != 1024){
+			if(feof(f) == 0){
+				//error
+				XML_ParserFree(p);
+				return false;
+			}
+			else{
+				eof = 1;
+			}
+		}
+
+		XML_Status status = XML_ParseBuffer(p, bytes_read, eof);
+		switch (status) {
+		case XML_STATUS_ERROR:
+			XML_ParserFree(p);
+			return false;
+		}
+	}while(eof == 0 && loadstatus == 0);
+
+	XML_ParserFree(p);
+	if(loadstatus != 0){
+		return false;
+	}
+	else{
+		return true;
+	}
+
+	return false;
+}
+
+bool ItemsTypes::exportToXml(const char *filename)
+{
+	FILE *f;
+	f = fopen(filename, "w");
+	if(!f)
+		return false;
+
+	fprintf(f, "<?xml version=\"1.0\"?><items>\n");
+
+	ItemMap::iterator it = getTypes();
+	for(;it != getEnd(); it++){
+		fprintf(f, "<item id=\"%d\" name=\"%s\"/>\n", it->first, it->second->name);
+	}
+	fprintf(f, "</items>\n");
+	fclose(f);
+	return true;
+}
+
+
 bool ItemsTypes::setGroup(int id, itemgroup_t newgroup)
 {
 	ItemType* it = getType(id);
@@ -919,6 +994,34 @@ bool ItemsTypes::setGroup(int id, itemgroup_t newgroup)
 
 	return false;
 }
+
+void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, const char **atts)
+{
+	if(loadstatus == 1)
+		return;
+	
+	const xmlProp *props = (const xmlProp *)atts;
+
+	if(strcmp(name, "item") == 0){
+		int id;
+		const char* tmp;
+		ItemType* sType = NULL;
+
+		if((tmp = readXmlProp("id", props)) != 0){
+			id = atoi(tmp);
+			sType = g_itemsTypes->getType(id);
+		}
+		else
+			loadstatus = 1;
+
+		if(sType) {
+			if((tmp = readXmlProp("name", props)) != 0){
+				strncpy(sType->name, tmp, 127);
+			}
+		}
+	}
+}
+
 
 itemgroup_t ItemsTypes::getGroup(int id)
 {

@@ -298,6 +298,9 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 			break;
 		case ID_TOOLS_VERIFYITEMS:
 			break;
+		case ID_TOOLS_GOTOITEM:
+			return onGotoItem(h);
+			break;
 		case ID_TOOLS_CREATEMISSING:
 			return onCreateMissing(h);
 			break;
@@ -306,6 +309,13 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 			break;
 		case ID_TOOLS_SHOWALL:
 			loadTreeItemTypes(h);
+			break;
+		case ID_TOOLS_IMPORTXMLNAMES:
+			g_itemsTypes->importFromXml("itemnames.xml");
+			loadTreeItemTypes(h);
+			break;
+		case ID_TOOLS_EXPORTXMLNAMES:
+			g_itemsTypes->exportToXml("itemnamesExport.xml");
 			break;
 		case ID_HELP_ABOUT:
 			break;
@@ -660,6 +670,12 @@ LRESULT GUIWin::onCreateMissing(HWND h)
 	//fclose(f);
 	delete usedSprites;
 	loadTreeItemTypes(h);
+	return TRUE;
+}
+
+LRESULT GUIWin::onGotoItem(HWND h)
+{
+
 	return TRUE;
 }
 

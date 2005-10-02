@@ -73,13 +73,15 @@
 #define ID_TOOLS_AUTOFIND               40032
 #define ID_TOOLS_SHOWNOTFOUN            40033
 #define ID_TOOLS_SHOWALL                40034
+#define ID_TOOLS_IMPORTXMLNAMES         40035
+#define ID_TOOLS_EXPORTXMLNAMES         40036
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        114
-#define _APS_NEXT_COMMAND_VALUE         40035
+#define _APS_NEXT_COMMAND_VALUE         40037
 #define _APS_NEXT_CONTROL_VALUE         1047
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

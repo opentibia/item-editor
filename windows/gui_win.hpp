@@ -120,6 +120,7 @@ protected:
 	static LRESULT onLoadOtb(HWND h);
 	static LRESULT onAutoFindImages(HWND h);
 	static LRESULT onCreateMissing(HWND h);
+	static LRESULT onGotoItem(HWND h);
 	static LRESULT onContextMenu(HWND h, unsigned long lParam);
 	static LRESULT onContextMenuClick(HWND h, unsigned long newgroup);
 

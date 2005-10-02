@@ -48,6 +48,9 @@ BEGIN
         MENUITEM "Autofind client id",          ID_TOOLS_AUTOFIND
         MENUITEM "Show not found images",       ID_TOOLS_SHOWNOTFOUN
         MENUITEM "Show all",                    ID_TOOLS_SHOWALL
+        MENUITEM SEPARATOR
+        MENUITEM "Import xml names",            ID_TOOLS_IMPORTXMLNAMES
+        MENUITEM "Export xml names",            ID_TOOLS_EXPORTXMLNAMES
     END
     POPUP "Help"
     BEGIN
