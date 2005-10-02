@@ -27,6 +27,7 @@
 
 const char* readXmlProp(const char* propName, const xmlProp *props);
 extern ItemsTypes *g_itemsTypes;
+extern ItemsSprites *g_itemsSprites;
 extern void getImageHash(unsigned short cid, void* output);
 
 long ItemType::minClientId = 0;
@@ -1268,7 +1269,17 @@ int ItemsTypes::loadOtb(const char *filename)
 						break;
 				}
 			}
-			
+			/// GET EXTRA INFOS FROM TIBIA.DAT/////
+			/*SpriteType *st = g_itemsSprites->getSprite(sType->clientid);
+			if(st){
+				sType->isVertical = st->isVertical;
+				sType->isHorizontal = st->isHorizontal;
+				sType->isHangable = st->isHangable ;
+				//sType->alwaysOnTop = st->alwaysOnTop;
+				//sType->lightLevel = st->lightLevel;
+				//sType->lightColor = st->lightColor;
+			}
+			///*/
 			addType(sType->id, sType);
 		}
 
@@ -1327,12 +1338,12 @@ int ItemsTypes::saveOtb(const char *filename)
 			saveAttr.push_back(ITEM_ATTR_08);
 		}
 
+		saveAttr.push_back(ITEM_ATTR_MINIMAPCOLOR);
+		#endif
+
 		if(it->second->lightLevel != 0) {
 			saveAttr.push_back(ITEM_ATTR_LIGHT);
 		}
-
-		saveAttr.push_back(ITEM_ATTR_MINIMAPCOLOR);
-		#endif
 
 		switch(it->second->group) {
 			case ITEM_GROUP_GROUND:

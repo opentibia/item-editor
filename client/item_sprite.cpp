@@ -306,6 +306,7 @@ bool ItemsSprites::loadFromDat(const char *filename)
 	{
 		SpriteType *sType = new SpriteType();
 		sType->id = id;
+
 		// read the options until we find a 0xff
 		int optbyte;
 		
@@ -543,3 +544,4 @@ bool ItemsSprites::loadHash()
 	}
 	return true;
 }
+
