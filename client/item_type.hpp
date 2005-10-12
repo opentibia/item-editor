@@ -89,7 +89,8 @@ enum itemflags_t {
  FLAG_ROTABLE = 32768,
  FLAG_HANGABLE = 65536,
  FLAG_VERTICAL = 131072,
- FLAG_HORIZONTAL = 262144
+ FLAG_HORIZONTAL = 262144,
+ FLAG_CANNOTDECAY = 524288
 };
 
 struct decayBlock{
@@ -219,6 +220,8 @@ public:
 	bool pickupable;
 	bool rotable;
 	bool readable;
+
+	bool canNotDecay;
 
 	int rotateTo;
 	

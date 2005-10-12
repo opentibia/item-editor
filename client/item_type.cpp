@@ -54,6 +54,7 @@ ItemType::ItemType()
 	pickupable	= false;
 	rotable = false;
 	readable = false;
+	canNotDecay = false;
 	
 	rotateTo = 0;
 
@@ -1016,8 +1017,266 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 
 		if(sType) {
 			if((tmp = readXmlProp("name", props)) != 0){
+				if(strlen(sType->name) != 0){
+					//__asm int 3
+				}
 				strncpy(sType->name, tmp, 127);
 			}
+
+			if((tmp = readXmlProp("descr", props)) != 0){
+				strncpy(sType->descr, tmp, 127);
+			}
+
+			if((tmp = readXmlProp("weight", props)) != 0){
+				sType->weight = atof(tmp);
+			}
+
+			if((tmp = readXmlProp("decayto", props)) != 0){
+				sType->decayTo = atoi(tmp);
+			}
+
+			if((tmp = readXmlProp("decaytime", props)) != 0){
+				sType->decayTime = atoi(tmp);
+			}
+
+			if((tmp = readXmlProp("blockingprojectile", props)) != 0){
+				if(atoi(tmp) == 0)
+					sType->blockProjectile = false;
+				else
+					sType->blockProjectile = true;
+			}
+
+			if((tmp = readXmlProp("floorchange", props)) != 0){
+				sType->floorChangeDown = true;
+			}
+
+			if((tmp = readXmlProp("floorchangenorth", props)) != 0){
+				sType->floorChangeNorth = true;
+			}
+
+			if((tmp = readXmlProp("floorchangesouth", props)) != 0){
+				sType->floorChangeSouth = true;
+			}
+
+			if((tmp = readXmlProp("floorchangeeast", props)) != 0){
+				sType->floorChangeEast = true;
+			}
+
+			if((tmp = readXmlProp("floorchangewest", props)) != 0){
+				sType->floorChangeWest = true;
+			}
+			
+			if((tmp = readXmlProp("position", props)) != 0){
+				if (!strcmp(tmp, "helmet") || !strcmp(tmp, "head"))
+					sType->slot_position = SLOT_HEAD;
+				else if (!strcmp(tmp, "amulet"))
+					sType->slot_position = SLOT_AMULET;
+				else if (!strcmp(tmp, "body"))
+					sType->slot_position = SLOT_BODY;
+				else if (!strcmp(tmp, "legs"))
+					sType->slot_position = SLOT_LEGS;
+				else if (!strcmp(tmp, "boots"))
+					sType->slot_position = SLOT_FEET;
+				else if (!strcmp(tmp, "ring"))
+					sType->slot_position = SLOT_RING;
+				else if (!strcmp(tmp, "backpack"))					 	
+					sType->slot_position = SLOT_BACKPACK;
+				else if (!strcmp(tmp, "weapon"))
+					sType->slot_position = SLOT_HAND;
+				else if (!strcmp(tmp, "twohand"))
+					sType->slot_position = SLOT_2HAND;
+				else if (!strcmp(tmp, "hand"))
+					sType->slot_position = SLOT_HAND;
+				
+			}
+			
+			// now set special properties...
+			// first we check the type...
+			const char* type;
+			if((type = readXmlProp("type", props)) != 0) {
+
+				//container
+				if(strcmp(type, "container") == 0) {
+					sType->group = ITEM_GROUP_CONTAINER;
+					if((tmp = readXmlProp("maxitems", props)) != 0){
+						sType->maxItems = atoi(tmp);
+					}
+				}
+				//weapon
+				else if(strcmp(type, "weapon") == 0) {
+					sType->group = ITEM_GROUP_WEAPON;
+
+					const char* skill;
+					if((skill = readXmlProp("skill", props)) != 0){
+						if (!strcmp(skill, "sword"))
+							sType->weaponType = WEAPON_SWORD;
+						else if (!strcmp(skill, "club"))
+							sType->weaponType = WEAPON_CLUB;
+						else if (!strcmp(skill, "axe"))
+							sType->weaponType = WEAPON_AXE;
+						else if (!strcmp(skill, "shielding"))
+							sType->weaponType = WEAPON_SHIELD;
+						else if (!strcmp(skill, "distance")){
+							sType->weaponType = WEAPON_DIST;
+
+							const char *amutype;
+							if((amutype = readXmlProp("amutype", props)) != 0){
+								if (!strcmp(amutype, "bolt"))
+									sType->amuType = AMU_BOLT;
+								else if (!strcmp(amutype, "arrow"))
+									sType->amuType = AMU_ARROW;
+							}
+							else{ //no ammunition, check shoottype
+								const char *sshoottype;
+								if((sshoottype = readXmlProp("shottype", props)) != 0){
+									if (!strcmp(sshoottype, "throwing-star"))
+							    	sType->shootType = DIST_THROWINGSTAR;
+							    else if (!strcmp(sshoottype, "throwing-knife"))
+							    	sType->shootType = DIST_THROWINGKNIFE;
+							    else if (!strcmp(sshoottype, "small-stone"))
+							    	sType->shootType = DIST_SMALLSTONE;
+							    else if (!strcmp(sshoottype, "sudden-death"))
+							    	sType->shootType = DIST_SUDDENDEATH;
+							    else if (!strcmp(sshoottype, "large-rock"))
+							    	sType->shootType = DIST_LARGEROCK;
+							    else if (!strcmp(sshoottype, "snowball"))
+							    	sType->shootType = DIST_SNOWBALL;
+							    else if (!strcmp(sshoottype, "spear"))
+							    	sType->shootType = DIST_SPEAR;
+                				else
+									__asm int 3
+								}
+								else
+									__asm int 3
+							}
+						}
+						//magic
+						else if(!strcmp(skill, "magic")){
+							sType->weaponType = WEAPON_MAGIC;
+
+							const char *sshoottype;
+							if((sshoottype = readXmlProp("shottype", props)) != 0) {
+								if (!strcmp(sshoottype, "fire"))
+							    sType->shootType = DIST_FIRE;
+							  else if (!strcmp(sshoottype, "energy"))
+							    sType->shootType = DIST_ENERGY;
+							  else
+							    __asm int 3
+							}								
+						}
+						//shielding
+						else if(!strcmp(skill, "shielding")) 
+							sType->weaponType = WEAPON_SHIELD;
+						else
+							__asm int 3
+					}//skills
+					
+					const char* attack;
+					if((attack = readXmlProp("attack", props)) != 0) {
+						sType->attack = atoi(attack);
+					}
+
+					const char* defence;
+					if((defence = readXmlProp("defence", props)) != 0) {
+						sType->defence = atoi(defence);
+					}
+				}
+				//ammunition
+				else if(strcmp(type, "amunition") == 0) {
+					sType->group = ITEM_GROUP_AMMUNITION;
+					
+					const char *amutype;
+					if((amutype = readXmlProp("amutype", props)) != 0) {
+						if (!strcmp(amutype, "bolt"))
+							sType->amuType = AMU_BOLT;
+						else if (!strcmp(amutype, "arrow"))
+							sType->amuType = AMU_ARROW;
+					}
+					else
+						__asm int 3
+
+					const char *sshoottype;
+					if((sshoottype = readXmlProp("shottype", props)) != 0) {
+						if (!strcmp(sshoottype, "bolt"))
+							sType->shootType = DIST_BOLT;
+						else if (!strcmp(sshoottype, "arrow"))
+							sType->shootType = DIST_ARROW;
+						else if (!strcmp(sshoottype, "poison-arrow"))
+							sType->shootType = DIST_POISONARROW;
+						else if (!strcmp(sshoottype, "burst-arrow"))
+							sType->shootType = DIST_BURSTARROW;
+						else if (!strcmp(sshoottype, "power-bolt"))
+							sType->shootType = DIST_POWERBOLT;
+						else
+							__asm int 3
+					}
+					else
+						__asm int 3
+
+					const char* attack;
+					if((attack = readXmlProp("attack", props)) != 0) {
+						sType->attack = atoi(attack);
+					}
+				}
+				//armor
+				else if(strcmp(type, "armor") == 0) {
+					sType->group = ITEM_GROUP_ARMOR;
+
+					if((tmp = readXmlProp("arm", props)) != 0) {
+						sType->armor = atoi(tmp);
+					}
+					else
+						__asm int 3
+				}
+				//rune
+				else if (!strcmp(type, "rune")) {
+					sType->group = ITEM_GROUP_RUNE;
+
+					if((tmp = readXmlProp("maglevel", props)) != 0) {
+						sType->runeMagLevel = atoi(tmp);
+					}
+					else
+						__asm int 3
+				}
+				//teleport
+				else if (!strcmp(type, "teleport")) {
+					sType->group = ITEM_GROUP_TELEPORT;
+				}
+				//magicfield
+				else if (!strcmp(type, "magicfield")) {
+					sType->group = ITEM_GROUP_MAGICFIELD;
+
+					if((tmp = readXmlProp("fieldtype", props)) != 0) {
+						if (!strcmp(tmp, "fire"))
+							sType->magicfieldtype = MAGIC_FIELD_FIRE;
+						else if (!strcmp(tmp, "energy"))
+							sType->magicfieldtype = MAGIC_FIELD_ENERGY;
+						else if (!strcmp(tmp, "poison"))
+							sType->magicfieldtype = MAGIC_FIELD_POISON;
+						else
+							__asm int 3
+					}
+					else
+	       				__asm int 3
+				}
+				//oneTimeWrite
+				else if(!strcmp(type, "write1time")) {
+					sType->group = ITEM_GROUP_WRITEABLE;
+					sType->readable = true;;
+					if((tmp = readXmlProp("readonlyid", props)) != 0) {
+						sType->readOnlyId = atoi(tmp);
+					}
+				}
+				//key
+				else if(!strcmp(type, "key")) {
+					sType->group = ITEM_GROUP_KEY;
+				}
+				//splash
+				else if(!strcmp(type, "splash")) {
+					sType->group = ITEM_GROUP_SPLASH;
+				}
+			}
+
 		}
 	}
 }
@@ -1126,6 +1385,7 @@ int ItemsTypes::loadOtb(const char *filename)
 							sType->isHangable = ((flags & FLAG_HANGABLE) == FLAG_HANGABLE);
 							sType->isVertical = ((flags & FLAG_VERTICAL) == FLAG_VERTICAL);
 							sType->isHorizontal = ((flags & FLAG_HORIZONTAL) == FLAG_HORIZONTAL);
+							sType->canNotDecay = ((flags & FLAG_CANNOTDECAY) == FLAG_CANNOTDECAY);
 
 							if(p >= data + len) //no attributes
 								break;
@@ -1543,6 +1803,9 @@ int ItemsTypes::saveOtb(const char *filename)
 		if(it->second->hasHeight)
 			flags |= FLAG_HAS_HEIGHT;
 		
+		if(it->second->canNotDecay)
+			flags |= FLAG_CANNOTDECAY;
+
 		if(it->second->useable)
 			flags |= FLAG_USEABLE;
 		

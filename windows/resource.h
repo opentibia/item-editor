@@ -45,6 +45,7 @@
 #define IDC_OPT_HASHEIGHT               1043
 #define IDC_OPT_READABLE                1045
 #define IDC_SAVE_ITEM                   1046
+#define IDC_OPT_CANNOTDECAY             1047
 #define IDC_COMBO_EDITOR                1049
 #define ID_FILE_IMPORTXML               40001
 #define ID_FILE_IMPORTOLD               40001
@@ -82,7 +83,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        114
 #define _APS_NEXT_COMMAND_VALUE         40037
-#define _APS_NEXT_CONTROL_VALUE         1047
+#define _APS_NEXT_CONTROL_VALUE         1048
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

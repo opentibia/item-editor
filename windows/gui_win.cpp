@@ -311,7 +311,7 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 			loadTreeItemTypes(h);
 			break;
 		case ID_TOOLS_IMPORTXMLNAMES:
-			g_itemsTypes->importFromXml("itemnames.xml");
+			g_itemsTypes->importFromXml("new_items.xml");
 			loadTreeItemTypes(h);
 			break;
 		case ID_TOOLS_EXPORTXMLNAMES:
@@ -675,7 +675,6 @@ LRESULT GUIWin::onCreateMissing(HWND h)
 
 LRESULT GUIWin::onGotoItem(HWND h)
 {
-
 	return TRUE;
 }
 
@@ -967,6 +966,7 @@ bool GUIWin::saveCurrentItem(HWND h)
 	iType->readable = getCheckButton(h, IDC_OPT_READABLE);
 	iType->blockPathFind = getCheckButton(h, IDC_OPT_BLOCKPATHFIND);
 	iType->hasHeight = getCheckButton(h, IDC_OPT_HASHEIGHT);
+	iType->canNotDecay = getCheckButton(h, IDC_OPT_CANNOTDECAY);
 
 	iType->slot_position = (enum slots_t)getComboValue(h, IDC_COMBO_SLOT);
 	iType->weaponType = (enum WeaponType)getComboValue(h, IDC_COMBO_SKILL);
@@ -1052,6 +1052,7 @@ void GUIWin::loadItem(HWND h)
 		setCheckButton(h, IDC_OPT_READABLE, iType->readable);
 		setCheckButton(h, IDC_OPT_BLOCKPATHFIND, iType->blockPathFind);
 		setCheckButton(h, IDC_OPT_HASHEIGHT, iType->hasHeight);
+		setCheckButton(h, IDC_OPT_CANNOTDECAY, iType->canNotDecay);
 
 		setComboValue(h, IDC_COMBO_SLOT, iType->slot_position);
 		setComboValue(h, IDC_COMBO_SKILL, iType->weaponType);
@@ -1108,6 +1109,7 @@ void GUIWin::loadItem(HWND h)
 		setCheckButton(h, IDC_OPT_READABLE, false);
 		setCheckButton(h, IDC_OPT_BLOCKPATHFIND, false);
 		setCheckButton(h, IDC_OPT_HASHEIGHT, false);
+		setCheckButton(h, IDC_OPT_CANNOTDECAY, false);
 
 		setComboValue(h, IDC_COMBO_SLOT, SLOT_DEFAULT);
 		setComboValue(h, IDC_COMBO_SKILL, WEAPON_NONE);
@@ -1280,6 +1282,7 @@ void GUIWin::setControlState(HWND h, unsigned long flagsEdit, unsigned long flag
 	EnableWindow(GetDlgItem(h, IDC_OPT_READABLE),getFlagState(flagsOpt, IDC_OPT_READABLE_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_OPT_BLOCKPATHFIND),getFlagState(flagsOpt, IDC_OPT_BLOCKPATHFIND_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_OPT_HASHEIGHT),getFlagState(flagsOpt, IDC_OPT_HASHEIGHT_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_OPT_CANNOTDECAY),getFlagState(flagsOpt, IDC_OPT_CANNOTDECAY_FLAG));
 
 	EnableWindow(GetDlgItem(h, IDC_COMBO_SLOT),getFlagState(flagsCombo, IDC_COMBO_SLOT_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_COMBO_SKILL),getFlagState(flagsCombo, IDC_COMBO_SKILL_FLAG));
