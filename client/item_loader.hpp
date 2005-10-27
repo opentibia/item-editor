@@ -31,8 +31,6 @@ class ItemLoader : public FileLoader {
 public:
 	int setFlags(flags_t flags);
 	int setProps(attribute_t attr, void* data, datasize_t size);
-	//int getFlags(unsigned long &flags);
-	//int getProps(unsigned char attr, void* data, unsigned short &size);
 };
 
 #endif

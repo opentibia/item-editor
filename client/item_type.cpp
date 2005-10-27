@@ -1328,11 +1328,15 @@ int ItemsTypes::loadOtb(const char *filename)
 	}
 	
 	unsigned long type,len;
+	const unsigned char* data;
+
 	NODE node = f->getChildNode(NULL, type);
-	//f->getProps(node, len);
+	data = f->getProps(node, len);
+	//4 byte flags
+	//attributes (optional)
+	//0x01 = version data
 	node = f->getChildNode(node, type);
 
-	const unsigned char* data;
 	while(node != NO_NODE) {
 		data = f->getProps(node, len);
 		if(data == NULL && f->getError() != ERROR_NONE)
@@ -1416,7 +1420,6 @@ int ItemsTypes::loadOtb(const char *filename)
 								memcpy(&sType->id, p, sizeof(unsigned short));
 								break;
 							}
-
 							case ITEM_ATTR_CLIENTID:
 							{
 								if(datalen != sizeof(unsigned short))
@@ -1617,11 +1620,88 @@ int ItemsTypes::loadOtb(const char *filename)
 								break;
 							}
 
+							case ITEM_ATTR_DECAY2:
+							{
+								if(datalen != sizeof(decayBlock2))
+									return ERROR_INVALID_FORMAT;
+
+								decayBlock2 db2;
+								memcpy(&db2, p, sizeof(decayBlock2));
+								sType->decayTime = db2.decayTime;
+								sType->decayTo = db2.decayTo;
+								break;
+							}
+
+							case ITEM_ATTR_WEAPON2:
+							{
+								if(datalen != sizeof(weaponBlock2))
+									return ERROR_INVALID_FORMAT;
+
+								weaponBlock2 wb2;
+								memcpy(&wb2, p, sizeof(weaponBlock2));
+								sType->weaponType = (WeaponType)wb2.weaponType;
+								sType->shootType = (subfight_t)wb2.shootType;
+								sType->amuType = (amu_t)wb2.amuType;
+								sType->attack = wb2.attack;
+								sType->defence = wb2.defence;
+								break;
+							}
+
+							case ITEM_ATTR_AMU2:
+							{
+								if(datalen != sizeof(amuBlock2))
+									return ERROR_INVALID_FORMAT;
+
+								amuBlock2 ab2;
+								memcpy(&ab2, p, sizeof(amuBlock2));
+								sType->shootType = (subfight_t)ab2.shootType;
+								sType->amuType = (amu_t)ab2.amuType;
+								sType->attack = ab2.attack;
+								break;
+							}
+
+							case ITEM_ATTR_ARMOR2:
+							{
+								if(datalen != sizeof(armorBlock2))
+									return ERROR_INVALID_FORMAT;
+
+								armorBlock2 ab2;
+								memcpy(&ab2, p, sizeof(armorBlock2));									
+								sType->armor = ab2.armor;
+								sType->weight = ab2.weight;
+								sType->slot_position = (slots_t)ab2.slot_position;
+
+								break;
+							}
+
+							case ITEM_ATTR_WRITEABLE2:
+							{
+								if(datalen != sizeof(writeableBlock2))
+									return ERROR_INVALID_FORMAT;
+
+								struct writeableBlock2 wb2;
+								memcpy(&wb2, p, sizeof(writeableBlock2));
+								sType->readOnlyId = wb2.readOnlyId;
+
+								break;
+							}
+
+							case ITEM_ATTR_LIGHT2:
+							{
+								if(datalen != sizeof(lightBlock2))
+									return ERROR_INVALID_FORMAT;
+
+								lightBlock2 lb2;
+								memcpy(&lb2, p, sizeof(lightBlock2));
+								sType->lightLevel = lb2.lightLevel;
+								sType->lightColor = lb2.lightColor;
+								break;
+							}
+
 							default:
 								delete sType;
 								return ERROR_INVALID_FORMAT;
 						}
-
 						
 						p+= datalen;
 						break;
@@ -1661,6 +1741,16 @@ int ItemsTypes::saveOtb(const char *filename)
 
 	f->startNode(0);
 	f->setFlags(0);
+	
+	VERSIONINFO vi;
+	memset(&vi, '\0', sizeof(VERSIONINFO));
+
+	vi.dwMajorVersion = 1;
+	vi.dwMinorVersion = 1;
+	vi.dwBuildNumber = 1;
+	strcpy(vi.CSDVersion, "OTB 1.1.1 (1-byte aligned)");
+
+	f->setProps(ROOT_ATTR_VERSION, &vi, sizeof(VERSIONINFO));
 
 	ItemMap::iterator it;
 	for(it = item.begin(); it != item.end(); it++){
@@ -1683,7 +1773,7 @@ int ItemsTypes::saveOtb(const char *filename)
 		}
 		
 		if(it->second->decayTo != 0) {
-			saveAttr.push_back(ITEM_ATTR_DECAY);
+			saveAttr.push_back(ITEM_ATTR_DECAY2);
 		}
 
 		if(it->second->rotateTo != 0) {
@@ -1705,7 +1795,7 @@ int ItemsTypes::saveOtb(const char *filename)
 		#endif
 
 		if(it->second->lightLevel != 0) {
-			saveAttr.push_back(ITEM_ATTR_LIGHT);
+			saveAttr.push_back(ITEM_ATTR_LIGHT2);
 		}
 
 		switch(it->second->group) {
@@ -1724,21 +1814,21 @@ int ItemsTypes::saveOtb(const char *filename)
 			case ITEM_GROUP_WEAPON:
 			{				
 				saveAttr.push_back(ITEM_ATTR_SLOT);
-				saveAttr.push_back(ITEM_ATTR_WEAPON);
+				saveAttr.push_back(ITEM_ATTR_WEAPON2);
 				break;
 			}
 
 			case ITEM_GROUP_AMMUNITION:
 			{
 				saveAttr.push_back(ITEM_ATTR_SLOT);
-				saveAttr.push_back(ITEM_ATTR_AMU);
+				saveAttr.push_back(ITEM_ATTR_AMU2);
 				break;
 			}
 
 			case ITEM_GROUP_ARMOR:
 			{
 				saveAttr.push_back(ITEM_ATTR_SLOT);
-				saveAttr.push_back(ITEM_ATTR_ARMOR);
+				saveAttr.push_back(ITEM_ATTR_ARMOR2);
 
 				break;
 			}
@@ -1764,7 +1854,7 @@ int ItemsTypes::saveOtb(const char *filename)
 			case ITEM_GROUP_WRITEABLE:
 			{
 				if(it->second->readOnlyId) {
-					saveAttr.push_back(ITEM_ATTR_WRITEABLE);
+					saveAttr.push_back(ITEM_ATTR_WRITEABLE2);
 				}
 
 				break;
@@ -1896,33 +1986,33 @@ int ItemsTypes::saveOtb(const char *filename)
 					f->setProps(ITEM_ATTR_WEIGHT, &it->second->weight, sizeof(double));
 					break;
 				}
-				case ITEM_ATTR_WEAPON:
+				case ITEM_ATTR_WEAPON2:
 				{
-					weaponBlock wb;
-					wb.weaponType = it->second->weaponType;
-					wb.shootType = it->second->shootType;
-					wb.amuType = it->second->amuType;
-					wb.attack = it->second->attack;
-					wb.defence = it->second->defence;
-					f->setProps(ITEM_ATTR_WEAPON, &wb, sizeof(wb));
+					weaponBlock2 wb2;
+					wb2.weaponType = it->second->weaponType;
+					wb2.shootType = it->second->shootType;
+					wb2.amuType = it->second->amuType;
+					wb2.attack = it->second->attack;
+					wb2.defence = it->second->defence;
+					f->setProps(ITEM_ATTR_WEAPON2, &wb2, sizeof(wb2));
 					break;
 				}
-				case ITEM_ATTR_AMU:
+				case ITEM_ATTR_AMU2:
 				{
-					amuBlock ab;
-					ab.shootType = it->second->shootType;
-					ab.amuType = it->second->amuType;
-					ab.attack = it->second->attack;
-					f->setProps(ITEM_ATTR_AMU, &ab, sizeof(ab));
+					amuBlock2 ab2;
+					ab2.shootType = it->second->shootType;
+					ab2.amuType = it->second->amuType;
+					ab2.attack = it->second->attack;
+					f->setProps(ITEM_ATTR_AMU2, &ab2, sizeof(ab2));
 					break;
 				}
-				case ITEM_ATTR_ARMOR:
+				case ITEM_ATTR_ARMOR2:
 				{
-					armorBlock ab;
-					ab.armor = it->second->armor;
-					ab.slot_position = it->second->slot_position;
-					ab.weight = it->second->weight;
-					f->setProps(ITEM_ATTR_ARMOR, &ab, sizeof(armorBlock));
+					armorBlock2 ab2;
+					ab2.armor = it->second->armor;
+					ab2.slot_position = it->second->slot_position;
+					ab2.weight = it->second->weight;
+					f->setProps(ITEM_ATTR_ARMOR2, &ab2, sizeof(ab2));
 					break;
 				}
 				case ITEM_ATTR_MAGLEVEL:
@@ -1935,11 +2025,11 @@ int ItemsTypes::saveOtb(const char *filename)
 					f->setProps(ITEM_ATTR_MAGFIELDTYPE, &it->second->magicfieldtype, sizeof(unsigned char));
 					break;
 				}
-				case ITEM_ATTR_WRITEABLE:
+				case ITEM_ATTR_WRITEABLE2:
 				{
-					struct writeableBlock wb;
-					wb.readOnlyId = it->second->readOnlyId;
-					f->setProps(ITEM_ATTR_WRITEABLE, &wb, sizeof(wb));
+					struct writeableBlock2 wb2;
+					wb2.readOnlyId = it->second->readOnlyId;
+					f->setProps(ITEM_ATTR_WRITEABLE2, &wb2, sizeof(wb2));
 					break;
 				}
 				case ITEM_ATTR_ROTATETO:
@@ -1947,12 +2037,12 @@ int ItemsTypes::saveOtb(const char *filename)
 					f->setProps(ITEM_ATTR_ROTATETO, &it->second->rotateTo, sizeof(unsigned short));
 					break;
 				}
-				case ITEM_ATTR_DECAY:
+				case ITEM_ATTR_DECAY2:
 				{
-					struct decayBlock db;
-					db.decayTo = it->second->decayTo;
-					db.decayTime = it->second->decayTime;
-					f->setProps(ITEM_ATTR_DECAY, &db, sizeof(db));
+					struct decayBlock2 db2;
+					db2.decayTo = it->second->decayTo;
+					db2.decayTime = it->second->decayTime;
+					f->setProps(ITEM_ATTR_DECAY2, &db2, sizeof(db2));
 					break;
 				}
 				case ITEM_ATTR_SPRITEHASH:
@@ -1975,12 +2065,12 @@ int ItemsTypes::saveOtb(const char *filename)
 					f->setProps(ITEM_ATTR_08, &it->second->subParam08, sizeof(it->second->subParam08));
 					break;
 				}
-				case ITEM_ATTR_LIGHT:
+				case ITEM_ATTR_LIGHT2:
 				{
-					struct lightBlock lb;
-					lb.lightLevel = it->second->lightLevel;
-					lb.lightColor = it->second->lightColor;
-					f->setProps(ITEM_ATTR_LIGHT, &lb, sizeof(lb));
+					struct lightBlock2 lb2;
+					lb2.lightLevel = it->second->lightLevel;
+					lb2.lightColor = it->second->lightColor;
+					f->setProps(ITEM_ATTR_LIGHT2, &lb2, sizeof(lb2));
 					break;
 				}
 			}
