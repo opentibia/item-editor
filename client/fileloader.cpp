@@ -84,7 +84,8 @@ const unsigned char* FileLoader::getProps(const NODE node, unsigned long &size)
 		return NULL;
 	}
 	
-	int byte, position;
+	int byte;
+	unsigned int position;
 	if(!readByte(byte))
 		return NULL;
 

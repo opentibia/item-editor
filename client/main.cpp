@@ -36,18 +36,17 @@ HINSTANCE g_instance;
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPreInst, LPSTR lpszCmdLine, int nCmdShow)
 #else
 //linux 
-#include "wx/wx.h"
-class OtItemEditorApp: public wxApp { 
-    virtual bool OnInit(); 
-    virtual int OnExit(); 
-};
-IMPLEMENT_APP(OtItemEditorApp)
-
-bool OtItemEditorApp::OnInit()
+#include "gtk/gtk.h"
+int g_argc;
+char **g_argv;
+int main(int argc, char *argv[])
 #endif
 {
 #ifdef _WINDOWS
 	g_instance = hInstance;
+#else
+	g_argc = argc;
+	g_argv = argv;
 #endif
 	
 	//get GUI
@@ -88,14 +87,3 @@ bool OtItemEditorApp::OnInit()
 	return true;
 #endif
 }
-
-#ifndef WIN32
-int OtItemEditorApp::OnExit() 
-{ 
-	//unloading sprites/items
-	g_itemsSprites->unloadDat();
-	g_itemsSprites->unloadSpr();
-	
-	return 0;
-}
-#endif

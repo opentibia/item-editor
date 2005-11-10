@@ -18,22 +18,33 @@
 // Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //////////////////////////////////////////////////////////////////////
 
-#define __FILE_REVISION "0.0.1 CVS"
-#include "definitions.hpp"
+#ifndef __OTITEMEDITOR_GUI_LINUX_H__
+#define __OTITEMEDITOR_GUI_LINUX_H__
 
-#include "gui.hpp"
-#if defined WIN32 || defined __WINDOWS__
-	#include "../windows/gui_win.hpp"
-#else
-	#include "../linux/gui_linux.hpp"
+#include "gtk/gtk.h"
+
+#include "../client/gui.hpp"
+#include "../client/item_type.hpp"
+#include "../client/item_sprite.hpp"
+
+
+class GUILinux: public GUI {
+public:
+	GUILinux();
+	virtual ~GUILinux(){};
+	virtual void initGUI();
+	virtual void messageBox(const char* text, MesageBoxType_t type);
+	/*
+	virtual bool loadSpriteInternal(const unsigned char *, const unsigned long, InternalSprite * );
+	virtual void loadSpriteInternalTransparent(unsigned long color,  InternalSprite *sprite);
+	virtual void unloadSpriteInternal(InternalSprite);
+	*/
+
+protected:
+	static void onDestroyEvent(GtkWidget *widget, gpointer data);
+	static gboolean onDeleteEvent(GtkWidget *widget, GdkEvent *event, gpointer data);
+private:
+	GtkWidget *m_mainWindow;
+};
+
 #endif
-
-
-GUI* GUI::getGUI()
-{
-#if defined WIN32 || defined __WINDOWS__
-	return new GUIWin();
-#else
-	return new GUILinux();
-#endif
-}

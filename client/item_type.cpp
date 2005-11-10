@@ -21,7 +21,6 @@
 #define __FILE_REVISION "0.0.1 CVS"
 #include "definitions.hpp"
 
-
 #include "item_type.hpp"
 #include "item_sprite.hpp"
 
@@ -1143,11 +1142,15 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 							    	sType->shootType = DIST_SNOWBALL;
 							    else if (!strcmp(sshoottype, "spear"))
 							    	sType->shootType = DIST_SPEAR;
-                				else
+#ifdef WIN32
+                					else
 									__asm int 3
+#endif
 								}
+#ifdef WIN32
 								else
 									__asm int 3
+#endif
 							}
 						}
 						//magic
@@ -1160,15 +1163,19 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 							    sType->shootType = DIST_FIRE;
 							  else if (!strcmp(sshoottype, "energy"))
 							    sType->shootType = DIST_ENERGY;
+#ifdef WIN32
 							  else
 							    __asm int 3
+#endif
 							}								
 						}
 						//shielding
 						else if(!strcmp(skill, "shielding")) 
 							sType->weaponType = WEAPON_SHIELD;
+#ifdef WIN32
 						else
 							__asm int 3
+#endif
 					}//skills
 					
 					const char* attack;
@@ -1192,8 +1199,10 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 						else if (!strcmp(amutype, "arrow"))
 							sType->amuType = AMU_ARROW;
 					}
+#ifdef WIN32
 					else
 						__asm int 3
+#endif
 
 					const char *sshoottype;
 					if((sshoottype = readXmlProp("shottype", props)) != 0) {
@@ -1207,11 +1216,15 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 							sType->shootType = DIST_BURSTARROW;
 						else if (!strcmp(sshoottype, "power-bolt"))
 							sType->shootType = DIST_POWERBOLT;
+#ifdef WIN32
 						else
 							__asm int 3
+#endif
 					}
+#ifdef WIN32
 					else
 						__asm int 3
+#endif
 
 					const char* attack;
 					if((attack = readXmlProp("attack", props)) != 0) {
@@ -1225,8 +1238,10 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 					if((tmp = readXmlProp("arm", props)) != 0) {
 						sType->armor = atoi(tmp);
 					}
+#ifdef WIN32
 					else
 						__asm int 3
+#endif
 				}
 				//rune
 				else if (!strcmp(type, "rune")) {
@@ -1235,8 +1250,10 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 					if((tmp = readXmlProp("maglevel", props)) != 0) {
 						sType->runeMagLevel = atoi(tmp);
 					}
+#ifdef WIN32
 					else
 						__asm int 3
+#endif
 				}
 				//teleport
 				else if (!strcmp(type, "teleport")) {
@@ -1253,11 +1270,15 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 							sType->magicfieldtype = MAGIC_FIELD_ENERGY;
 						else if (!strcmp(tmp, "poison"))
 							sType->magicfieldtype = MAGIC_FIELD_POISON;
+#ifdef WIN32
 						else
 							__asm int 3
+#endif
 					}
+#ifdef WIN32
 					else
 	       				__asm int 3
+#endif
 				}
 				//oneTimeWrite
 				else if(!strcmp(type, "write1time")) {
