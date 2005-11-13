@@ -34,14 +34,16 @@ public:
 	virtual ~GUILinux(){};
 	virtual void initGUI();
 	virtual void messageBox(const char* text, MesageBoxType_t type);
-	/*
+	
 	virtual bool loadSpriteInternal(const unsigned char *, const unsigned long, InternalSprite * );
 	virtual void loadSpriteInternalTransparent(unsigned long color,  InternalSprite *sprite);
+	/*
 	virtual void unloadSpriteInternal(InternalSprite);
 	*/
 	
 	static void onNew();
 	static void onLoadOtb();
+	static void onSaveOtb();
 	static void onQuit();
 	static void onImportXmlNames();
 	static void onExportXmlNames();
@@ -52,19 +54,26 @@ private:
 	GtkTreeModel *createTreeModel();
 	GtkWidget *createViewAndModel();
 	void loadItem();
+	void drawCurrentSprite();
+	void putPixel(GdkPixbuf *pixbuf, int x, int y, guchar red, guchar green, guchar blue, guchar alpha);
+	
 	// Events
+	void onSpriteImageNotFound();
 	static void onDestroyEvent(GtkWidget *widget, gpointer data);
 	static gboolean onDeleteEvent(GtkWidget *widget, GdkEvent *event, gpointer data);
 	static void onSpinClientIdChange(GtkWidget *widget, GtkSpinButton *spin);
 	static void onSpinServerIdChange(GtkWidget *widget, GtkSpinButton *spin);
+	static void saveCurrentItem(GtkWidget *widget, gpointer data);
 	
 	//vars
 	static long m_curItemServerId;
 	static long m_curItemClientId;
 	
 	GtkWidget *m_mainWindow;
+	GtkWidget *m_imageSprite;
 	GtkWidget *m_entryName;
 	GtkWidget *m_entryDescription;
+	GtkWidget *m_labelInfo;
 	GtkWidget *m_spinClientId;
 	GtkWidget *m_spinServerId;
 	GtkWidget *m_checkBlocking;
