@@ -39,12 +39,61 @@ public:
 	virtual void loadSpriteInternalTransparent(unsigned long color,  InternalSprite *sprite);
 	virtual void unloadSpriteInternal(InternalSprite);
 	*/
-
-protected:
+	
+	static void onNew();
+	static void onLoadOtb();
+	static void onQuit();
+	static void onImportXmlNames();
+	static void onExportXmlNames();
+	
+private:
+	
+	GtkWidget* createMenuBar();
+	GtkTreeModel *createTreeModel();
+	GtkWidget *createViewAndModel();
+	void loadItem();
+	// Events
 	static void onDestroyEvent(GtkWidget *widget, gpointer data);
 	static gboolean onDeleteEvent(GtkWidget *widget, GdkEvent *event, gpointer data);
-private:
+	static void onSpinClientIdChange(GtkWidget *widget, GtkSpinButton *spin);
+	static void onSpinServerIdChange(GtkWidget *widget, GtkSpinButton *spin);
+	
+	//vars
+	static long m_curItemServerId;
+	static long m_curItemClientId;
+	
 	GtkWidget *m_mainWindow;
+	GtkWidget *m_entryName;
+	GtkWidget *m_entryDescription;
+	GtkWidget *m_spinClientId;
+	GtkWidget *m_spinServerId;
+	GtkWidget *m_checkBlocking;
+	GtkWidget *m_checkAlwaysTop;
+	GtkWidget *m_checkStackable;
+	GtkWidget *m_checkUseable;
+	GtkWidget *m_checkNotMoveable;
+	GtkWidget *m_checkReadable;
+	GtkWidget *m_checkRotable;
+	GtkWidget *m_checkPickupable;
+	GtkWidget *m_checkBlockProjectile;
+	GtkWidget *m_checkBlockPathFind;
+	GtkWidget *m_checkHasHeight;
+	GtkWidget *m_checkCanNotDecay;
+	GtkWidget *m_spinWeight;
+	GtkWidget *m_spinDecayTo;
+	GtkWidget *m_spinDecayTime;
+	GtkWidget *m_comboFloorChange;
+	GtkWidget *m_comboSlot;
+	GtkWidget *m_spinReadOnlyId;
+	GtkWidget *m_spinRotateTo;
+	GtkWidget *m_spinSpeed;
+	GtkWidget *m_spinMaxItems;
+	GtkWidget *m_comboSkill;
+	GtkWidget *m_comboAmuType;
+	GtkWidget *m_comboShootType;
+	GtkWidget *m_spinAttack;
+	GtkWidget *m_spinDefence;
+	GtkWidget *m_spinArmor;
 };
 
 #endif

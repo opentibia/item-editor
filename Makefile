@@ -1,7 +1,7 @@
 # Makefile by Primer
 
 CXX = g++
-CXXFLAGS = -O2 -march=i486 -Wall
+CXXFLAGS = -O2 -march=i486 -Wall -g
 TARGET = otie
 OBJS = main.o gui.o fileloader.o item_loader.o item_sprite.o item_type.o md5.o gui_linux.o
 INCS = `pkg-config --cflags gtk+-2.0`
