@@ -33,6 +33,9 @@ long ItemType::minClientId = 0;
 long ItemType::maxClientId = 0;
 long ItemType::minServerId = 0;
 long ItemType::maxServerId = 0;
+long ItemType::dwMajorVersion = 0;
+long ItemType::dwMinorVersion = 0;
+long ItemType::dwBuildNumber = 0;
 
 ItemType::ItemType()
 {
@@ -140,6 +143,7 @@ ItemType::ItemType(unsigned short _id, const SpriteType *stype)
 	pickupable = stype->pickupable;
 	rotable = stype->rotable;
 	readable = stype->readable;
+	canNotDecay = false;
 	speed = stype->speed;
 
 	miniMapColor = stype->miniMapColor;
@@ -1010,6 +1014,7 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 		if((tmp = readXmlProp("id", props)) != 0){
 			id = atoi(tmp);
 			sType = g_itemsTypes->getType(id);
+			//sType = g_itemsTypes->getTypeBySrpite(id);
 		}
 		else
 			loadstatus = 1;
@@ -1018,9 +1023,14 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 			if((tmp = readXmlProp("name", props)) != 0){
 				if(strlen(sType->name) != 0){
 					//__asm int 3
+					return;
 				}
 				strncpy(sType->name, tmp, 127);
 			}
+			else{
+				return;
+			}
+
 
 			if((tmp = readXmlProp("descr", props)) != 0){
 				strncpy(sType->descr, tmp, 127);
@@ -1341,6 +1351,19 @@ ItemType* ItemsTypes::getType(int id)
 }
 
 
+ItemType* ItemsTypes::getTypeBySrpite(int sprite)
+{
+	ItemMap::iterator it;
+	for(it = getTypes(); it != getEnd(); it++){
+		if(it->second->clientid == sprite){
+			return it->second;
+		}
+	}
+	   
+	return NULL;
+}
+
+
 int ItemsTypes::loadOtb(const char *filename)
 {
 	ItemLoader *f = new ItemLoader();
@@ -1356,6 +1379,28 @@ int ItemsTypes::loadOtb(const char *filename)
 	//4 byte flags
 	//attributes (optional)
 	//0x01 = version data
+	if(len > 4){
+		const unsigned char* p = &data[4];
+		//attribute
+		attribute_t attrib = *p; p+= sizeof(attribute_t);
+		if(p >= data + len) {
+			return ERROR_INVALID_FORMAT;
+		}
+
+		datasize_t datalen = 0;
+		//size of data
+		memcpy(&datalen, p, sizeof(datasize_t)); p+= sizeof(datalen);
+		if(p >= data + len) {
+			return ERROR_INVALID_FORMAT;
+		}
+	
+		VERSIONINFO vi;
+		memcpy(&vi, p, sizeof(VERSIONINFO)); p+= sizeof(VERSIONINFO);
+		ItemType::dwMajorVersion = vi.dwMajorVersion;
+		ItemType::dwMinorVersion = vi.dwMinorVersion;
+		ItemType::dwBuildNumber = vi.dwBuildNumber;
+	}
+	
 	node = f->getChildNode(node, type);
 
 	while(node != NO_NODE) {
@@ -1768,8 +1813,10 @@ int ItemsTypes::saveOtb(const char *filename)
 
 	vi.dwMajorVersion = 1;
 	vi.dwMinorVersion = 1;
-	vi.dwBuildNumber = 1;
-	strcpy(vi.CSDVersion, "OTB 1.1.1 (1-byte aligned)");
+	vi.dwBuildNumber = ItemType::dwBuildNumber + 1;
+	char str_version[128];
+	sprintf(str_version, "OTB 1.1.%d-7.5", vi.dwBuildNumber);
+	strcpy(vi.CSDVersion, str_version);
 
 	f->setProps(ROOT_ATTR_VERSION, &vi, sizeof(VERSIONINFO));
 
@@ -1801,21 +1848,34 @@ int ItemsTypes::saveOtb(const char *filename)
 			saveAttr.push_back(ITEM_ATTR_ROTATETO);
 		}
 
-		#ifdef __SPRITE_SEARCH__
-		saveAttr.push_back(ITEM_ATTR_SPRITEHASH);
+#ifdef __SPRITE_SEARCH__
 
-		if(it->second->subParam07 != 0) {
-			saveAttr.push_back(ITEM_ATTR_07);
+		if(it->second->id < 20000){
+			saveAttr.push_back(ITEM_ATTR_SPRITEHASH);
+			getImageHash(it->second->clientid, it->second->sprHash);
+			it->second->miniMapColor = g_itemsSprites->getSprite(it->second->clientid)->miniMapColor;
+			if(it->second->miniMapColor){
+				saveAttr.push_back(ITEM_ATTR_MINIMAPCOLOR);
+			}
+
+			if(g_itemsSprites->getSprite(it->second->clientid)->subParam07 != 0){
+				saveAttr.push_back(ITEM_ATTR_07);
+				it->second->subParam07 = g_itemsSprites->getSprite(it->second->clientid)->subParam07;
+			}
+
+			if(g_itemsSprites->getSprite(it->second->clientid)->subParam08 != 0){
+				saveAttr.push_back(ITEM_ATTR_08);
+				it->second->subParam08 = g_itemsSprites->getSprite(it->second->clientid)->subParam08;
+			}
+			//if(g_itemsSprites->getSprite(it->second->clientid)->lightLevel != 0 || 
+			//	g_itemsSprites->getSprite(it->second->clientid)->lightColor != 0){
+			//	it->second->lightLevel = g_itemsSprites->getSprite(it->second->clientid)->lightLevel;
+			//	it->second->lightColor = g_itemsSprites->getSprite(it->second->clientid)->lightColor;
+			//	saveAttr.push_back(ITEM_ATTR_LIGHT2);
+			//}
 		}
-
-		if(it->second->subParam08 != 0) {
-			saveAttr.push_back(ITEM_ATTR_08);
-		}
-
-		saveAttr.push_back(ITEM_ATTR_MINIMAPCOLOR);
-		#endif
-
-		if(it->second->lightLevel != 0) {
+#endif
+		if(it->second->lightLevel != 0 || it->second->lightColor != 0) {
 			saveAttr.push_back(ITEM_ATTR_LIGHT2);
 		}
 

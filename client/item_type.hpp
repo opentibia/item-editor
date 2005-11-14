@@ -261,6 +261,10 @@ public:
 	static long maxClientId;
 	static long minServerId;
 	static long maxServerId;
+
+	static long dwMajorVersion;
+	static long dwMinorVersion;
+	static long dwBuildNumber;
 	
 	itemgroup_t group;
 	int id;
@@ -373,6 +377,7 @@ public:
 	itemgroup_t getGroup(int id);
 
 	ItemType* getType(int id);
+	ItemType* getTypeBySrpite(int sprite);
 	bool addType(int id, ItemType* type);
 	
 private:
