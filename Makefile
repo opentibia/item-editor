@@ -1,16 +1,15 @@
-# Makefile by Primer
-
 CXX = g++
 CXXFLAGS = -O2 -march=i486 -Wall -g
 TARGET = otie
 OBJS = main.o gui.o fileloader.o item_loader.o item_sprite.o item_type.o md5.o gui_linux.o
-INCS = `pkg-config --cflags gtk+-2.0`
-LIBS = `pkg-config --libs gtk+-2.0`
+INCS = `pkg-config --cflags libglade-2.0`
+LIBS = `pkg-config --libs libglade-2.0`
+LDFLAGS = -Wl,--export-dynamic
 
 .PHONY: clean all install
 
 $(TARGET): $(OBJS)
-	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $@
+	$(CXX) $(LDFLAGS) $(LIBS) $^ -o $@
 	@ echo ">> Compilation finished successfully."
 
 # Common rules

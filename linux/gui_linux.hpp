@@ -21,12 +21,23 @@
 #ifndef __OTITEMEDITOR_GUI_LINUX_H__
 #define __OTITEMEDITOR_GUI_LINUX_H__
 
-#include "gtk/gtk.h"
+#include <gtk/gtk.h>
+#include <glade/glade.h>
 
 #include "../client/gui.hpp"
 #include "../client/item_type.hpp"
 #include "../client/item_sprite.hpp"
 
+extern "C" {
+void on_menu_new_activate (GtkMenuItem *menuitem, gpointer user_data);
+void on_menu_load_otb_activate (GtkMenuItem *menuitem, gpointer user_data);
+void on_menu_save_otb_activate (GtkMenuItem *menuitem, gpointer user_data);
+void on_import_xml_names_activate (GtkMenuItem *menuitem, gpointer user_data);
+void on_export_xml_names_activate (GtkMenuItem *menuitem, gpointer user_data);
+void on_spinServerId_value_changed (GtkSpinButton *spinbutton, GtkScrollType scroll, gpointer user_data);
+void on_spinClientId_value_changed (GtkSpinButton *spinbutton, GtkScrollType scroll, gpointer user_data);
+void on_buttonSaveItem_clicked (GtkButton *button, gpointer user_data);
+}
 
 class GUILinux: public GUI {
 public:
@@ -36,40 +47,36 @@ public:
 	virtual void messageBox(const char* text, MesageBoxType_t type);
 	
 	virtual bool loadSpriteInternal(const unsigned char *, const unsigned long, InternalSprite * );
-	virtual void loadSpriteInternalTransparent(unsigned long color,  InternalSprite *sprite);
 	/*
+	virtual void loadSpriteInternalTransparent(unsigned long color,  InternalSprite *sprite);
 	virtual void unloadSpriteInternal(InternalSprite);
 	*/
 	
-	static void onNew();
-	static void onLoadOtb();
-	static void onSaveOtb();
-	static void onQuit();
-	static void onImportXmlNames();
-	static void onExportXmlNames();
+	void onNew();
+	void onLoadOtb();
+	void onSaveOtb();
+	void onImportXmlNames();
+	void onExportXmlNames();
+	
+	void loadItem();
+	void onSpinClientIdChange();
+	void onSpinServerIdChange();
+	void saveCurrentItem();
 	
 private:
 	
-	GtkWidget* createMenuBar();
 	GtkTreeModel *createTreeModel();
 	GtkWidget *createViewAndModel();
-	void loadItem();
 	void drawCurrentSprite();
 	void putPixel(GdkPixbuf *pixbuf, int x, int y, guchar red, guchar green, guchar blue, guchar alpha);
 	
-	// Events
 	void onSpriteImageNotFound();
-	static void onDestroyEvent(GtkWidget *widget, gpointer data);
-	static gboolean onDeleteEvent(GtkWidget *widget, GdkEvent *event, gpointer data);
-	static void onSpinClientIdChange(GtkWidget *widget, GtkSpinButton *spin);
-	static void onSpinServerIdChange(GtkWidget *widget, GtkSpinButton *spin);
-	static void saveCurrentItem(GtkWidget *widget, gpointer data);
 	
 	//vars
 	static long m_curItemServerId;
 	static long m_curItemClientId;
 	
-	GtkWidget *m_mainWindow;
+	GtkWidget *m_windowMain;
 	GtkWidget *m_imageSprite;
 	GtkWidget *m_entryName;
 	GtkWidget *m_entryDescription;
