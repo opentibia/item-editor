@@ -318,6 +318,7 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 			g_itemsTypes->exportToXml("itemnamesExport.xml");
 			break;
 		case ID_HELP_ABOUT:
+			MessageBox(h, OTIE_VERSION_STRING, "OTItemEditor", MB_OK | MB_ICONINFORMATION) ;
 			break;
 		default:
 			//context menu
@@ -918,9 +919,17 @@ bool GUIWin::saveCurrentItem(HWND h)
 	SpriteType *sType;
 	sType = g_itemsSprites->getSprite(iType->clientid);
 	if(sType){
+		iType->speed = sType->speed;
 		iType->miniMapColor = sType->miniMapColor;
 		iType->subParam07 = sType->subParam07;
 		iType->subParam08 = sType->subParam08;
+		iType->lightLevel = sType->lightLevel;
+		iType->lightColor = sType->lightColor;
+		iType->lightColor = sType->lightColor;
+		iType->lightColor = sType->lightColor;
+		iType->isHangable = sType->isHangable;
+		iType->isHorizontal = sType->isHorizontal;
+		iType->isVertical = sType->isVertical;
 	}
 
 
