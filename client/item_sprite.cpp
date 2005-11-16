@@ -286,7 +286,7 @@ bool ItemsSprites::loadFromDat(const char *filename)
 	int speed;
 	short read_short;
 	unsigned short us;
-	
+
 	fp = fopen(filename, "rb");
 	if(!fp)
 		return false;
@@ -302,24 +302,20 @@ bool ItemsSprites::loadFromDat(const char *filename)
 
 	fseek(fp, 0x0C, SEEK_SET);
 	// loop throw all Items until we reach the end of file
-	while(ftell(fp) < size && id <= SpriteType::maxClientId)
-	{
+	while(ftell(fp) < size && id <= SpriteType::maxClientId){
 		SpriteType *sType = new SpriteType();
 		sType->id = id;
 
 		// read the options until we find a 0xff
 		int optbyte;
-		
-		while (((optbyte = fgetc(fp)) >= 0) && (optbyte != 0xFF))
-		{                                                            
-			switch (optbyte)
-			{
+
+		while(((optbyte = fgetc(fp)) >= 0) && (optbyte != 0xFF)){                                                            
+			switch(optbyte){
 			case 0x00: //is groundtile
 				fread(&read_short, 2, 1, fp);
 				speed = read_short;
 				sType->speed = speed;
 				sType->group = ITEM_GROUP_GROUND;
-
 				break;
 			case 0x01: //all OnTop
 				sType->alwaysOnTop = true;
@@ -327,102 +323,103 @@ bool ItemsSprites::loadFromDat(const char *filename)
 			case 0x02: //can walk trough (open doors, arces, bug pen fence ??)
 				sType->alwaysOnTop = true;
 				break;
-			case 0x03: //is a container
+			case 0x03: //can walk trough (arces)
+				sType->alwaysOnTop = true;
+				break;
+			case 0x04: //is a container
 				sType->group = ITEM_GROUP_CONTAINER;
 				break;
-			case 0x04: //is stackable
+			case 0x05: //is stackable
 				sType->stackable = true;
 				break;
-			case 0x05: //is useable
+			case 0x06: //ladders
+				break;
+			case 0x07: //is useable
 				sType->useable = true;
 				break;
-			case 0x0A: //liquid with states
+			case 0x08: //writtable objects
+				sType->group = ITEM_GROUP_WRITEABLE;
+				sType->readable = true;
+				fread(&us, sizeof(us), 1, fp); //unknown, values like 80, 200, 512, 1024, 2000
+				sType->subParam07 = us;
+				break;
+			case 0x09: //writtable objects that can't be edited 
+				sType->readable = true;
+				fread(&us, sizeof(us), 1, fp); //unknown, all have the value 1024
+				sType->subParam08 = us;
+				break;
+			case 0x0A: //can contain fluids
+				sType->group = ITEM_GROUP_FLUID;
+				break;
+			case 0x0B: //liquid with states 
 				sType->group = ITEM_GROUP_SPLASH;
 				break;
-			case 0x0B: //is blocking
+			case 0x0C: //is blocking
 				sType->blockSolid = true;
 				break;
-			case 0x0C: //is no moveable
+			case 0x0D: //is no moveable
 				sType->moveable = false;
 				break;
-			case 0x0F: //can be equipped
+			case 0x0E: //blocks missiles (walls, magic wall etc)
+				sType->blockProjectile = true;
+				break;
+			case 0x0F: //blocks monster movement (flowers, parcels etc)
+				sType->blockPathFind = true;
+				break;
+			case 0x10: //can be equipped
 				sType->pickupable = true;
 				break;
-			case 0x10: //light info
+			case 0x11: //wall items
+				sType->isHangable = true;
+				break;
+			case 0x12:
+				sType->isHorizontal = true;
+				break;
+			case 0x13:
+				sType->isVertical = true;
+				break;
+			case 0x14: //rotable items
+				sType->rotable = true;
+				break;
+			case 0x15: //light info .. //sprite-drawing related
 				unsigned short lightlevel;
 				fread(&lightlevel, sizeof(lightlevel), 1, fp);
 				sType->lightLevel = lightlevel;
-
 				unsigned short lightcolor;
 				fread(&lightcolor, sizeof(lightcolor), 1, fp);
 				sType->lightColor = lightcolor;
 				break;
-			case 0x06: //ladder up (id 1386) why a group for just 1 item ???  			
+			case 0x17:  //floor change 
 				break;
-			case 0x09: //can contain fluids
-				sType->group = ITEM_GROUP_FLUID;
+			case 0x18: //???
+				fgetc(fp);
+				fgetc(fp);
+				fgetc(fp);
+				fgetc(fp);
 				break;
-			case 0x0D: //blocks missiles (walls, magic wall etc)
-				sType->blockProjectile = true;
-				break;
-			case 0x0E: //blocks monster movement (flowers, parcels etc)
-				sType->blockPathFind = true;
-				break;
-			case 0x11: //can see what is under (ladder holes, stairs holes etc)
-				break;
-			case 0x12: //ground tiles that don't cause level change
-				//iType->noFloorChange = true;
-				break;
-			case 0x18: //draw with height offset for all parts (2x2) of the sprite
-				break;
-			case 0x14: //sprite-drawing related
-				break;
-			case 0x07: //writtable objects
-				//sType->group = ITEM_GROUP_WRITEABLE;
-				sType->readable = true;
-
-				fread(&us, sizeof(us), 1, fp); //unknown, values like 80, 200, 512, 1024, 2000
-				sType->subParam07 = us;
-				break;
-			case 0x08: //writtable objects that can't be edited 
-				sType->readable = true;
-
-				fread(&us, sizeof(us), 1, fp); //unknown, all have the value 1024
-				sType->subParam08 = us;
-				break;
-			case 0x13: //mostly blocking items, but also items that can pile up in level (boxes, chairs etc)
+			case 0x19:
 				sType->hasHeight = true;
 				fgetc(fp); //always 8
 				fgetc(fp); //always 0
 				break;
-			case 0x16: //ground, blocking items and mayby some more 
+			case 0x1A://draw with height offset for all parts (2x2) of the sprite
+				break; 
+			case 0x1C:
 				unsigned short color;
 				fread(&color, sizeof(color), 1, fp);
 				sType->miniMapColor = color;
 				break;
-			case 0x1A: 
-				//7.4 (change no data ?? ) action that can be performed (doors-> open, hole->open, book->read) not all included ex. wall torches
-				sType->isHorizontal = true;
-				break;  
-			case 0x1B:  //walls 2 types of them same material (total 4 pairs)
-				sType->isVertical = true;
-				break;
-			case 0x1D:  //line spot ...
+			case 0x1D:  //line spot
 				int tmp;
 				tmp = fgetc(fp); // 86 -> openable holes, 77-> can be used to go down, 76 can be used to go up, 82 -> stairs up, 79 switch,    
 				if(tmp == 0x58)
 					sType->readable = true;
 				fgetc(fp); // always 4
 				break;         
-			case 0x19:  //wall items
-				sType->isHangable = true;
-				break;    
-			case 0x17:  //seems like decorables with 4 states of turning (exception first 4 are unique statues)                 
-				sType->rotable = true;
+			case 0x1E: //ground items
 				break;
-			case 0x1C:  //monster has animation even when iddle (rot, wasp, slime, fe)
-				break;            
 			default:
+				optbyte = optbyte;
 				//std::cout << "unknown byte: " << (unsigned short)optbyte << std::endl;
 				return false;
 				break;
@@ -440,8 +437,9 @@ bool ItemsSprites::loadFromDat(const char *filename)
 		sType->xdiv        = fgetc(fp);
 		sType->ydiv        = fgetc(fp);
 		sType->animcount   = fgetc(fp);
-		
-		sType->numsprites = sType->width * sType->height * sType->blendframes * sType->xdiv * sType->ydiv * sType->animcount;
+		unsigned char unk1 = fgetc(fp);
+
+		sType->numsprites = sType->width * sType->height * sType->blendframes * sType->xdiv * sType->ydiv * sType->animcount * unk1;
 		// Dynamic memoy reserve
 		sType->imageID = new unsigned short[sType->numsprites];
 		
@@ -471,7 +469,6 @@ bool ItemsSprites::loadFromDat(const char *filename)
 	}
 
 	fclose(fp);
-	
 	datLoaded = true;
 	
 	return true;
@@ -512,7 +509,6 @@ unsigned short ItemsSprites::getItemSpriteID(unsigned short item_id, unsigned sh
 InternalSprite ItemsSprites::getSpriteInternalFormat(unsigned short item_id, unsigned short frame)
 {
 	unsigned short spriteid = getItemSpriteID(item_id, frame);
-
 	SpriteMap::iterator it = sprite.find(spriteid);
 	
 	if(it != sprite.end()) // Found
@@ -544,4 +540,3 @@ bool ItemsSprites::loadHash()
 	}
 	return true;
 }
-

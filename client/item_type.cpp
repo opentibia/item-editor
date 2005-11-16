@@ -1812,10 +1812,10 @@ int ItemsTypes::saveOtb(const char *filename)
 	memset(&vi, '\0', sizeof(VERSIONINFO));
 
 	vi.dwMajorVersion = 1;
-	vi.dwMinorVersion = 1;
+	vi.dwMinorVersion = 2;
 	vi.dwBuildNumber = ItemType::dwBuildNumber + 1;
 	char str_version[128];
-	sprintf(str_version, "OTB 1.1.%d-7.5", vi.dwBuildNumber);
+	sprintf(str_version, "OTB 1.2.%d-7.55", vi.dwBuildNumber);
 	strcpy(vi.CSDVersion, str_version);
 
 	f->setProps(ROOT_ATTR_VERSION, &vi, sizeof(VERSIONINFO));
