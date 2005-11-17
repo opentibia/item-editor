@@ -217,6 +217,9 @@ bool ItemType::compareOptions(const SpriteType *stype)
 	if(blockPathFind != stype->blockPathFind)
 		return false;
 
+	if(alwaysOnTop != stype->alwaysOnTop)
+		return false;
+
 	if(stackable != stype->stackable)
 		return false;
 
