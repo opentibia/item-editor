@@ -102,7 +102,6 @@ private:
 	GtkWidget *m_comboSlot;
 	GtkWidget *m_spinReadOnlyId;
 	GtkWidget *m_spinRotateTo;
-	GtkWidget *m_spinSpeed;
 	GtkWidget *m_spinMaxItems;
 	GtkWidget *m_comboSkill;
 	GtkWidget *m_comboAmuType;

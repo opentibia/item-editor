@@ -167,7 +167,6 @@ void GUILinux::initGUI()
 	m_comboSlot =  glade_xml_get_widget(g_xmlInterface, "comboSlot");
 	m_spinReadOnlyId = glade_xml_get_widget(g_xmlInterface, "spinReadOnlyId");
 	m_spinRotateTo = glade_xml_get_widget(g_xmlInterface, "spinRotateTo");
-	m_spinSpeed = glade_xml_get_widget(g_xmlInterface, "spinSpeed");
 	
 	m_spinMaxItems = glade_xml_get_widget(g_xmlInterface, "spinMaxItems");
 	m_comboSkill =  glade_xml_get_widget(g_xmlInterface, "comboSkill");
@@ -267,7 +266,6 @@ void GUILinux::loadItem()
 		gtk_combo_box_set_active(GTK_COMBO_BOX(m_comboSlot), iType->slot_position);
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(m_spinReadOnlyId), iType->readOnlyId);
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(m_spinRotateTo), iType->rotateTo);
-		gtk_spin_button_set_value(GTK_SPIN_BUTTON(m_spinSpeed), iType->speed);
 		
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(m_spinMaxItems), iType->maxItems);
 		gtk_combo_box_set_active(GTK_COMBO_BOX(m_comboSkill), iType->weaponType);
@@ -304,7 +302,6 @@ void GUILinux::loadItem()
 		gtk_combo_box_set_active(GTK_COMBO_BOX(m_comboSlot), 0);
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(m_spinReadOnlyId), 0);
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(m_spinRotateTo), 0);
-		gtk_spin_button_set_value(GTK_SPIN_BUTTON(m_spinSpeed), 0);
 		
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(m_spinMaxItems), 0);
 		gtk_combo_box_set_active(GTK_COMBO_BOX(m_comboSkill), 0);
@@ -619,11 +616,19 @@ void GUILinux::saveCurrentItem()
 	SpriteType *sType;
 	sType = g_itemsSprites->getSprite(iType->clientid);
 	if(sType){
+		iType->speed = sType->speed;
 		iType->miniMapColor = sType->miniMapColor;
 		iType->subParam07 = sType->subParam07;
 		iType->subParam08 = sType->subParam08;
+		iType->lightLevel = sType->lightLevel;
+		iType->lightColor = sType->lightColor;
+		iType->lightColor = sType->lightColor;
+		iType->lightColor = sType->lightColor;
+		iType->isHangable = sType->isHangable;
+		iType->isHorizontal = sType->isHorizontal;
+		iType->isVertical = sType->isVertical;
 	}
-	
+
 	iType->blockSolid = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_gui->m_checkBlocking));
 	iType->alwaysOnTop = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_gui->m_checkAlwaysTop));
 	iType->stackable = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_gui->m_checkStackable));
@@ -644,7 +649,6 @@ void GUILinux::saveCurrentItem()
 	iType->defence = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(g_gui->m_spinDefence));
 	iType->armor = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(g_gui->m_spinArmor));
 	iType->maxItems = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(g_gui->m_spinMaxItems));
-	iType->speed = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(g_gui->m_spinSpeed));
 	iType->readOnlyId = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(g_gui->m_spinReadOnlyId));
 	iType->rotateTo = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(g_gui->m_spinRotateTo));
 
