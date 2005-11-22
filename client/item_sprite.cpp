@@ -436,8 +436,8 @@ bool ItemsSprites::loadFromDat(const char *filename)
 		sType->blendframes = fgetc(fp);
 		sType->xdiv        = fgetc(fp);
 		sType->ydiv        = fgetc(fp);
-		sType->animcount   = fgetc(fp);
 		unsigned char unk1 = fgetc(fp);
+		sType->animcount   = fgetc(fp);
 
 		sType->numsprites = sType->width * sType->height * sType->blendframes * sType->xdiv * sType->ydiv * sType->animcount * unk1;
 		// Dynamic memoy reserve
