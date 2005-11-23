@@ -22,6 +22,17 @@
 #include "../client/definitions.hpp"
 #include "resource.h"
 
+#ifdef __GNUC__
+#define _WIN32_IE	0x0500 
+#define  WINVER  0x0500
+#define _WIN32_WINNT 0x0501
+#define max(a, b)       ((a) >? (b))
+#define min(a, b)       ((a) <? (b))
+#endif
+
+#include <windows.h>
+#include <commctrl.h> 
+
 #ifdef STRICT
 #undef STRICT
 #endif
@@ -1477,10 +1488,10 @@ HBITMAP GUIDraw::getBitmap(const InternalSprite sprite)
 void GUIDraw::releaseBitmaps()
 {
 	BitmapMap::iterator it;
-	for(it = m_bitmaps.begin(); it != m_bitmaps.end();)
+	for(it = m_bitmaps.begin(); it != m_bitmaps.end(); it++)
 	{
 		DeleteObject(it->second);
-		it = m_bitmaps.erase(it);
+		m_bitmaps.erase(it);
 	}
 
 }

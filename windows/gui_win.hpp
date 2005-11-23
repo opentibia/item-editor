@@ -197,7 +197,9 @@ private:
 
 	static BitmapMap m_bitmaps;
 
+    #ifndef __GNUC__
 	friend GUIWin;
+	#endif
 };
 
 #endif
