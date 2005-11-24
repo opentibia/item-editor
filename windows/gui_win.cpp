@@ -30,9 +30,6 @@
 #define min(a, b)       ((a) <? (b))
 #endif
 
-#include <windows.h>
-#include <commctrl.h> 
-
 #ifdef STRICT
 #undef STRICT
 #endif
@@ -609,6 +606,7 @@ LRESULT GUIWin::onAutoFindImages(HWND h)
 		ItemMap::iterator it;
 		for(it = g_itemsTypes->getTypes(); it != g_itemsTypes->getEnd(); it++){
 			if(it->second->foundNewImage == false && memcmp(hash, it->second->sprHash, 16) == 0){
+
 				if(it->second->compareOptions(g_itemsSprites->getSprite(i))){
 					it->second->foundNewImage = true;
 					it->second->clientid = i;
@@ -1488,10 +1486,10 @@ HBITMAP GUIDraw::getBitmap(const InternalSprite sprite)
 void GUIDraw::releaseBitmaps()
 {
 	BitmapMap::iterator it;
-	for(it = m_bitmaps.begin(); it != m_bitmaps.end(); it++)
+	for(it = m_bitmaps.begin(); it != m_bitmaps.end();)
 	{
 		DeleteObject(it->second);
-		m_bitmaps.erase(it);
+		m_bitmaps.erase(it++);
 	}
 
 }

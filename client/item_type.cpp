@@ -1160,7 +1160,7 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 									#ifdef __GNUC__
                                     __asm__("int $3");
                                     #else
-                                    asm int 3
+                                    __asm int 3
                                     #endif
 #endif
 								}
@@ -1169,7 +1169,7 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 									#ifdef __GNUC__
                                     __asm__("int $3");
                                     #else
-                                    asm int 3
+                                    __asm int 3
                                     #endif
 #endif
 							}
@@ -1189,7 +1189,7 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
                                 #ifdef __GNUC__
 							    __asm__("int $3");
 							    #else
-							    asm int 3
+							    __asm int 3
 							    #endif
 #endif
 							}								
@@ -1202,7 +1202,7 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 						   #ifdef __GNUC__
                            __asm__("int $3");
                            #else
-                           asm int 3
+                           __asm int 3
                            #endif
 #endif
 					}//skills
@@ -1233,7 +1233,7 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 					    #ifdef __GNUC__
 						__asm__("int $3");
 						#else
-						asm int 3
+						__asm int 3
 						#endif
 #endif
 
@@ -1254,7 +1254,7 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 						    #ifdef __GNUC__
 							__asm__("int $3");
 							#else
-							asm int 3
+							__asm int 3
 							#endif
 #endif
 					}
@@ -1263,7 +1263,7 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 					    #ifdef __GNUC__
 						__asm__("int $3");
 						#else
-						asm int 3
+						__asm int 3
 						#endif
 #endif
 
@@ -1284,7 +1284,7 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 					    #ifdef __GNUC__
 						__asm__("int $3");
 						#else
-						asm int 3
+						__asm int 3
 						#endif
 #endif
 				}
@@ -1300,7 +1300,7 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 					    #ifdef __GNUC__
 						__asm__("int $3");
 						#else
-						asm int 3
+						__asm int 3
 						#endif
 #endif
 				}
@@ -1324,7 +1324,7 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 						    #ifdef __GNUC__
 							__asm__("int $3");
 							#else
-							asm int 3
+							__asm int 3
 							#endif
 #endif
 					}
@@ -1333,7 +1333,7 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 					    #ifdef __GNUC__
 	       				__asm__("int $3");
 	       				#else
-	       				asm int 3
+	       				__asm int 3
 	       				#endif
 #endif
 				}
