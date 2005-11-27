@@ -1413,16 +1413,16 @@ ItemType* ItemsTypes::getTypeBySrpite(int sprite)
 
 int ItemsTypes::loadOtb(const char *filename)
 {
-	ItemLoader *f = new ItemLoader();
-	if(!f->openFile(filename, false)) {
-		return f->getError();
+	ItemLoader f;
+	if(!f.openFile(filename, false, true)) {
+		return f.getError();
 	}
 	
 	unsigned long type,len;
 	const unsigned char* data;
 
-	NODE node = f->getChildNode(NULL, type);
-	data = f->getProps(node, len);
+	NODE node = f.getChildNode(NULL, type);
+	data = f.getProps(node, len);
 	//4 byte flags
 	//attributes (optional)
 	//0x01 = version data
@@ -1448,12 +1448,12 @@ int ItemsTypes::loadOtb(const char *filename)
 		ItemType::dwBuildNumber = vi.dwBuildNumber;
 	}
 	
-	node = f->getChildNode(node, type);
+	node = f.getChildNode(node, type);
 
 	while(node != NO_NODE) {
-		data = f->getProps(node, len);
-		if(data == NULL && f->getError() != ERROR_NONE)
-			return f->getError();
+		data = f.getProps(node, len);
+		if(data == NULL && f.getError() != ERROR_NONE)
+			return f.getError();
 		
 		flags_t flags;
 		if(data != NULL) {
@@ -1839,7 +1839,7 @@ int ItemsTypes::loadOtb(const char *filename)
 			addType(sType->id, sType);
 		}
 
-		node = f->getNextNode(node, type);
+		node = f.getNextNode(node, type);
 	}
 	
 	return ERROR_NONE;

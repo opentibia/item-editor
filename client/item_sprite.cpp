@@ -300,7 +300,13 @@ bool ItemsSprites::loadFromDat(const char *filename)
 	SpriteType::maxClientId = read_short;
 	SpriteType::minClientId = 100;
 
-	fseek(fp, 0x0C, SEEK_SET);
+	fread(&read_short, 2, 1, fp);
+	unsigned short monsters = read_short;
+	fread(&read_short, 2, 1, fp);
+	unsigned short effects = read_short;
+	fread(&read_short, 2, 1, fp);
+	unsigned short distance = read_short;
+
 	// loop throw all Items until we reach the end of file
 	while(ftell(fp) < size && id <= SpriteType::maxClientId){
 		SpriteType *sType = new SpriteType();
@@ -403,7 +409,9 @@ bool ItemsSprites::loadFromDat(const char *filename)
 				fgetc(fp); //always 0
 				break;
 			case 0x1A://draw with height offset for all parts (2x2) of the sprite
-				break; 
+				break;
+			case 0x1B://some monsters
+				break;
 			case 0x1C:
 				unsigned short color;
 				fread(&color, sizeof(color), 1, fp);
