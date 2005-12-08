@@ -50,6 +50,7 @@ ItemType::ItemType()
 	blockPathFind = false;
 
 	alwaysOnTop	= false;
+	alwaysOnTopOrder = 0;
 	stackable	= false;
 	useable		= false;
 	moveable	= true;
@@ -137,6 +138,7 @@ ItemType::ItemType(unsigned short _id, const SpriteType *stype)
 	blockPathFind = stype->blockPathFind;
 
 	alwaysOnTop = stype->alwaysOnTop;
+	alwaysOnTopOrder = stype->alwaysOnTopOrder;
 	stackable = stype->stackable ;
 	useable = stype->useable;
 	moveable = stype->moveable;
@@ -1810,6 +1812,15 @@ int ItemsTypes::loadOtb(const char *filename)
 								sType->lightColor = lb2.lightColor;
 								break;
 							}
+							
+							case ITEM_ATTR_TOPORDER:
+							{
+								if(datalen != sizeof(unsigned char))
+									return ERROR_INVALID_FORMAT;
+
+								memcpy(&sType->alwaysOnTopOrder, p, sizeof(unsigned char));
+								break;
+							}
 
 							default:
 								delete sType;
@@ -2051,8 +2062,11 @@ int ItemsTypes::saveOtb(const char *filename)
 		if(it->second->floorChangeWest)
 			flags |= FLAG_FLOORCHANGEWEST;
 		
-		if(it->second->alwaysOnTop)
+		if(it->second->alwaysOnTop){
 			flags |= FLAG_ALWAYSONTOP;
+
+			saveAttr.push_back(ITEM_ATTR_TOPORDER);
+		}
 		
 		if(it->second->readable)
 			flags |= FLAG_READABLE;
@@ -2199,6 +2213,11 @@ int ItemsTypes::saveOtb(const char *filename)
 					lb2.lightLevel = it->second->lightLevel;
 					lb2.lightColor = it->second->lightColor;
 					f->setProps(ITEM_ATTR_LIGHT2, &lb2, sizeof(lb2));
+					break;
+				}
+				case ITEM_ATTR_TOPORDER:
+				{
+					f->setProps(ITEM_ATTR_TOPORDER, &it->second->alwaysOnTopOrder, sizeof(it->second->alwaysOnTopOrder));
 					break;
 				}
 			}

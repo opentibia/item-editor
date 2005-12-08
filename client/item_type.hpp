@@ -86,6 +86,8 @@ enum itemattrib_t{
 	ITEM_ATTR_WRITEABLE2,
 	ITEM_ATTR_LIGHT2,
 
+	ITEM_ATTR_TOPORDER,
+
 	ITEM_ATTR_LAST
 };
 
@@ -162,7 +164,7 @@ struct decayBlock2{
 	unsigned short decayTime;
 };
 
-struct weaponBlock2 {
+struct weaponBlock2{
 	unsigned char weaponType;
 	unsigned char amuType;
 	unsigned char shootType;
@@ -170,23 +172,23 @@ struct weaponBlock2 {
 	unsigned char defence;
 };
 
-struct amuBlock2 {
+struct amuBlock2{
 	unsigned char amuType;
 	unsigned char shootType;
 	unsigned char attack;
 };
 
-struct armorBlock2 {
+struct armorBlock2{
 	unsigned short armor;
 	double weight;
 	unsigned short slot_position;
 };
 
-struct writeableBlock2 {
+struct writeableBlock2{
 	unsigned short readOnlyId;
 };
 
-struct lightBlock2 {
+struct lightBlock2{
 	unsigned short lightLevel;
 	unsigned short lightColor;
 };
@@ -283,6 +285,7 @@ public:
 	bool blockPathFind;
 
 	bool alwaysOnTop;
+	unsigned char alwaysOnTopOrder;
 	bool stackable;
 	bool useable;
 	bool moveable;

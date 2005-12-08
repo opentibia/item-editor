@@ -52,6 +52,7 @@ SpriteType::SpriteType()
 	blockPathFind = false;
 	blockProjectile = false;
 	alwaysOnTop = false;
+	alwaysOnTopOrder = 0;
 	stackable = false;
 	useable = false;
 	moveable = true;
@@ -147,6 +148,12 @@ bool SpriteType::compareOptions(const SpriteType *stype)
 	if(isHangable != stype->isHangable)
 		return false;
 
+	//if(alwaysOnTop != stype->alwaysOnTop)
+	//	return false;
+
+	//if(alwaysOnTopOrder != stype->alwaysOnTopOrder)
+	//	return false;
+	
 	return true;
 }
 
@@ -314,7 +321,7 @@ bool ItemsSprites::loadFromDat(const char *filename)
 
 		// read the options until we find a 0xff
 		int optbyte;
-
+	
 		while(((optbyte = fgetc(fp)) >= 0) && (optbyte != 0xFF)){                                                            
 			switch(optbyte){
 			case 0x00: //is groundtile
@@ -325,12 +332,15 @@ bool ItemsSprites::loadFromDat(const char *filename)
 				break;
 			case 0x01: //all OnTop
 				sType->alwaysOnTop = true;
+				sType->alwaysOnTopOrder = 1;
 				break;
 			case 0x02: //can walk trough (open doors, arces, bug pen fence ??)
 				sType->alwaysOnTop = true;
+				sType->alwaysOnTopOrder = 2;
 				break;
 			case 0x03: //can walk trough (arces)
 				sType->alwaysOnTop = true;
+				sType->alwaysOnTopOrder = 3;
 				break;
 			case 0x04: //is a container
 				sType->group = ITEM_GROUP_CONTAINER;

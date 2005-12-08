@@ -59,6 +59,7 @@ public:
 	bool blockPathFind;
 
 	bool alwaysOnTop;
+	unsigned char alwaysOnTopOrder;
 	bool stackable;
 	bool useable;
 	bool moveable;
