@@ -464,7 +464,7 @@ bool ItemsSprites::loadFromDat(const char *filename)
 		// Read the sprite ids
 		for(int i = 0; i < sType->numsprites; ++i) {
 			fread(&sType->imageID[i], sizeof(unsigned short), 1, fp);
-			Sprite *newSprite = new Sprite();
+			//Sprite *newSprite = new Sprite();
 			/*if(id == 460){
 				g_gui->loadSpriteInternalTransparent(0xFF0000,&newSprite->internal);
 				sType->imageID[i] = 0xF000;
@@ -473,12 +473,12 @@ bool ItemsSprites::loadFromDat(const char *filename)
 				g_gui->loadSpriteInternalTransparent(0xFFFF00,&newSprite->internal);
 				sType->imageID[i] = 0xF001;
 			}*/
-			newSprite->id = sType->imageID[i];
 			// Sprite added to the SpriteMap
-			if(i < sType->width * sType->height * sType->blendframes)
+			if(i < sType->width * sType->height * sType->blendframes){
+				Sprite *newSprite = new Sprite();
+				newSprite->id = sType->imageID[i];
 				sprite[sType->imageID[i]] = newSprite;
-			else
-				delete newSprite;
+			}	
 		}
 		
 		// store the found item

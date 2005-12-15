@@ -152,6 +152,14 @@ ItemType::ItemType(unsigned short _id, const SpriteType *stype)
 	subParam07 = stype->subParam07;
 	subParam08 = stype->subParam08;
 
+	lightLevel = stype->lightLevel;
+	lightColor = stype->lightColor;
+
+	isVertical = stype->isVertical;
+	isHorizontal = stype->isHorizontal;
+
+	isHangable = stype->isHangable;
+
 	#ifdef __SPRITE_SEARCH__
 	memcpy(sprHash, stype->sprHash, 16);
 	#else
@@ -221,6 +229,9 @@ bool ItemType::compareOptions(const SpriteType *stype)
 
 	if(alwaysOnTop != stype->alwaysOnTop)
 		return false;
+
+	//if(alwaysOnTopOrder != stype->alwaysOnTopOrder)
+	//	return false;
 
 	if(stackable != stype->stackable)
 		return false;
@@ -1870,10 +1881,10 @@ int ItemsTypes::saveOtb(const char *filename)
 	memset(&vi, '\0', sizeof(VERSIONINFO));
 
 	vi.dwMajorVersion = 1;
-	vi.dwMinorVersion = CLIENT_VERSION_755;
+	vi.dwMinorVersion = CLIENT_VERSION_760;
 	vi.dwBuildNumber = ItemType::dwBuildNumber + 1;
 	char str_version[128];
-	sprintf(str_version, "OTB 1.2.%d-7.55", vi.dwBuildNumber);
+	sprintf(str_version, "OTB %d.%d.%d-7.60", vi.dwMajorVersion, vi.dwMinorVersion, vi.dwBuildNumber);
 	strcpy(vi.CSDVersion, str_version);
 
 	f->setProps(ROOT_ATTR_VERSION, &vi, sizeof(VERSIONINFO));
@@ -1925,12 +1936,26 @@ int ItemsTypes::saveOtb(const char *filename)
 				saveAttr.push_back(ITEM_ATTR_08);
 				it->second->subParam08 = g_itemsSprites->getSprite(it->second->clientid)->subParam08;
 			}
-			//if(g_itemsSprites->getSprite(it->second->clientid)->lightLevel != 0 || 
-			//	g_itemsSprites->getSprite(it->second->clientid)->lightColor != 0){
-			//	it->second->lightLevel = g_itemsSprites->getSprite(it->second->clientid)->lightLevel;
-			//	it->second->lightColor = g_itemsSprites->getSprite(it->second->clientid)->lightColor;
-			//	saveAttr.push_back(ITEM_ATTR_LIGHT2);
-			//}
+			if(g_itemsSprites->getSprite(it->second->clientid)->lightLevel != 0 || 
+				g_itemsSprites->getSprite(it->second->clientid)->lightColor != 0 || 
+				it->second->lightLevel != 0 ||
+				it->second->lightColor != 0){
+				it->second->lightLevel = g_itemsSprites->getSprite(it->second->clientid)->lightLevel;
+				it->second->lightColor = g_itemsSprites->getSprite(it->second->clientid)->lightColor;
+				saveAttr.push_back(ITEM_ATTR_LIGHT2);
+			}
+			switch(g_itemsSprites->getSprite(it->second->clientid)->group){
+			case ITEM_GROUP_GROUND:
+			case ITEM_GROUP_CONTAINER:
+			case ITEM_GROUP_SPLASH:
+			case ITEM_GROUP_FLUID:
+				it->second->group = g_itemsSprites->getSprite(it->second->clientid)->group;
+				break;
+			}
+			it->second->speed = g_itemsSprites->getSprite(it->second->clientid)->speed;
+			it->second->useable = g_itemsSprites->getSprite(it->second->clientid)->useable;
+			it->second->blockSolid = g_itemsSprites->getSprite(it->second->clientid)->blockSolid;
+			it->second->alwaysOnTopOrder = g_itemsSprites->getSprite(it->second->clientid)->alwaysOnTopOrder;
 		}
 #endif
 		if(it->second->lightLevel != 0 || it->second->lightColor != 0) {
