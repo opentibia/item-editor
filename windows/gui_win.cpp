@@ -122,10 +122,11 @@ void GUIWin::initGUI()
 		if(ret == -1){
 			return;
 		}
+
 		if((!TranslateAccelerator(hDlg, haccel, &msg)) && !IsDialogMessage(hDlg, &msg)){ 
 			TranslateMessage (&msg); 
 			DispatchMessage (&msg); 
-		} 
+		}
 	}
 	DestroyWindow(hDlg);
 }
@@ -753,6 +754,7 @@ LRESULT GUIWin::onInitDialog(HWND h)
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Arrow", DIST_ARROW);
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Poison Arrow", DIST_POISONARROW);
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Burst Arrow", DIST_BURSTARROW);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Poison", DIST_POISONFIELD);
 
 	//editor types
 	createItemCombo(GetDlgItem(h, IDC_COMBO_EDITOR), "Grounds", 0);
