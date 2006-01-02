@@ -743,18 +743,18 @@ LRESULT GUIWin::onInitDialog(HWND h)
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Throwing Star", DIST_THROWINGSTAR);
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Throwing Knife", DIST_THROWINGKNIFE);
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Small Stone", DIST_SMALLSTONE);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Sudden Death", DIST_SUDDENDEATH);
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Large Rock", DIST_LARGEROCK);
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Snowball", DIST_SNOWBALL);
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Spear", DIST_SPEAR);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Fire", DIST_FIRE);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Energy", DIST_ENERGY);
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Bolt", DIST_BOLT);
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Power Bolt", DIST_POWERBOLT);
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Arrow", DIST_ARROW);
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Poison Arrow", DIST_POISONARROW);
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Burst Arrow", DIST_BURSTARROW);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Fire", DIST_FIRE);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Energy", DIST_ENERGY);
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Poison", DIST_POISONFIELD);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Sudden Death", DIST_SUDDENDEATH);
 
 	//editor types
 	createItemCombo(GetDlgItem(h, IDC_COMBO_EDITOR), "Grounds", 0);
