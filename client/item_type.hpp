@@ -89,6 +89,8 @@ enum itemattrib_t{
 
 	ITEM_ATTR_TOPORDER,
 
+	ITEM_ATTR_WRITEABLE3,
+
 	ITEM_ATTR_LAST
 };
 
@@ -187,6 +189,11 @@ struct armorBlock2{
 
 struct writeableBlock2{
 	unsigned short readOnlyId;
+};
+
+struct writeableBlock3{
+	unsigned short readOnlyId;
+	unsigned short maxTextLen;
 };
 
 struct lightBlock2{
@@ -337,6 +344,7 @@ public:
 	
 	//writeable
 	int readOnlyId;
+	int maxTextLen;
 	
 	unsigned short miniMapColor;
 	unsigned short subParam07;

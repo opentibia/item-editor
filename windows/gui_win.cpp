@@ -968,6 +968,9 @@ bool GUIWin::saveCurrentItem(HWND h)
 	if(!getEditTextInt(h, IDC_EDIT_READONLYID, iType->readOnlyId)){
 		return false;
 	}
+	if(!getEditTextInt(h, IDC_EDIT_MAXTEXTLEN, iType->maxTextLen)){
+		return false;
+	}
 	if(!getEditTextInt(h, IDC_EDIT_ROTATETO, iType->rotateTo)){
 		return false;
 	}
@@ -1058,6 +1061,7 @@ void GUIWin::loadItem(HWND h)
 		setEditTextInt(h, IDC_EDIT_MAXITEMS, iType->maxItems);
 		setEditTextInt(h, IDC_EDIT_SPEED, iType->speed);
 		setEditTextInt(h, IDC_EDIT_READONLYID, iType->readOnlyId);
+		setEditTextInt(h, IDC_EDIT_MAXTEXTLEN, iType->maxTextLen);
 		setEditTextInt(h, IDC_EDIT_ROTATETO, iType->rotateTo);
 		setEditTextDouble(h, IDC_EDIT_WEIGHT, iType->weight);
 
@@ -1115,6 +1119,7 @@ void GUIWin::loadItem(HWND h)
 		setEditTextInt(h, IDC_EDIT_MAXITEMS, 0);
 		setEditTextInt(h, IDC_EDIT_SPEED, 0);
 		setEditTextInt(h, IDC_EDIT_READONLYID, 0);
+		setEditTextInt(h, IDC_EDIT_MAXTEXTLEN, 0);
 		setEditTextInt(h, IDC_EDIT_ROTATETO, 0);
 		setEditTextDouble(h, IDC_EDIT_WEIGHT, 0);
 
@@ -1288,6 +1293,7 @@ void GUIWin::setControlState(HWND h, unsigned long flagsEdit, unsigned long flag
 	EnableWindow(GetDlgItem(h, IDC_EDIT_MAXITEMS),getFlagState(flagsEdit, IDC_EDIT_MAXITEMS_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_EDIT_SPEED),getFlagState(flagsEdit, IDC_EDIT_SPEED_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_EDIT_READONLYID),getFlagState(flagsEdit, IDC_EDIT_READONLYID_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_EDIT_MAXTEXTLEN),getFlagState(flagsEdit, IDC_EDIT_MAXTEXTLEN_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_EDIT_ROTATETO),getFlagState(flagsEdit, IDC_EDIT_ROTATETO_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_EDIT_WEIGHT),getFlagState(flagsEdit, IDC_EDIT_WEIGHT_FLAG));
 

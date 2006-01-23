@@ -96,6 +96,7 @@ bool SpriteType::compareOptions(const SpriteType *stype)
 	case ITEM_GROUP_CONTAINER:
 	case ITEM_GROUP_SPLASH:
 	case ITEM_GROUP_FLUID:
+	case ITEM_GROUP_WRITEABLE:
 		if(group != stype->group)
 			return false;
 	}
@@ -146,6 +147,9 @@ bool SpriteType::compareOptions(const SpriteType *stype)
 		return false;
 
 	if(isHangable != stype->isHangable)
+		return false;
+
+	if(readable != stype->readable)
 		return false;
 
 	//if(alwaysOnTop != stype->alwaysOnTop)

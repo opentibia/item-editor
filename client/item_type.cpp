@@ -113,6 +113,7 @@ ItemType::ItemType()
 	
 	//writeable
 	readOnlyId = 0;
+	maxTextLen = 0;
 
 	//
 	//canWalkThrough = false;
@@ -204,6 +205,7 @@ ItemType::ItemType(unsigned short _id, const SpriteType *stype)
 	
 	//writeable
 	readOnlyId = 0;
+	maxTextLen = 0;
 
 }
 
@@ -217,6 +219,7 @@ bool ItemType::compareOptions(const SpriteType *stype)
 	case ITEM_GROUP_CONTAINER:
 	case ITEM_GROUP_SPLASH:
 	case ITEM_GROUP_FLUID:
+	case ITEM_GROUP_WRITEABLE:
 		if(group != stype->group)
 			return false;
 	}
@@ -273,6 +276,9 @@ bool ItemType::compareOptions(const SpriteType *stype)
 		return false;
 
 	if(isHangable != stype->isHangable)
+		return false;
+
+	if(readable != stype->readable)
 		return false;
 
 	return true;
@@ -1812,6 +1818,19 @@ int ItemsTypes::loadOtb(const char *filename)
 								break;
 							}
 
+							case ITEM_ATTR_WRITEABLE3:
+							{
+								if(datalen != sizeof(writeableBlock3))
+									return ERROR_INVALID_FORMAT;
+
+								struct writeableBlock3 wb3;
+								memcpy(&wb3, p, sizeof(writeableBlock3));
+								sType->readOnlyId = wb3.readOnlyId;
+								sType->maxTextLen = wb3.maxTextLen;
+
+								break;
+							}
+
 							case ITEM_ATTR_LIGHT2:
 							{
 								if(datalen != sizeof(lightBlock2))
@@ -1949,9 +1968,11 @@ int ItemsTypes::saveOtb(const char *filename)
 			case ITEM_GROUP_CONTAINER:
 			case ITEM_GROUP_SPLASH:
 			case ITEM_GROUP_FLUID:
+			case ITEM_GROUP_WRITEABLE:
 				it->second->group = g_itemsSprites->getSprite(it->second->clientid)->group;
 				break;
 			}
+			it->second->readable = g_itemsSprites->getSprite(it->second->clientid)->readable;
 			it->second->speed = g_itemsSprites->getSprite(it->second->clientid)->speed;
 			it->second->useable = g_itemsSprites->getSprite(it->second->clientid)->useable;
 			it->second->blockSolid = g_itemsSprites->getSprite(it->second->clientid)->blockSolid;
@@ -2017,8 +2038,8 @@ int ItemsTypes::saveOtb(const char *filename)
 
 			case ITEM_GROUP_WRITEABLE:
 			{
-				if(it->second->readOnlyId) {
-					saveAttr.push_back(ITEM_ATTR_WRITEABLE2);
+				if(it->second->readOnlyId || it->second->maxTextLen){
+					saveAttr.push_back(ITEM_ATTR_WRITEABLE3);
 				}
 
 				break;
@@ -2192,11 +2213,12 @@ int ItemsTypes::saveOtb(const char *filename)
 					f->setProps(ITEM_ATTR_MAGFIELDTYPE, &it->second->magicfieldtype, sizeof(unsigned char));
 					break;
 				}
-				case ITEM_ATTR_WRITEABLE2:
+				case ITEM_ATTR_WRITEABLE3:
 				{
-					struct writeableBlock2 wb2;
-					wb2.readOnlyId = it->second->readOnlyId;
-					f->setProps(ITEM_ATTR_WRITEABLE2, &wb2, sizeof(wb2));
+					struct writeableBlock3 wb3;
+					wb3.readOnlyId = it->second->readOnlyId;
+					wb3.maxTextLen = it->second->maxTextLen;
+					f->setProps(ITEM_ATTR_WRITEABLE3, &wb3, sizeof(wb3));
 					break;
 				}
 				case ITEM_ATTR_ROTATETO:

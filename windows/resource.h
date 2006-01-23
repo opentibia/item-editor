@@ -43,10 +43,12 @@
 #define IDC_EDIT_SPEED                  1041
 #define IDC_OPT_BLOCKPATHFIND           1042
 #define IDC_OPT_HASHEIGHT               1043
+#define IDC_EDIT_WRITETO                1044
 #define IDC_OPT_READABLE                1045
 #define IDC_SAVE_ITEM                   1046
 #define IDC_OPT_CANNOTDECAY             1047
 #define IDC_COMBO_EDITOR                1049
+#define IDC_EDIT_MAXTEXTLEN             1050
 #define ID_FILE_IMPORTXML               40001
 #define ID_FILE_IMPORTOLD               40001
 #define ID_FILE_IMPORTDAT               40002
