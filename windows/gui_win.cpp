@@ -779,6 +779,7 @@ LRESULT GUIWin::onInitDialog(HWND h)
 	menuGroups[ITEM_GROUP_KEY] = ID_MENUG_KEY;
 	menuGroups[ITEM_GROUP_SPLASH] = ID_MENUG_SPLASH;
 	menuGroups[ITEM_GROUP_FLUID] = ID_MENUG_FLUID;
+	menuGroups[ITEM_GROUP_DOOR] = ID_MENUG_DOOR;
 	menuGroups[ITEM_GROUP_NONE] = ID_MENUG_NONE;
 	popupMenu = GetSubMenu(LoadMenu(g_instance, MAKEINTRESOURCE(MENU_POPUP_ITEMS)), 0);
 
@@ -813,6 +814,7 @@ void GUIWin::createGroupsTree(HWND htree)
 	rootItems[ITEM_GROUP_KEY] = insertTreeItem(htree, "Key", NULL, ITEM_GROUP_KEY);
 	rootItems[ITEM_GROUP_SPLASH] = insertTreeItem(htree, "Splash", NULL, ITEM_GROUP_SPLASH);
 	rootItems[ITEM_GROUP_FLUID] = insertTreeItem(htree, "Fluid Container", NULL, ITEM_GROUP_FLUID);
+	rootItems[ITEM_GROUP_DOOR] = insertTreeItem(htree, "Door", NULL, ITEM_GROUP_DOOR);
 	rootItems[ITEM_GROUP_NONE] = insertTreeItem(htree, "Other", NULL, ITEM_GROUP_NONE);
 
 	//insertTreeItem(htree, "Container 1", rootItems[ITEM_GROUP_NONE], 1988);
@@ -990,6 +992,7 @@ bool GUIWin::saveCurrentItem(HWND h)
 	iType->blockPathFind = getCheckButton(h, IDC_OPT_BLOCKPATHFIND);
 	iType->hasHeight = getCheckButton(h, IDC_OPT_HASHEIGHT);
 	iType->canNotDecay = getCheckButton(h, IDC_OPT_CANNOTDECAY);
+	iType->allowDistRead = getCheckButton(h, IDC_OPT_DISTREAD);
 
 	iType->slot_position = (enum slots_t)getComboValue(h, IDC_COMBO_SLOT);
 	iType->weaponType = (enum WeaponType)getComboValue(h, IDC_COMBO_SKILL);
@@ -1077,6 +1080,7 @@ void GUIWin::loadItem(HWND h)
 		setCheckButton(h, IDC_OPT_BLOCKPATHFIND, iType->blockPathFind);
 		setCheckButton(h, IDC_OPT_HASHEIGHT, iType->hasHeight);
 		setCheckButton(h, IDC_OPT_CANNOTDECAY, iType->canNotDecay);
+		setCheckButton(h, IDC_OPT_DISTREAD, iType->allowDistRead);
 
 		setComboValue(h, IDC_COMBO_SLOT, iType->slot_position);
 		setComboValue(h, IDC_COMBO_SKILL, iType->weaponType);
@@ -1135,6 +1139,7 @@ void GUIWin::loadItem(HWND h)
 		setCheckButton(h, IDC_OPT_BLOCKPATHFIND, false);
 		setCheckButton(h, IDC_OPT_HASHEIGHT, false);
 		setCheckButton(h, IDC_OPT_CANNOTDECAY, false);
+		setCheckButton(h, IDC_OPT_DISTREAD, false);
 
 		setComboValue(h, IDC_COMBO_SLOT, SLOT_DEFAULT);
 		setComboValue(h, IDC_COMBO_SKILL, WEAPON_NONE);
@@ -1309,6 +1314,7 @@ void GUIWin::setControlState(HWND h, unsigned long flagsEdit, unsigned long flag
 	EnableWindow(GetDlgItem(h, IDC_OPT_BLOCKPATHFIND),getFlagState(flagsOpt, IDC_OPT_BLOCKPATHFIND_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_OPT_HASHEIGHT),getFlagState(flagsOpt, IDC_OPT_HASHEIGHT_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_OPT_CANNOTDECAY),getFlagState(flagsOpt, IDC_OPT_CANNOTDECAY_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_OPT_DISTREAD),getFlagState(flagsOpt, IDC_OPT_DISTREAD_FLAG));
 
 	EnableWindow(GetDlgItem(h, IDC_COMBO_SLOT),getFlagState(flagsCombo, IDC_COMBO_SLOT_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_COMBO_SKILL),getFlagState(flagsCombo, IDC_COMBO_SKILL_FLAG));

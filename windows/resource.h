@@ -43,10 +43,10 @@
 #define IDC_EDIT_SPEED                  1041
 #define IDC_OPT_BLOCKPATHFIND           1042
 #define IDC_OPT_HASHEIGHT               1043
-#define IDC_EDIT_WRITETO                1044
 #define IDC_OPT_READABLE                1045
 #define IDC_SAVE_ITEM                   1046
 #define IDC_OPT_CANNOTDECAY             1047
+#define IDC_OPT_DISTREAD                1048
 #define IDC_COMBO_EDITOR                1049
 #define IDC_EDIT_MAXTEXTLEN             1050
 #define ID_FILE_IMPORTXML               40001
@@ -78,14 +78,15 @@
 #define ID_TOOLS_SHOWALL                40034
 #define ID_TOOLS_IMPORTXMLNAMES         40035
 #define ID_TOOLS_EXPORTXMLNAMES         40036
+#define ID_MENUG_DOOR                   40037
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        114
-#define _APS_NEXT_COMMAND_VALUE         40037
-#define _APS_NEXT_CONTROL_VALUE         1048
+#define _APS_NEXT_COMMAND_VALUE         40038
+#define _APS_NEXT_CONTROL_VALUE         1049
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

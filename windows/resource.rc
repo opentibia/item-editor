@@ -180,6 +180,8 @@ BEGIN
     LTEXT           "MaxTextLen",IDC_STATIC,210,190,40,10
     EDITTEXT        IDC_EDIT_MAXTEXTLEN,252,190,50,12,ES_AUTOHSCROLL | 
                     ES_NUMBER
+    CONTROL         "DistRead",IDC_OPT_DISTREAD,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,150,262,60,12
 END
 
 
@@ -243,6 +245,7 @@ BEGIN
     "9",            ID_MENUG_RUNE,          VIRTKEY, CONTROL, NOINVERT
     "E",            ID_MENUG_WEAPON,        VIRTKEY, CONTROL, NOINVERT
     "Q",            ID_MENUG_AMMUNITION,    VIRTKEY, CONTROL, NOINVERT
+    "R",            ID_MENUG_DOOR,          VIRTKEY, CONTROL, NOINVERT
     "W",            ID_MENUG_WRITEABLE,     VIRTKEY, CONTROL, NOINVERT
 END
 

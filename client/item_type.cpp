@@ -58,6 +58,7 @@ ItemType::ItemType()
 	rotable = false;
 	readable = false;
 	canNotDecay = false;
+	allowDistRead = false;
 	
 	rotateTo = 0;
 
@@ -147,6 +148,7 @@ ItemType::ItemType(unsigned short _id, const SpriteType *stype)
 	rotable = stype->rotable;
 	readable = stype->readable;
 	canNotDecay = false;
+	allowDistRead = false;
 	speed = stype->speed;
 
 	miniMapColor = stype->miniMapColor;
@@ -1497,6 +1499,7 @@ int ItemsTypes::loadOtb(const char *filename)
 					case ITEM_GROUP_KEY:
 					case ITEM_GROUP_SPLASH:
 					case ITEM_GROUP_FLUID:
+					case ITEM_GROUP_DOOR:
 					{
 						if(!loadedFlags) {
 							//read 4 byte flags
@@ -1522,6 +1525,8 @@ int ItemsTypes::loadOtb(const char *filename)
 							sType->isVertical = ((flags & FLAG_VERTICAL) == FLAG_VERTICAL);
 							sType->isHorizontal = ((flags & FLAG_HORIZONTAL) == FLAG_HORIZONTAL);
 							sType->canNotDecay = ((flags & FLAG_CANNOTDECAY) == FLAG_CANNOTDECAY);
+							sType->allowDistRead = ((flags & FLAG_ALLOWDISTREAD) == FLAG_ALLOWDISTREAD);
+
 
 							if(p >= data + len) //no attributes
 								break;
@@ -2059,7 +2064,10 @@ int ItemsTypes::saveOtb(const char *filename)
 			{
 				break;
 			}
-
+			case ITEM_GROUP_DOOR:
+			{
+				break;
+			}
 			case ITEM_GROUP_NONE:
 			{
 				break;
@@ -2128,6 +2136,9 @@ int ItemsTypes::saveOtb(const char *filename)
 
 		if(it->second->isHorizontal)
 			flags |= FLAG_HORIZONTAL;
+
+		if(it->second->allowDistRead)
+			flags |= FLAG_ALLOWDISTREAD;
 
 		f->setFlags(flags);
 		
