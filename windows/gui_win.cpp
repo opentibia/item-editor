@@ -88,6 +88,8 @@ void getImageHash(unsigned short cid, void*output)
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 GUIDraw* GUIWin::drawEngine = NULL;
+long GUIWin::curItemClientIdSprite = 0;
+long GUIWin::curItemClientCountSprite = 0;
 long GUIWin::curItemClientId = 0;
 HTREEITEM GUIWin::curItem = NULL;
 long GUIWin::curItemServerId = 0;
@@ -270,7 +272,7 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 		GetClientRect(hwnd, &rect);
 		
 		Rectangle(tmp, 0, 0, rect.right, rect.bottom);
-		drawEngine->drawSprite(tmp, 34, 34, rect.right, rect.bottom, curItemClientId);
+		drawEngine->drawSprite(tmp, 34, 34, rect.right, rect.bottom, curItemClientIdSprite, curItemClientCountSprite);
 		drawEngine->releaseBitmaps();
 
 		ReleaseDC(GetDlgItem(h,IDC_ITEM_PIC),tmp);
@@ -306,6 +308,7 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 			return onAutoFindImages(h);
 			break;
 		case ID_TOOLS_VERIFYITEMS:
+			return onVerify(h);
 			break;
 		case ID_TOOLS_GOTOITEM:
 			return onGotoItem(h);
@@ -325,6 +328,9 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 			break;
 		case ID_TOOLS_EXPORTXMLNAMES:
 			g_itemsTypes->exportToXml("itemnamesExport.xml");
+			break;
+		case ID_TOOLS_ADDITEM:
+			return onAddItem(h);
 			break;
 		case ID_HELP_ABOUT:
 			MessageBox(h, OTIE_VERSION_STRING, "OTItemEditor", MB_OK | MB_ICONINFORMATION) ;
@@ -458,11 +464,25 @@ LRESULT GUIWin::onClientIdChange(HWND h, HWND hEdit)
 	SendMessage(hEdit, WM_GETTEXT , len + 1, (LPARAM)tmp);
 	tmp[len] = 0;
 	if(sscanf(tmp, "%d", &new_id) == 1){
-		if(new_id <= SpriteType::maxClientId && new_id >= SpriteType::minClientId){
+		if(curItemServerId >= 20000){
 			curItemClientId = new_id;
+			curItemClientIdSprite = 2874;
+			if(curItemClientId > 255){
+				curItemClientCountSprite = 0;
+			}
+			else{
+				curItemClientCountSprite = (curItemServerId - 20000) % 8;
+			}
+		}
+		else if(new_id <= SpriteType::maxClientId && new_id >= SpriteType::minClientId){
+			curItemClientId = new_id;
+			curItemClientIdSprite = new_id;
+			curItemClientCountSprite = 0;
 		}
 		else{
 			curItemClientId = 0;
+			curItemClientIdSprite = 0;
+			curItemClientCountSprite = 0;
 		}
 		invalidateSprite(h);
 	}
@@ -605,9 +625,9 @@ LRESULT GUIWin::onAutoFindImages(HWND h)
 		getImageHash(i, hash);
 		#endif
 		ItemMap::iterator it;
+
 		for(it = g_itemsTypes->getTypes(); it != g_itemsTypes->getEnd(); it++){
 			if(it->second->foundNewImage == false && memcmp(hash, it->second->sprHash, 16) == 0){
-
 				if(it->second->compareOptions(g_itemsSprites->getSprite(i))){
 					it->second->foundNewImage = true;
 					it->second->clientid = i;
@@ -620,11 +640,43 @@ LRESULT GUIWin::onAutoFindImages(HWND h)
 
 	char str[64];
 	sprintf(str , "Found %d of %d.", n, SpriteType::maxClientId - SpriteType::minClientId + 1);
-
 	MessageBox(h, str, NULL, MB_OK | MB_ICONINFORMATION);
 
 	autoFindPerformed = true;
 	loadTreeItemTypes(h);
+
+	return TRUE;
+}
+
+LRESULT GUIWin::onVerify(HWND h)
+{
+	char hash[16];
+	int n;
+	if(!saveCurrentItem(h)){
+		return TRUE;
+	}	
+	n = 0;
+	ItemMap::iterator it;
+	for(it = g_itemsTypes->getTypes(); it != g_itemsTypes->getEnd(); it++){
+		if(it->first < 20000){
+			//getImageHash(it->second->clientid, hash);
+			//if(memcmp(hash, it->second->sprHash, 16) == 0){
+				if(it->second->compareOptions(g_itemsSprites->getSprite(it->second->clientid))){
+					n++;
+				}
+				else{
+					int u = it->first;
+				}
+			//}
+//			else{
+//				int u = it->first;
+//			}
+		}
+	}
+
+	char str[64];
+	sprintf(str , "Found %d of %d.", n, SpriteType::maxClientId - SpriteType::minClientId + 1);
+	MessageBox(h, str, NULL, MB_OK | MB_ICONINFORMATION);
 
 	return TRUE;
 }
@@ -651,12 +703,15 @@ LRESULT GUIWin::onCreateMissing(HWND h)
 	}
 
 	ItemType *new_it;
+	long counter = 0;
 	int n = ItemType::maxServerId + 1;
 	bool found;
 	//FILE *f;
 	//f = fopen("noused.txt","w");
 	for(int i = SpriteType::minClientId; i <= SpriteType::maxClientId; i++){
 		found = false;
+
+
 		if(usedSprites[i] == 0){
 			//fprintf(f, "%d\n", i);
 			/*for(int j = SpriteType::minClientId; j <= SpriteType::maxClientId; j++){
@@ -671,6 +726,7 @@ LRESULT GUIWin::onCreateMissing(HWND h)
 				new_it = new ItemType(n, g_itemsSprites->getSprite(i));
 				g_itemsTypes->addType(n, new_it);
 				n++;
+				counter++;
 				usedSprites[i]++;
 			//}
 		}
@@ -679,10 +735,54 @@ LRESULT GUIWin::onCreateMissing(HWND h)
 		}
 	}
 	//fclose(f);
+	char str[64];
+	sprintf(str , "Created %d items.", counter);
+	MessageBox(h, str, NULL, MB_OK | MB_ICONINFORMATION);
+
 	delete usedSprites;
 	loadTreeItemTypes(h);
 	return TRUE;
 }
+
+LRESULT GUIWin::onAddItem(HWND h)
+{
+	if(!saveCurrentItem(h)){
+		return TRUE;
+	}
+
+	if(ItemType::minServerId == 0 || ItemType::maxServerId == 0){
+		MessageBox(h, "Wrong items set.", NULL, MB_OK | MB_ICONERROR);
+		return TRUE;
+	}
+
+	int n;
+	if(!getEditTextInt(h, IDC_EDITCID, n))
+		return TRUE;
+
+	ItemType *new_it;
+	if(n < 20000){
+		if(n != ItemType::maxServerId + 1){
+			MessageBox(h, "Not valid item id.", NULL, MB_OK | MB_ICONERROR);
+			return TRUE;
+		}
+	}
+
+	if(g_itemsTypes->getType(n) != NULL){
+		MessageBox(h, "Used item id.", NULL, MB_OK | MB_ICONERROR);
+		return TRUE;
+	}
+	
+
+	new_it = new ItemType();
+	new_it->id = n;
+	new_it->clientid = 0;
+	g_itemsTypes->addType(n, new_it);
+	
+
+	loadTreeItemTypes(h);
+	return TRUE;
+}
+
 
 LRESULT GUIWin::onGotoItem(HWND h)
 {
@@ -1081,6 +1181,9 @@ void GUIWin::loadItem(HWND h)
 		setCheckButton(h, IDC_OPT_HASHEIGHT, iType->hasHeight);
 		setCheckButton(h, IDC_OPT_CANNOTDECAY, iType->canNotDecay);
 		setCheckButton(h, IDC_OPT_DISTREAD, iType->allowDistRead);
+		setCheckButton(h, IDC_OPT_VERTICAL, iType->isVertical);
+		setCheckButton(h, IDC_OPT_HORIZONTAL, iType->isHorizontal);
+		
 
 		setComboValue(h, IDC_COMBO_SLOT, iType->slot_position);
 		setComboValue(h, IDC_COMBO_SKILL, iType->weaponType);
@@ -1408,7 +1511,7 @@ GUIDraw::~GUIDraw(){
 	DeleteDC(m_auxHDC);
 }
 
-bool GUIDraw::drawSprite(HDC desthdc, long x, long y, long maxx, long maxy, unsigned long itemid, bool drawFrame /*= false*/)
+bool GUIDraw::drawSprite(HDC desthdc, long x, long y, long maxx, long maxy, unsigned long itemid, long count, bool drawFrame /*= false*/)
 {
 
 	const SpriteType *it = g_itemsSprites->getSprite(itemid);
@@ -1426,7 +1529,13 @@ bool GUIDraw::drawSprite(HDC desthdc, long x, long y, long maxx, long maxy, unsi
 		for(long cy = 0; cy < it->height; cy++) {
 			for(long cx = 0; cx < it->width; cx++) {
 				unsigned long frameindex = spriteBase + cx + cy*it->width + frame*it->width*it->height;
-				InternalSprite sprite = g_itemsSprites->getSpriteInternalFormat(itemid,frameindex);
+				InternalSprite sprite;
+				if(count == 0){
+					sprite = g_itemsSprites->getSpriteInternalFormat(itemid,frameindex);
+				}
+				else{
+					sprite = g_itemsSprites->getSpriteInternalFormat(itemid, count);
+				}
 				HBITMAP itembmp = getBitmap(sprite);
 				if(sprite){
 					SelectObject(m_auxHDC,itembmp);

@@ -222,21 +222,25 @@ bool ItemType::compareOptions(const SpriteType *stype)
 	case ITEM_GROUP_SPLASH:
 	case ITEM_GROUP_FLUID:
 	case ITEM_GROUP_WRITEABLE:
+	case ITEM_GROUP_RUNE:
 		if(group != stype->group)
 			return false;
 	}
 	
-	if(blockSolid != stype->blockSolid)
-		return false;
+//	if(blockSolid != stype->blockSolid)
+//		return false;
 	
-	if(blockPathFind != stype->blockPathFind)
-		return false;
+//	if(blockPathFind != stype->blockPathFind)
+//		return false;
 
-	if(alwaysOnTop != stype->alwaysOnTop)
-		return false;
 
-	//if(alwaysOnTopOrder != stype->alwaysOnTopOrder)
-	//	return false;
+	if(alwaysOnTop != stype->alwaysOnTop){
+		alwaysOnTop = stype->alwaysOnTop;
+		alwaysOnTopOrder = 0;
+	}
+
+	if(alwaysOnTopOrder != stype->alwaysOnTopOrder)
+		return false;
 
 	if(stackable != stype->stackable)
 		return false;
@@ -255,7 +259,7 @@ bool ItemType::compareOptions(const SpriteType *stype)
 
 	if(speed != stype->speed)
 		return false;
-
+/*
 	if(miniMapColor != stype->miniMapColor)
 		return false;
 	
@@ -264,7 +268,7 @@ bool ItemType::compareOptions(const SpriteType *stype)
 
 	if(subParam08 != stype->subParam08)
 		return false;
-
+*/
 	if(lightLevel != stype->lightLevel)
 		return false;
 
@@ -1904,18 +1908,17 @@ int ItemsTypes::saveOtb(const char *filename)
 	VERSIONINFO vi;
 	memset(&vi, '\0', sizeof(VERSIONINFO));
 
-	vi.dwMajorVersion = 1;
-	vi.dwMinorVersion = CLIENT_VERSION_760;
-	vi.dwBuildNumber = ItemType::dwBuildNumber + 1;
+	vi.dwMajorVersion = 1; //version
+	vi.dwMinorVersion = CLIENT_VERSION_780; //client
+	vi.dwBuildNumber = ItemType::dwBuildNumber + 1; //build
 	char str_version[128];
-	sprintf(str_version, "OTB %d.%d.%d-7.60", vi.dwMajorVersion, vi.dwMinorVersion, vi.dwBuildNumber);
+	sprintf(str_version, "OTB %d.%d.%d-7.80", vi.dwMajorVersion, vi.dwMinorVersion, vi.dwBuildNumber);
 	strcpy(vi.CSDVersion, str_version);
 
 	f->setProps(ROOT_ATTR_VERSION, &vi, sizeof(VERSIONINFO));
 
 	ItemMap::iterator it;
 	for(it = item.begin(); it != item.end(); it++){
-		f->startNode(it->second->group);
 
 		flags_t flags = 0;
 		std::list<itemattrib_t> saveAttr;
@@ -1942,7 +1945,6 @@ int ItemsTypes::saveOtb(const char *filename)
 		}
 
 #ifdef __SPRITE_SEARCH__
-
 		if(it->second->id < 20000){
 			saveAttr.push_back(ITEM_ATTR_SPRITEHASH);
 			getImageHash(it->second->clientid, it->second->sprHash);
@@ -1968,6 +1970,7 @@ int ItemsTypes::saveOtb(const char *filename)
 				it->second->lightColor = g_itemsSprites->getSprite(it->second->clientid)->lightColor;
 				saveAttr.push_back(ITEM_ATTR_LIGHT2);
 			}
+
 			switch(g_itemsSprites->getSprite(it->second->clientid)->group){
 			case ITEM_GROUP_GROUND:
 			case ITEM_GROUP_CONTAINER:
@@ -1975,6 +1978,16 @@ int ItemsTypes::saveOtb(const char *filename)
 			case ITEM_GROUP_FLUID:
 			case ITEM_GROUP_WRITEABLE:
 				it->second->group = g_itemsSprites->getSprite(it->second->clientid)->group;
+				break;
+			default:
+				switch(it->second->group){
+				case ITEM_GROUP_GROUND:
+				case ITEM_GROUP_CONTAINER:
+				case ITEM_GROUP_SPLASH:
+				case ITEM_GROUP_FLUID:
+					it->second->group = ITEM_GROUP_NONE;
+					break;
+				}
 				break;
 			}
 			it->second->readable = g_itemsSprites->getSprite(it->second->clientid)->readable;
@@ -1988,6 +2001,7 @@ int ItemsTypes::saveOtb(const char *filename)
 			saveAttr.push_back(ITEM_ATTR_LIGHT2);
 		}
 
+		f->startNode(it->second->group);
 		switch(it->second->group) {
 			case ITEM_GROUP_GROUND:
 			{				
@@ -2290,3 +2304,4 @@ int ItemsTypes::saveOtb(const char *filename)
 	f = NULL;
 	return 1;
 }
+

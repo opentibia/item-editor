@@ -122,7 +122,9 @@ protected:
 	static LRESULT onSaveOtb(HWND h);
 	static LRESULT onLoadOtb(HWND h);
 	static LRESULT onAutoFindImages(HWND h);
+	static LRESULT onVerify(HWND h);
 	static LRESULT onCreateMissing(HWND h);
+	static LRESULT onAddItem(HWND h);
 	static LRESULT onGotoItem(HWND h);
 	static LRESULT onContextMenu(HWND h, unsigned long lParam);
 	static LRESULT onContextMenuClick(HWND h, unsigned long newgroup);
@@ -160,6 +162,8 @@ protected:
 	static void changeGroup(HWND h, HTREEITEM htItem, HTREEITEM newParent);
 
 	static long curItemClientId;
+	static long curItemClientIdSprite;
+	static long curItemClientCountSprite;
 	static long curItemServerId;
 	static GUIDraw* drawEngine;
 	static HWND m_hwndTree;
@@ -186,7 +190,7 @@ class GUIDraw{
 public:
 	GUIDraw();
 	~GUIDraw();
-	bool drawSprite(HDC desthdc, long x, long y, long maxx, long maxy, unsigned long itemid, bool drawFrame = false);
+	bool drawSprite(HDC desthdc, long x, long y, long maxx, long maxy, unsigned long itemid, long count, bool drawFrame = false);
 	HBITMAP getBitmap(const InternalSprite sprite);
 	void releaseBitmaps();
 

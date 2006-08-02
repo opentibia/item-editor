@@ -97,6 +97,7 @@ bool SpriteType::compareOptions(const SpriteType *stype)
 	case ITEM_GROUP_SPLASH:
 	case ITEM_GROUP_FLUID:
 	case ITEM_GROUP_WRITEABLE:
+	case ITEM_GROUP_RUNE:
 		if(group != stype->group)
 			return false;
 	}
@@ -318,15 +319,16 @@ bool ItemsSprites::loadFromDat(const char *filename)
 	fread(&read_short, 2, 1, fp);
 	unsigned short distance = read_short;
 
+	//SpriteType::maxClientId = SpriteType::maxClientId + monsters + effects + distance;
+
 	// loop throw all Items until we reach the end of file
 	while(ftell(fp) < size && id <= SpriteType::maxClientId){
 		SpriteType *sType = new SpriteType();
 		sType->id = id;
-
 		// read the options until we find a 0xff
 		int optbyte;
-	
-		while(((optbyte = fgetc(fp)) >= 0) && (optbyte != 0xFF)){                                                            
+
+		while(((optbyte = fgetc(fp)) >= 0) && (optbyte != 0xFF)){
 			switch(optbyte){
 			case 0x00: //is groundtile
 				fread(&read_short, 2, 1, fp);
@@ -357,51 +359,54 @@ bool ItemsSprites::loadFromDat(const char *filename)
 			case 0x07: //is useable
 				sType->useable = true;
 				break;
-			case 0x08: //writtable objects
+			case 0x08: //runes
+				sType->group = ITEM_GROUP_RUNE;
+				break;
+			case 0x09: //writtable objects
 				sType->group = ITEM_GROUP_WRITEABLE;
 				sType->readable = true;
 				fread(&us, sizeof(us), 1, fp); //unknown, values like 80, 200, 512, 1024, 2000
 				sType->subParam07 = us;
 				break;
-			case 0x09: //writtable objects that can't be edited 
+			case 0x0A: //writtable objects that can't be edited 
 				sType->readable = true;
 				fread(&us, sizeof(us), 1, fp); //unknown, all have the value 1024
 				sType->subParam08 = us;
 				break;
-			case 0x0A: //can contain fluids
+			case 0x0B: //can contain fluids
 				sType->group = ITEM_GROUP_FLUID;
 				break;
-			case 0x0B: //liquid with states 
+			case 0x0C: //liquid with states 
 				sType->group = ITEM_GROUP_SPLASH;
 				break;
-			case 0x0C: //is blocking
+			case 0x0D: //is blocking
 				sType->blockSolid = true;
 				break;
-			case 0x0D: //is no moveable
+			case 0x0E: //is no moveable
 				sType->moveable = false;
 				break;
-			case 0x0E: //blocks missiles (walls, magic wall etc)
+			case 0x0F: //blocks missiles (walls, magic wall etc)
 				sType->blockProjectile = true;
 				break;
-			case 0x0F: //blocks monster movement (flowers, parcels etc)
+			case 0x10: //blocks monster movement (flowers, parcels etc)
 				sType->blockPathFind = true;
 				break;
-			case 0x10: //can be equipped
+			case 0x11: //can be equipped
 				sType->pickupable = true;
 				break;
-			case 0x11: //wall items
+			case 0x12: //wall items
 				sType->isHangable = true;
 				break;
-			case 0x12:
+			case 0x13:
 				sType->isHorizontal = true;
 				break;
-			case 0x13:
+			case 0x14:
 				sType->isVertical = true;
 				break;
-			case 0x14: //rotable items
+			case 0x15: //rotable items
 				sType->rotable = true;
 				break;
-			case 0x15: //light info .. //sprite-drawing related
+			case 0x16: //light info .. //sprite-drawing related
 				unsigned short lightlevel;
 				fread(&lightlevel, sizeof(lightlevel), 1, fp);
 				sType->lightLevel = lightlevel;
@@ -411,34 +416,37 @@ bool ItemsSprites::loadFromDat(const char *filename)
 				break;
 			case 0x17:  //floor change 
 				break;
-			case 0x18: //???
+			case 0x18:
+				optbyte = optbyte;
+				break;
+			case 0x19: //???
 				fgetc(fp);
 				fgetc(fp);
 				fgetc(fp);
 				fgetc(fp);
 				break;
-			case 0x19:
+			case 0x1A:
 				sType->hasHeight = true;
 				fgetc(fp); //always 8
 				fgetc(fp); //always 0
 				break;
-			case 0x1A://draw with height offset for all parts (2x2) of the sprite
+			case 0x1B://draw with height offset for all parts (2x2) of the sprite
 				break;
-			case 0x1B://some monsters
+			case 0x1C://some monsters
 				break;
-			case 0x1C:
+			case 0x1D:
 				unsigned short color;
 				fread(&color, sizeof(color), 1, fp);
 				sType->miniMapColor = color;
 				break;
-			case 0x1D:  //line spot
+			case 0x1E:  //line spot
 				int tmp;
 				tmp = fgetc(fp); // 86 -> openable holes, 77-> can be used to go down, 76 can be used to go up, 82 -> stairs up, 79 switch,    
 				if(tmp == 0x58)
 					sType->readable = true;
 				fgetc(fp); // always 4
-				break;         
-			case 0x1E: //ground items
+				break;
+			case 0x1F:
 				break;
 			default:
 				optbyte = optbyte;
@@ -468,28 +476,19 @@ bool ItemsSprites::loadFromDat(const char *filename)
 		// Read the sprite ids
 		for(int i = 0; i < sType->numsprites; ++i) {
 			fread(&sType->imageID[i], sizeof(unsigned short), 1, fp);
-			//Sprite *newSprite = new Sprite();
-			/*if(id == 460){
-				g_gui->loadSpriteInternalTransparent(0xFF0000,&newSprite->internal);
-				sType->imageID[i] = 0xF000;
-			}
-			else if(id == 459){
-				g_gui->loadSpriteInternalTransparent(0xFFFF00,&newSprite->internal);
-				sType->imageID[i] = 0xF001;
-			}*/
+
 			// Sprite added to the SpriteMap
-			if(i < sType->width * sType->height * sType->blendframes){
+			if(i < sType->width * sType->height * sType->blendframes || sType->group == ITEM_GROUP_FLUID){
 				Sprite *newSprite = new Sprite();
 				newSprite->id = sType->imageID[i];
 				sprite[sType->imageID[i]] = newSprite;
-			}	
+			}
 		}
 		
 		// store the found item
 		item[id] = sType;
 		id++;
 	}
-
 	fclose(fp);
 	datLoaded = true;
 	
