@@ -59,6 +59,7 @@ ItemType::ItemType()
 	readable = false;
 	canNotDecay = false;
 	allowDistRead = false;
+	corpse = false;
 	
 	rotateTo = 0;
 
@@ -149,6 +150,7 @@ ItemType::ItemType(unsigned short _id, const SpriteType *stype)
 	readable = stype->readable;
 	canNotDecay = false;
 	allowDistRead = false;
+	corpse = false;
 	speed = stype->speed;
 
 	miniMapColor = stype->miniMapColor;
@@ -227,16 +229,14 @@ bool ItemType::compareOptions(const SpriteType *stype)
 			return false;
 	}
 	
-//	if(blockSolid != stype->blockSolid)
-//		return false;
+	if(blockSolid != stype->blockSolid)
+		return false;
 	
-//	if(blockPathFind != stype->blockPathFind)
-//		return false;
-
+	if(blockPathFind != stype->blockPathFind)
+		return false;
 
 	if(alwaysOnTop != stype->alwaysOnTop){
-		alwaysOnTop = stype->alwaysOnTop;
-		alwaysOnTopOrder = 0;
+		return false;
 	}
 
 	if(alwaysOnTopOrder != stype->alwaysOnTopOrder)
@@ -1530,6 +1530,7 @@ int ItemsTypes::loadOtb(const char *filename)
 							sType->isHorizontal = ((flags & FLAG_HORIZONTAL) == FLAG_HORIZONTAL);
 							sType->canNotDecay = ((flags & FLAG_CANNOTDECAY) == FLAG_CANNOTDECAY);
 							sType->allowDistRead = ((flags & FLAG_ALLOWDISTREAD) == FLAG_ALLOWDISTREAD);
+							sType->corpse = ((flags & FLAG_CORPSE) == FLAG_CORPSE);
 
 
 							if(p >= data + len) //no attributes
@@ -1875,17 +1876,7 @@ int ItemsTypes::loadOtb(const char *filename)
 						break;
 				}
 			}
-			/// GET EXTRA INFOS FROM TIBIA.DAT/////
-			/*SpriteType *st = g_itemsSprites->getSprite(sType->clientid);
-			if(st){
-				sType->isVertical = st->isVertical;
-				sType->isHorizontal = st->isHorizontal;
-				sType->isHangable = st->isHangable ;
-				//sType->alwaysOnTop = st->alwaysOnTop;
-				//sType->lightLevel = st->lightLevel;
-				//sType->lightColor = st->lightColor;
-			}
-			///*/
+
 			addType(sType->id, sType);
 		}
 
@@ -2153,6 +2144,9 @@ int ItemsTypes::saveOtb(const char *filename)
 
 		if(it->second->allowDistRead)
 			flags |= FLAG_ALLOWDISTREAD;
+
+		if(it->second->corpse)
+			flags |= FLAG_CORPSE;
 
 		f->setFlags(flags);
 		

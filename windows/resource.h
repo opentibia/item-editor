@@ -43,6 +43,7 @@
 #define IDC_EDIT_SPEED                  1041
 #define IDC_OPT_BLOCKPATHFIND           1042
 #define IDC_OPT_HASHEIGHT               1043
+#define IDC_EDIT_TOPORDER               1044
 #define IDC_OPT_READABLE                1045
 #define IDC_SAVE_ITEM                   1046
 #define IDC_OPT_CANNOTDECAY             1047
@@ -51,6 +52,9 @@
 #define IDC_EDIT_MAXTEXTLEN             1050
 #define IDC_OPT_VERTICAL                1051
 #define IDC_OPT_HORIZONTAL              1052
+#define IDC_OPT_CORPSE                  1053
+#define IDC_LIGHT_LEVEL                 1054
+#define IDC_LIGHT_COLOR                 1055
 #define ID_FILE_IMPORTXML               40001
 #define ID_FILE_IMPORTOLD               40001
 #define ID_FILE_IMPORTDAT               40002
@@ -88,8 +92,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        114
-#define _APS_NEXT_COMMAND_VALUE         40039
-#define _APS_NEXT_CONTROL_VALUE         1053
+#define _APS_NEXT_COMMAND_VALUE         40040
+#define _APS_NEXT_CONTROL_VALUE         1056
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

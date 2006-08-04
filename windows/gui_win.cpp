@@ -650,7 +650,7 @@ LRESULT GUIWin::onAutoFindImages(HWND h)
 
 LRESULT GUIWin::onVerify(HWND h)
 {
-	char hash[16];
+	//char hash[16];
 	int n;
 	if(!saveCurrentItem(h)){
 		return TRUE;
@@ -667,7 +667,7 @@ LRESULT GUIWin::onVerify(HWND h)
 				else{
 					int u = it->first;
 				}
-			//}
+//			}
 //			else{
 //				int u = it->first;
 //			}
@@ -1167,6 +1167,9 @@ void GUIWin::loadItem(HWND h)
 		setEditTextInt(h, IDC_EDIT_MAXTEXTLEN, iType->maxTextLen);
 		setEditTextInt(h, IDC_EDIT_ROTATETO, iType->rotateTo);
 		setEditTextDouble(h, IDC_EDIT_WEIGHT, iType->weight);
+		setEditTextInt(h, IDC_EDIT_TOPORDER, iType->alwaysOnTopOrder);
+		setEditTextInt(h, IDC_LIGHT_LEVEL, iType->lightLevel);
+		setEditTextInt(h, IDC_LIGHT_COLOR, iType->lightColor);
 
 		setCheckButton(h, IDC_OPT_BLOCKING, iType->blockSolid);
 		setCheckButton(h, IDC_OPT_ATOP, iType->alwaysOnTop);
@@ -1183,6 +1186,7 @@ void GUIWin::loadItem(HWND h)
 		setCheckButton(h, IDC_OPT_DISTREAD, iType->allowDistRead);
 		setCheckButton(h, IDC_OPT_VERTICAL, iType->isVertical);
 		setCheckButton(h, IDC_OPT_HORIZONTAL, iType->isHorizontal);
+		setCheckButton(h, IDC_OPT_CORPSE, iType->corpse);
 		
 
 		setComboValue(h, IDC_COMBO_SLOT, iType->slot_position);
@@ -1229,6 +1233,9 @@ void GUIWin::loadItem(HWND h)
 		setEditTextInt(h, IDC_EDIT_MAXTEXTLEN, 0);
 		setEditTextInt(h, IDC_EDIT_ROTATETO, 0);
 		setEditTextDouble(h, IDC_EDIT_WEIGHT, 0);
+		setEditTextInt(h, IDC_EDIT_TOPORDER, 0);
+		setEditTextInt(h, IDC_LIGHT_LEVEL, 0);
+		setEditTextInt(h, IDC_LIGHT_COLOR, 0);
 
 		setCheckButton(h, IDC_OPT_BLOCKING, false);
 		setCheckButton(h, IDC_OPT_ATOP, false);
@@ -1243,6 +1250,9 @@ void GUIWin::loadItem(HWND h)
 		setCheckButton(h, IDC_OPT_HASHEIGHT, false);
 		setCheckButton(h, IDC_OPT_CANNOTDECAY, false);
 		setCheckButton(h, IDC_OPT_DISTREAD, false);
+		setCheckButton(h, IDC_OPT_VERTICAL, false);
+		setCheckButton(h, IDC_OPT_HORIZONTAL, false);
+		setCheckButton(h, IDC_OPT_CORPSE, false);
 
 		setComboValue(h, IDC_COMBO_SLOT, SLOT_DEFAULT);
 		setComboValue(h, IDC_COMBO_SKILL, WEAPON_NONE);
@@ -1427,7 +1437,6 @@ void GUIWin::setControlState(HWND h, unsigned long flagsEdit, unsigned long flag
 	EnableWindow(GetDlgItem(h, IDC_COMBO_EDITOR),getFlagState(flagsCombo, IDC_COMBO_EDITOR_FLAG));
 
 	EnableWindow(GetDlgItem(h, IDC_SET_CLIENT_OPT),getFlagState(flagsButton, IDC_SET_CLIENT_OPT_FLAG));
-	EnableWindow(GetDlgItem(h, IDC_SAVE_ITEM),getFlagState(flagsButton, IDC_SAVE_ITEM_FLAG));
 }
 
 void GUIWin::loadTreeItemTypes(HWND h, bool notFound)

@@ -85,7 +85,7 @@ END
 // Dialog
 //
 
-DLG_MAIN DIALOG DISCARDABLE  0, 0, 416, 320
+DLG_MAIN DIALOG DISCARDABLE  0, 0, 423, 328
 STYLE DS_MODALFRAME | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "OTItemEditor"
@@ -94,8 +94,8 @@ FONT 8, "MS Shell Dlg"
 BEGIN
     CONTROL         "",IDC_EDITOR_TREE,"SysTreeView32",TVS_HASBUTTONS | 
                     TVS_HASLINES | TVS_LINESATROOT | TVS_SHOWSELALWAYS | 
-                    WS_BORDER | WS_TABSTOP,7,15,119,298
-    GROUPBOX        "Settings",IDC_STATIC,133,15,276,298
+                    WS_BORDER | WS_TABSTOP,7,15,119,304
+    GROUPBOX        "Settings",IDC_STATIC,133,15,283,304
     CONTROL         "",IDC_ITEM_PIC,"Static",SS_BLACKFRAME,145,25,50,43
     LTEXT           "Name:",IDC_STATIC,210,28,22,8
     EDITTEXT        IDC_EDIT_NAME,210,40,191,12,ES_AUTOHSCROLL
@@ -108,7 +108,7 @@ BEGIN
     CONTROL         "",IDC_SPINCID,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
                     UDS_NOTHOUSANDS,187,80,8,11
-    GROUPBOX        "Options:",IDC_STATIC,139,101,259,200
+    GROUPBOX        "Options:",IDC_STATIC,139,101,259,209
     CONTROL         "*Blocking",IDC_OPT_BLOCKING,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,150,112,60,8
     CONTROL         "*Always Top",IDC_OPT_ATOP,"Button",BS_AUTOCHECKBOX | 
@@ -163,30 +163,41 @@ BEGIN
     LTEXT           "ReadOnlyID",IDC_STATIC,210,177,42,11
     EDITTEXT        IDC_EDIT_READONLYID,252,177,50,12,ES_AUTOHSCROLL | 
                     ES_NUMBER
-    PUSHBUTTON      "Set Client *Opt",IDC_SET_CLIENT_OPT,252,244,55,11
+    PUSHBUTTON      "Set Client *Opt",IDC_SET_CLIENT_OPT,252,295,55,11,
+                    WS_DISABLED
     LTEXT           "*Speed",IDC_STATIC,210,216,42,10
     EDITTEXT        IDC_EDIT_SPEED,252,216,50,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "Readable",IDC_OPT_READABLE,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,150,177,60,8
-    PUSHBUTTON      "Save Item",IDC_SAVE_ITEM,326,243,55,11
     CONTROL         "Block pathfind",IDC_OPT_BLOCKPATHFIND,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,150,228,61,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,150,229,61,8
     CONTROL         "HasHeight",IDC_OPT_HASHEIGHT,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,150,240,61,8
+                    WS_TABSTOP,150,242,61,8
     LTEXT           "EditorType",IDC_STATIC,307,216,36,11
     COMBOBOX        IDC_COMBO_EDITOR,343,216,50,90,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "CanNotDecay",IDC_OPT_CANNOTDECAY,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,150,252,60,9
+                    BS_AUTOCHECKBOX | WS_TABSTOP,150,254,60,9
     LTEXT           "MaxTextLen",IDC_STATIC,210,190,40,10
     EDITTEXT        IDC_EDIT_MAXTEXTLEN,252,190,50,12,ES_AUTOHSCROLL | 
                     ES_NUMBER
     CONTROL         "DistRead",IDC_OPT_DISTREAD,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,150,262,60,12
+                    WS_TABSTOP,150,263,60,12
     CONTROL         "IsVertical",IDC_OPT_VERTICAL,"Button",BS_AUTOCHECKBOX | 
                     WS_DISABLED | WS_TABSTOP,150,275,60,8
     CONTROL         "IsHorizontal",IDC_OPT_HORIZONTAL,"Button",
                     BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,150,284,60,10
+    LTEXT           "TopOrder",IDC_STATIC,211,229,34,11
+    EDITTEXT        IDC_EDIT_TOPORDER,252,229,50,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER | WS_DISABLED
+    CONTROL         "Corpse",IDC_OPT_CORPSE,"Button",BS_AUTOCHECKBOX | 
+                    WS_DISABLED | WS_TABSTOP,150,296,60,9
+    EDITTEXT        IDC_LIGHT_LEVEL,252,242,50,12,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    EDITTEXT        IDC_LIGHT_COLOR,252,254,50,12,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    LTEXT           "LightLevel",IDC_STATIC,211,242,34,11
+    LTEXT           "LightColor",IDC_STATIC,211,254,34,9
 END
 
 
@@ -201,7 +212,7 @@ BEGIN
     DLG_MAIN, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 409
+        RIGHTMARGIN, 416
         VERTGUIDE, 133
         VERTGUIDE, 144
         VERTGUIDE, 150
@@ -215,7 +226,7 @@ BEGIN
         VERTGUIDE, 393
         VERTGUIDE, 401
         TOPMARGIN, 7
-        BOTTOMMARGIN, 319
+        BOTTOMMARGIN, 327
         HORZGUIDE, 15
         HORZGUIDE, 25
         HORZGUIDE, 40
@@ -224,8 +235,8 @@ BEGIN
         HORZGUIDE, 80
         HORZGUIDE, 91
         HORZGUIDE, 101
-        HORZGUIDE, 301
-        HORZGUIDE, 313
+        HORZGUIDE, 310
+        HORZGUIDE, 319
     END
 END
 #endif    // APSTUDIO_INVOKED
