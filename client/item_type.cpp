@@ -1181,20 +1181,28 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 							    else if (!strcmp(sshoottype, "spear"))
 							    	sType->shootType = DIST_SPEAR;
 #ifdef WIN32
-                					else
+                				else
+                					#ifdef _DEBUG
 									#ifdef __GNUC__
                                     __asm__("int $3");
                                     #else
                                     __asm int 3
                                     #endif
+                                    #else
+                                    return;
+                                    #endif
 #endif
 								}
 #ifdef WIN32
 								else
+									#ifdef _DEBUG
 									#ifdef __GNUC__
                                     __asm__("int $3");
                                     #else
                                     __asm int 3
+                                    #endif
+                                    #else
+                                    return;
                                     #endif
 #endif
 							}
@@ -1211,11 +1219,15 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 							    sType->shootType = DIST_ENERGY;
 #ifdef WIN32
 							  else
-                                #ifdef __GNUC__
-							    __asm__("int $3");
+							  	#ifdef _DEBUG
+								#ifdef __GNUC__
+								__asm__("int $3");
+								#else
+								__asm int 3
+								#endif
 							    #else
-							    __asm int 3
-							    #endif
+                                return;
+								#endif
 #endif
 							}								
 						}
@@ -1224,11 +1236,15 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 							sType->weaponType = WEAPON_SHIELD;
 #ifdef WIN32
 						else
-						   #ifdef __GNUC__
-                           __asm__("int $3");
-                           #else
-                           __asm int 3
-                           #endif
+							#ifdef _DEBUG
+							#ifdef __GNUC__
+							__asm__("int $3");
+							#else
+							__asm int 3
+							#endif
+							#else
+							return;
+							#endif
 #endif
 					}//skills
 					
@@ -1255,10 +1271,14 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 					}
 #ifdef WIN32
 					else
+						#ifdef _DEBUG
 					    #ifdef __GNUC__
 						__asm__("int $3");
 						#else
 						__asm int 3
+						#endif
+						#else
+						return;
 						#endif
 #endif
 
@@ -1276,19 +1296,27 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 							sType->shootType = DIST_POWERBOLT;
 #ifdef WIN32
 						else
+							#ifdef _DEBUG
 						    #ifdef __GNUC__
 							__asm__("int $3");
 							#else
 							__asm int 3
 							#endif
+							#else
+							return;
+							#endif
 #endif
 					}
 #ifdef WIN32
 					else
+						#ifdef _DEBUG
 					    #ifdef __GNUC__
 						__asm__("int $3");
 						#else
 						__asm int 3
+						#endif
+						#else
+						return;
 						#endif
 #endif
 
@@ -1306,10 +1334,14 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 					}
 #ifdef WIN32
 					else
+						#ifdef _DEBUG
 					    #ifdef __GNUC__
 						__asm__("int $3");
 						#else
 						__asm int 3
+						#endif
+						#else
+						return;
 						#endif
 #endif
 				}
@@ -1322,10 +1354,14 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 					}
 #ifdef WIN32
 					else
+						#ifdef _DEBUG
 					    #ifdef __GNUC__
 						__asm__("int $3");
 						#else
 						__asm int 3
+						#endif
+						#else
+						return;
 						#endif
 #endif
 				}
@@ -1346,20 +1382,28 @@ void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, co
 							sType->magicfieldtype = MAGIC_FIELD_POISON;
 #ifdef WIN32
 						else
+							#ifdef _DEBUG
 						    #ifdef __GNUC__
 							__asm__("int $3");
 							#else
 							__asm int 3
 							#endif
+							#else
+							return;
+							#endif
 #endif
 					}
 #ifdef WIN32
 					else
+						#ifdef _DEBUG
 					    #ifdef __GNUC__
 	       				__asm__("int $3");
 	       				#else
 	       				__asm int 3
 	       				#endif
+	       				#else
+						return;
+						#endif
 #endif
 				}
 				//oneTimeWrite
@@ -1446,7 +1490,7 @@ int ItemsTypes::loadOtb(const char *filename)
 	unsigned long type,len;
 	const unsigned char* data;
 
-	NODE node = f.getChildNode(NULL, type);
+	NODE node = f.getChildNode((const NODE)NULL, type);
 	data = f.getProps(node, len);
 	//4 byte flags
 	//attributes (optional)

@@ -97,7 +97,7 @@ bool GUIWin::m_dragging = false;
 HWND GUIWin::m_hwndTree = 0;
 HTREEITEM GUIWin::m_dragItem = NULL;
 HTREEITEM GUIWin::rootItems[ITEM_GROUP_LAST] = {NULL};
-unsigned long GUIWin::menuGroups[ITEM_GROUP_LAST] = {NULL};
+unsigned long GUIWin::menuGroups[ITEM_GROUP_LAST] = {0};
 HMENU GUIWin::popupMenu = 0;
 bool GUIWin::autoFindPerformed = false;
 

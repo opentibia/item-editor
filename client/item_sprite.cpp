@@ -242,8 +242,7 @@ bool ItemsSprites::loadFromSpr(const char *filename)
 	fseek(fp, 0x06, SEEK_SET);
 	
 	// Read the first sprite image pointer
-	fread(buf, 4, 1, fp);
-	memcpy(&first_spr_pos, buf, 4);
+	fread(&first_spr_pos, 1, 4, fp);
 	
 	// At the begining of the spr pointers
 	fseek(fp, 0x06, SEEK_SET);
@@ -251,16 +250,13 @@ bool ItemsSprites::loadFromSpr(const char *filename)
 	for(id=1; ftell(fp) < first_spr_pos; ++id)
 	{
 		// Read the sprite image pointer
-		fread(buf, 4, 1, fp);
-		memcpy(&spr_pos, buf, 4);
+		fread(&spr_pos, 1, 4, fp);
 		if(spr_pos == 0)
 			continue;
 
 		// Now the spr reading
-		fread(buf, 4, 1, fp_spr);
-		fseek(fp_spr, spr_pos, SEEK_SET);
-		fread(buf, 5, 1, fp_spr);
-		memcpy(&spr_size, buf+3, 2);
+		fseek(fp_spr, spr_pos + 3, SEEK_SET);
+		fread(&spr_size, 1, 2, fp_spr);
 
 
 		SpriteMap::iterator it = sprite.find(id);

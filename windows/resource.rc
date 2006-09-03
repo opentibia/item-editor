@@ -1,5 +1,7 @@
 //Microsoft Developer Studio generated resource script.
 //
+#define DEFINITIONS_RESOURCE
+#include "../client/definitions.hpp"
 #include "resource.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
@@ -41,7 +43,7 @@ BEGIN
     POPUP "Tools"
     BEGIN
         MENUITEM "Verify items",                ID_TOOLS_VERIFYITEMS
-        MENUITEM "Go to item...",               ID_TOOLS_GOTOITEM
+        MENUITEM "Go to item...",               ID_TOOLS_GOTOITEM, GRAYED
         MENUITEM SEPARATOR
         MENUITEM "Create missing client items", ID_TOOLS_CREATEMISSING
         MENUITEM "Add Item",                    ID_TOOLS_ADDITEM
@@ -88,7 +90,7 @@ END
 DLG_MAIN DIALOG DISCARDABLE  0, 0, 423, 328
 STYLE DS_MODALFRAME | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
-CAPTION "OTItemEditor"
+CAPTION OTIE_VERSION_STRING
 MENU MENU_MAIN
 FONT 8, "MS Shell Dlg"
 BEGIN

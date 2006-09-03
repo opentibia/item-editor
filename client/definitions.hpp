@@ -21,9 +21,11 @@
 #ifndef __OTITEMEDITOR_DEFS_H__
 #define __OTITEMEDITOR_DEFS_H__
 
+#ifndef DEFINITIONS_RESOURCE
 #include <iostream>
+#endif
 
-#define OTIE_VERSION_STRING "OTItemEditor 0.2.0"
+#define OTIE_VERSION_STRING "OTItemEditor 0.2.3 - 7.8"
 
 #ifdef WIN32
 #pragma warning(disable:4786) // msvc too long debug names in stl
