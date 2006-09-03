@@ -6,11 +6,14 @@
 
 
 What is this?
-	<add text here>
+	This is an editor to edit otb files which holds important information 
+about items.
+
 
 How does it work?
-	<add text here>
-
+	Copy the files tibia.dat and tibia.spr from your Tibia 7.8 directory 
+to where you extracted OTItemEditor. Then load your items.otb or download latest from
+http://opentibia.cvs.sourceforge.net/opentibia/otserv/data/items/items.otb?view=log.
 
 Credits?
 	Tliff - Developer, some kind of project leader, Forum administrator
