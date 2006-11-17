@@ -1971,7 +1971,7 @@ int ItemsTypes::saveOtb(const char *filename)
 			saveAttr.push_back(ITEM_ATTR_WEIGHT);
 		}
 		
-		if(it->second->decayTo != 0) {
+		if(it->second->decayTo != 0 || it->second->decayTime != 0) {
 			saveAttr.push_back(ITEM_ATTR_DECAY2);
 		}
 

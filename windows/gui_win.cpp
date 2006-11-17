@@ -791,6 +791,8 @@ LRESULT GUIWin::onGotoItem(HWND h)
 
 LRESULT GUIWin::onInitDialog(HWND h)
 {
+	//set window title
+	SetWindowText(h, OTIE_VERSION_STRING);
 
 	m_hwndTree = GetDlgItem(h, IDC_EDITOR_TREE);
 	createGroupsTree(m_hwndTree);
