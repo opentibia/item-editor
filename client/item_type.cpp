@@ -1944,10 +1944,10 @@ int ItemsTypes::saveOtb(const char *filename)
 	memset(&vi, '\0', sizeof(VERSIONINFO));
 
 	vi.dwMajorVersion = 1; //version
-	vi.dwMinorVersion = CLIENT_VERSION_780; //client
+	vi.dwMinorVersion = CLIENT_VERSION_790; //client
 	vi.dwBuildNumber = ItemType::dwBuildNumber + 1; //build
 	char str_version[128];
-	sprintf(str_version, "OTB %d.%d.%d-7.80", vi.dwMajorVersion, vi.dwMinorVersion, vi.dwBuildNumber);
+	sprintf(str_version, "OTB %d.%d.%d-7.90", vi.dwMajorVersion, vi.dwMinorVersion, vi.dwBuildNumber);
 	strcpy(vi.CSDVersion, str_version);
 
 	f->setProps(ROOT_ATTR_VERSION, &vi, sizeof(VERSIONINFO));
