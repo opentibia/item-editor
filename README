@@ -13,7 +13,7 @@ about items.
 How does it work?
 	Copy the files tibia.dat and tibia.spr from your Tibia 7.9 directory 
 to where you extracted OTItemEditor. Then load your items.otb or download latest from
-http://opentibia.cvs.sourceforge.net/opentibia/otserv/data/items/items.otb?view=log.
+http://opentibia.svn.sourceforge.net/viewvc/opentibia/otserv/trunk/data/items/items.otb?view=log.
 
 Credits?
 	Tliff - Developer, some kind of project leader, Forum administrator
