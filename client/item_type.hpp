@@ -249,7 +249,8 @@ enum subfight_t {
 	DIST_SNOWBALL      = 12,
 	DIST_POWERBOLT     = 13,
 	DIST_SPEAR         = 14,
-	DIST_POISONFIELD   = 15
+	DIST_POISONFIELD   = 15,
+	DIST_INFERNALBOLT   = 16
 };
 
 enum amu_t{

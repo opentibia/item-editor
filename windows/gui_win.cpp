@@ -850,6 +850,7 @@ LRESULT GUIWin::onInitDialog(HWND h)
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Spear", DIST_SPEAR);
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Bolt", DIST_BOLT);
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Power Bolt", DIST_POWERBOLT);
+	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Infernal Bolt", DIST_INFERNALBOLT);
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Arrow", DIST_ARROW);
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Poison Arrow", DIST_POISONARROW);
 	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Burst Arrow", DIST_BURSTARROW);

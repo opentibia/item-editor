@@ -221,7 +221,6 @@ bool ItemsSprites::loadFromSpr(const char *filename)
 	
 	FILE *fp, *fp_spr;
 	long spr_pos, first_spr_pos;
-	char buf[6];
 	unsigned short spr_size;
 	unsigned short id;
 	unsigned long loaded_pics = 0;
