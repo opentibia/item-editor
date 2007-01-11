@@ -1,5 +1,5 @@
 ============================================
-====== OTItemEditor 0.2.4.1 - 7.9 ==========
+======= OTItemEditor 0.2.5 - 7.92 ==========
 ============================================
 ===== www.otserv.org	www.otfans.net =====
 ============================================
@@ -11,7 +11,7 @@ about items.
 
 
 How does it work?
-	Copy the files tibia.dat and tibia.spr from your Tibia 7.9 directory 
+	Copy the files tibia.dat and tibia.spr from your Tibia 7.92 directory 
 to where you extracted OTItemEditor. Then load your items.otb or download latest from
 http://opentibia.svn.sourceforge.net/viewvc/opentibia/otserv/trunk/data/items/items.otb?view=log.
 
