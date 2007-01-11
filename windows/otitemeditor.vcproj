@@ -19,6 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -31,9 +32,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="comctl32.lib"
+				AdditionalDependencies="comctl32.lib msimg32.lib libexpat.lib"
 				OutputFile="$(OutDir)/otitemeditor.exe"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/otitemeditor.pdb"
 				SubSystem="2"
@@ -67,7 +69,8 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				AdditionalIncludeDirectories=""
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="4"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -77,10 +80,12 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="comctl32.lib msimg32.lib libexpat.lib"
 				OutputFile="$(OutDir)/otitemeditor.exe"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="TRUE"
-				SubSystem="1"
+				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"/>
@@ -123,10 +128,19 @@
 				RelativePath=".\gui_win.cpp">
 			</File>
 			<File
+				RelativePath="..\client\item_loader.cpp">
+			</File>
+			<File
+				RelativePath="..\client\item_sprite.cpp">
+			</File>
+			<File
 				RelativePath="..\client\item_type.cpp">
 			</File>
 			<File
 				RelativePath="..\client\main.cpp">
+			</File>
+			<File
+				RelativePath="..\client\md5.cpp">
 			</File>
 		</Filter>
 		<Filter
@@ -146,7 +160,16 @@
 				RelativePath=".\gui_win.hpp">
 			</File>
 			<File
+				RelativePath="..\client\item_loader.hpp">
+			</File>
+			<File
+				RelativePath="..\client\item_sprite.hpp">
+			</File>
+			<File
 				RelativePath="..\client\item_type.hpp">
+			</File>
+			<File
+				RelativePath="..\client\md5.h">
 			</File>
 			<File
 				RelativePath=".\resource.h">
