@@ -23,6 +23,7 @@
 
 #include "item_type.hpp"
 #include "item_sprite.hpp"
+#include <sstream>
 
 const char* readXmlProp(const char* propName, const xmlProp *props);
 extern ItemsTypes *g_itemsTypes;
@@ -997,6 +998,25 @@ bool ItemsTypes::importFromXml(const char *filename)
 	return false;
 }
 
+void saveAttribute(FILE* f, const std::string& key, const std::string& value)
+{
+	std::stringstream ss;
+	ss << "\t\t<attribute key=\"" << key << "\" value=\"" << value << "\"/>" << "\r";
+
+	fprintf(f, ss.str().c_str());
+	//fprintf(f, "\t<attribute key=\"%s\" value=\"%s\"/>", key.c_str(), value);
+}
+
+void saveAttribute(FILE* f, const std::string& key, int value)
+{
+	std::stringstream ss;
+	ss << "\t\t<attribute key=\"" << key << "\" value=\"" << value << "\"/>" << "\r";
+
+	fprintf(f, ss.str().c_str());
+
+	//fprintf(f, "\t<attribute key=\"%s\" value=\"%d\"/>", key.c_str(), value);
+}
+
 bool ItemsTypes::exportToXml(const char *filename)
 {
 	FILE *f;
@@ -1008,9 +1028,152 @@ bool ItemsTypes::exportToXml(const char *filename)
 
 	ItemMap::iterator it = getTypes();
 	for(;it != getEnd(); it++){
-		fprintf(f, "<item id=\"%d\" name=\"%s\"/>\n", it->first, it->second->name);
+		fprintf(f, "\t<item id=\"%d\">\r", it->second->id);
+
+		saveAttribute(f, "name", it->second->name);
+
+		if(it->second->group == ITEM_GROUP_WEAPON){
+			saveAttribute(f, "group", "weapon");
+		}
+		else if(it->second->group == ITEM_GROUP_AMMUNITION){
+			saveAttribute(f, "group", "ammunition");
+		}
+		else if(it->second->group == ITEM_GROUP_ARMOR){
+			saveAttribute(f, "group", "armor");
+		}
+		else if(it->second->group == ITEM_GROUP_WRITEABLE){
+			saveAttribute(f, "group", "writeable");
+		}
+		else if(it->second->group == ITEM_GROUP_KEY){
+			saveAttribute(f, "group", "key");
+		}
+
+		if(strlen(it->second->descr) > 0){
+			saveAttribute(f, "description", it->second->descr);
+		}
+
+		if(it->second->moveable){
+			saveAttribute(f, "weight", it->second->weight * 100);
+		}
+
+		if(it->second->armor != 0){
+			saveAttribute(f, "armor", it->second->armor);
+		}
+
+		if(it->second->defence != 0){
+			saveAttribute(f, "defense", it->second->defence);
+		}
+
+		if(it->second->attack != 0){
+			saveAttribute(f, "attack", it->second->attack);
+		}
+
+		if(it->second->rotateTo != 0){
+			saveAttribute(f, "rotateTo", it->second->rotateTo);
+		}
+
+		if(it->second->group == ITEM_GROUP_CONTAINER){
+			saveAttribute(f, "containerSize", it->second->maxItems);
+		}
+
+		if(it->second->group == ITEM_GROUP_WRITEABLE){
+			saveAttribute(f, "maxTextLen", it->second->maxTextLen);
+
+			if(it->second->readOnlyId != 0){
+				saveAttribute(f, "readOnceItemId", it->second->readOnlyId);
+			}
+		}
+
+		if(it->second->weaponType != WEAPON_NONE){
+			switch(it->second->weaponType){
+				case WEAPON_AXE: saveAttribute(f, "weaponType", "axe"); break;
+				case WEAPON_CLUB: saveAttribute(f, "weaponType", "club"); break;
+				case WEAPON_SWORD: saveAttribute(f, "weaponType", "sword"); break;
+				case WEAPON_DIST: saveAttribute(f, "weaponType", "distance"); break;
+				case WEAPON_MAGIC: saveAttribute(f, "weaponType", "wand"); break;
+				case WEAPON_SHIELD: saveAttribute(f, "weaponType", "shield"); break;
+			}
+		}
+
+		if(it->second->slot_position != SLOT_HAND){
+			switch(it->second->slot_position){
+				case SLOT_HEAD: saveAttribute(f, "slotType", "head"); break;
+				case SLOT_BODY: saveAttribute(f, "slotType", "body"); break;
+				case SLOT_LEGS: saveAttribute(f, "slotType", "legs"); break;
+				case SLOT_FEET: saveAttribute(f, "slotType", "feet"); break;
+				case SLOT_BACKPACK: saveAttribute(f, "slotType", "backpack"); break;
+				case SLOT_2HAND: saveAttribute(f, "slotType", "two-handed"); break;
+				case SLOT_AMULET: saveAttribute(f, "slotType", "necklace"); break;
+				case SLOT_RING: saveAttribute(f, "slotType", "ring"); break;
+			}
+		}
+
+		if(it->second->amuType != AMU_NONE){
+			switch(it->second->amuType){
+				case AMU_ARROW: saveAttribute(f, "ammoType", "arrow"); break;
+				case AMU_BOLT: saveAttribute(f, "ammoType", "bolt"); break;
+			}
+		}
+
+		if(it->second->shootType != DIST_NONE){
+			switch(it->second->shootType){
+				case DIST_SPEAR: saveAttribute(f, "shootType", "spear"); break;
+				case DIST_BOLT: saveAttribute(f, "shootType", "bolt"); break;
+				case DIST_ARROW: saveAttribute(f, "shootType", "arrow"); break;
+				case DIST_FIRE: saveAttribute(f, "shootType", "fire"); break;
+				case DIST_ENERGY: saveAttribute(f, "shootType", "energy"); break;
+				case DIST_POISONARROW: saveAttribute(f, "shootType", "poisonarrow"); break;
+				case DIST_BURSTARROW: saveAttribute(f, "shootType", "burstarrow"); break;
+				case DIST_THROWINGSTAR: saveAttribute(f, "shootType", "throwingstar"); break;
+				case DIST_THROWINGKNIFE: saveAttribute(f, "shootType", "throwingknife"); break;
+				case DIST_SMALLSTONE: saveAttribute(f, "shootType", "smallstone"); break;
+				case DIST_SUDDENDEATH: saveAttribute(f, "shootType", "suddendeath"); break;
+				case DIST_LARGEROCK: saveAttribute(f, "shootType", "largerock"); break;
+				case DIST_SNOWBALL: saveAttribute(f, "shootType", "snowball"); break;
+				case DIST_POWERBOLT: saveAttribute(f, "shootType", "powerbolt"); break;
+				case DIST_POISONFIELD: saveAttribute(f, "shootType", "poison"); break;
+				case DIST_INFERNALBOLT: saveAttribute(f, "shootType", "infernalbolt"); break;
+			}
+		}			
+		if(it->second->decayTime > 0){
+			saveAttribute(f, "decayTo", it->second->decayTo);
+			saveAttribute(f, "duration", it->second->decayTime);
+		}
+
+		//stopduration
+		//transformEquipTo
+		//transformDeEquipTo
+		//showduration
+		//charges
+		//showcharges
+		//invisible
+		//speed
+		//healthGain
+		//healthTicks
+		//manaGain
+		//manaTicks
+		//manaShield
+		//skillSword
+		//skillAxe
+		//skillClub
+		//skillDist
+		//skillFish
+		//skillShield
+		//skillFist
+		//absorbPercentAll
+		//absorbPercentEnergy
+		//absorbPercentFire
+		//absorbPercentPoison
+		//absorbPercentLifeDrain
+		//absorbPercentManaDrain
+		//absorbPercentPhysical
+		//suppressDrunk
+		//field
+
+		fprintf(f, "\t</item>\r\r");
 	}
-	fprintf(f, "</items>\n");
+
+	fprintf(f, "</items>\r");
 	fclose(f);
 	return true;
 }
