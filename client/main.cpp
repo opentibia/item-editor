@@ -57,6 +57,9 @@ int main(int argc, char *argv[])
 
 	//load sprites/items
 	g_itemsSprites = new ItemsSprites();
+	if(!g_itemsSprites->loadKnownVersions("graphics.dat"))
+		g_gui->messageBox("Error while loading graphics.dat.", MESSAGE_TYPE_FATAL_ERROR);
+
 	if(!g_itemsSprites->loadFromDat("tibia.dat"))
 		g_gui->messageBox("Error while loading client's tibia.dat.", MESSAGE_TYPE_FATAL_ERROR);
 

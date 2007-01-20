@@ -170,6 +170,45 @@ ItemsSprites::ItemsSprites()
 {
 	datLoaded = false;
 	sprLoaded = false;
+
+	datVersion = 0;
+	sprVersion = 0;
+}
+
+ItemsSprites::~ItemsSprites()
+{
+	versionVector::iterator it;
+	for(it = versions.begin(); it != versions.end(); ++it){
+		delete *it;
+	}
+}
+
+
+bool ItemsSprites::loadKnownVersions(const char* filename)
+{
+	graphicsVersion* version;
+	FILE* f = fopen(filename, "r");
+	if(!f)
+		return false;
+
+	while(!feof(f)){
+		version = new graphicsVersion;
+		fscanf(f, "%x %x %d %d\n", &version->dat,  &version->spr, &version->client, &version->otb);
+		versions.push_back(version);
+	}
+	fclose(f);
+	return true;
+}
+
+const graphicsVersion* ItemsSprites::getVersion()
+{
+	versionVector::iterator it;
+	for(it = versions.begin(); it != versions.end(); ++it){
+		if((*it)->spr == sprVersion && (*it)->dat == datVersion){
+			return (*it);
+		}
+	}
+	return NULL;
 }
 
 void ItemsSprites::unloadSpr()
@@ -237,6 +276,14 @@ bool ItemsSprites::loadFromSpr(const char *filename)
 		return false;
 	}
 	
+
+	fseek(fp, 0, SEEK_SET);
+	fread(&sprVersion, 4, 1, fp);
+	const graphicsVersion* version = getVersion();
+	if(!version){
+		return false;
+	}
+
 	// At the begining of the spr pointers
 	fseek(fp, 0x06, SEEK_SET);
 	
@@ -304,10 +351,12 @@ bool ItemsSprites::loadFromDat(const char *filename)
 	
 	fseek(fp,0,SEEK_END);
 	size = ftell(fp);
-
+	
+	fseek(fp, 0, SEEK_SET);
+	fread(&datVersion, 4, 1, fp);
 	//get max id
 	fseek(fp, 0x04, SEEK_SET);
-	fread(&read_short, 2, 1, fp); 
+	fread(&read_short, 2, 1, fp);
 	SpriteType::maxClientId = read_short;
 	SpriteType::minClientId = 100;
 
@@ -455,7 +504,7 @@ bool ItemsSprites::loadFromDat(const char *filename)
 				break;
 			}
 		}
-		
+
 		// Size and sprite data
 		sType->width  = fgetc(fp);
 		sType->height = fgetc(fp);
@@ -470,6 +519,7 @@ bool ItemsSprites::loadFromDat(const char *filename)
 		sType->animcount   = fgetc(fp);
 
 		sType->numsprites = sType->width * sType->height * sType->blendframes * sType->xdiv * sType->ydiv * sType->animcount * unk1;
+
 		// Dynamic memoy reserve
 		sType->imageID = new unsigned short[sType->numsprites];
 		

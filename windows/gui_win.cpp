@@ -97,7 +97,7 @@ bool GUIWin::m_dragging = false;
 HWND GUIWin::m_hwndTree = 0;
 HTREEITEM GUIWin::m_dragItem = NULL;
 HTREEITEM GUIWin::rootItems[ITEM_GROUP_LAST] = {NULL};
-unsigned long GUIWin::menuGroups[ITEM_GROUP_LAST] = {0};
+unsigned long GUIWin::menuGroups[ITEM_GROUP_LAST] = {NULL};
 HMENU GUIWin::popupMenu = 0;
 bool GUIWin::autoFindPerformed = false;
 
@@ -289,9 +289,6 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 		case ID_FILE_EXIT:
 			PostQuitMessage(0);
 			break;
-		case ID_FILE_IMPORTOLD:
-			return onImportOld(h);
-			break;
 		case ID_FILE_SAVEAS:
 			return onSaveOtb(h);
 			break;
@@ -322,12 +319,12 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 		case ID_TOOLS_SHOWALL:
 			loadTreeItemTypes(h);
 			break;
-		case ID_TOOLS_IMPORTXMLNAMES:
-			g_itemsTypes->importFromXml("new_items.xml");
-			loadTreeItemTypes(h);
+		case ID_TOOLS_EXPORTXML:
+			g_itemsTypes->exportToXml("itemsExport.xml");
 			break;
-		case ID_TOOLS_EXPORTXMLNAMES:
-			g_itemsTypes->exportToXml("itemnamesExport.xml");
+		case ID_TOOLS_GETXMLNAMES:
+			g_itemsTypes->importFromXml("items.xml");
+			loadTreeItemTypes(h);
 			break;
 		case ID_TOOLS_ADDITEM:
 			return onAddItem(h);
@@ -517,42 +514,6 @@ LRESULT GUIWin::onContextMenu(HWND h, unsigned long lParam)
 	return TRUE;
 }
 
-LRESULT GUIWin::onImportOld(HWND h)
-{
-	OPENFILENAME opf;
-	char fileItemsXml[512];
-	char fileTibiaDat[512];
-	long ret;
-	memset(&opf, 0, sizeof(opf));
-	fileItemsXml[0] = 0;
-	fileTibiaDat[0] = 0;
-	opf.lStructSize = sizeof(OPENFILENAME);
-	opf.hwndOwner = h;
-	opf.nFilterIndex = 1;
-	opf.nMaxFile = 511;
-	opf.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_NOLONGNAMES;
-
-	opf.lpstrFile = fileTibiaDat;
-	opf.lpstrFilter = "DAT files\0*.dat\0\0";
-	ret = GetOpenFileName(&opf);
-	if(ret == 0)
-		return TRUE;
-
-	opf.lpstrFile = fileItemsXml;
-	opf.lpstrFilter = "XML files\0*.xml\0\0";
-	ret = GetOpenFileName(&opf);
-	if(ret == 0)
-		return TRUE;
-	
-	g_itemsTypes->clear();
-	g_itemsTypes->loadFromDat(fileTibiaDat);
-	g_itemsTypes->loadFromXml(fileItemsXml);
-	
-	autoFindPerformed = false;
-	loadTreeItemTypes(h);
-
-	return TRUE;
-}
 
 LRESULT GUIWin::onSaveOtb(HWND h)
 {
@@ -625,7 +586,6 @@ LRESULT GUIWin::onAutoFindImages(HWND h)
 		getImageHash(i, hash);
 		#endif
 		ItemMap::iterator it;
-
 		for(it = g_itemsTypes->getTypes(); it != g_itemsTypes->getEnd(); it++){
 			if(it->second->foundNewImage == false && memcmp(hash, it->second->sprHash, 16) == 0){
 				if(it->second->compareOptions(g_itemsSprites->getSprite(i))){
@@ -811,75 +771,12 @@ LRESULT GUIWin::onInitDialog(HWND h)
 	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up SE", FLOOR_U_SE);
 	createItemCombo(GetDlgItem(h, IDC_COMBO_FLOOR), "Up SW", FLOOR_U_SW);
 
-	//slot
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Default", SLOT_DEFAULT);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Head", SLOT_HEAD);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Body", SLOT_BODY);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Legs", SLOT_LEGS);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Backpack", SLOT_BACKPACK);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "weapon", SLOT_WEAPON);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Two hand", SLOT_2HAND);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Boots", SLOT_FEET);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Amulet", SLOT_AMULET);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Ring", SLOT_RING);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SLOT), "Hand", SLOT_HAND);
-
-	
-	//skills
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "None", WEAPON_NONE);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "Sword", WEAPON_SWORD);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "Club", WEAPON_CLUB);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "Axe", WEAPON_AXE);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "Shield", WEAPON_SHIELD);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "Distance", WEAPON_DIST);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SKILL), "Magic", WEAPON_MAGIC);
-
-	//amu
-	createItemCombo(GetDlgItem(h, IDC_COMBO_AMU), "None", AMU_NONE);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_AMU), "Bolt", AMU_BOLT);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_AMU), "Arrow", AMU_ARROW);
-
-	//shoot
-	SendMessage(GetDlgItem(h, IDC_COMBO_SHOOT), CB_SETDROPPEDWIDTH, 96, 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "None", DIST_NONE);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Throwing Star", DIST_THROWINGSTAR);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Throwing Knife", DIST_THROWINGKNIFE);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Small Stone", DIST_SMALLSTONE);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Large Rock", DIST_LARGEROCK);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Snowball", DIST_SNOWBALL);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Spear", DIST_SPEAR);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Bolt", DIST_BOLT);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Power Bolt", DIST_POWERBOLT);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Infernal Bolt", DIST_INFERNALBOLT);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Arrow", DIST_ARROW);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Poison Arrow", DIST_POISONARROW);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Burst Arrow", DIST_BURSTARROW);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Fire", DIST_FIRE);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Energy", DIST_ENERGY);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Poison", DIST_POISONFIELD);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_SHOOT), "Sudden Death", DIST_SUDDENDEATH);
-
-	//editor types
-	createItemCombo(GetDlgItem(h, IDC_COMBO_EDITOR), "Grounds", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_EDITOR), "Building", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_EDITOR), "Hangable", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_EDITOR), "Interior", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_EDITOR), "Nature", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_EDITOR), "Accessories", 0);
-	createItemCombo(GetDlgItem(h, IDC_COMBO_EDITOR), "Exterior", 0);
-
-
 	//initialize menu entryes
 	menuGroups[ITEM_GROUP_GROUND] = ID_MENUG_GROUND;
 	menuGroups[ITEM_GROUP_CONTAINER] = ID_MENUG_CONTAINER;
-	menuGroups[ITEM_GROUP_WEAPON] = ID_MENUG_WEAPON;
-	menuGroups[ITEM_GROUP_AMMUNITION] = ID_MENUG_AMMUNITION;
-	menuGroups[ITEM_GROUP_ARMOR] = ID_MENUG_ARMOR;
 	menuGroups[ITEM_GROUP_RUNE] = ID_MENUG_RUNE;
 	menuGroups[ITEM_GROUP_TELEPORT] = ID_MENUG_TELEPORT;
 	menuGroups[ITEM_GROUP_MAGICFIELD] = ID_MENUG_MAGICFIELD;
-	menuGroups[ITEM_GROUP_WRITEABLE] = ID_MENUG_WRITEABLE;
-	menuGroups[ITEM_GROUP_KEY] = ID_MENUG_KEY;
 	menuGroups[ITEM_GROUP_SPLASH] = ID_MENUG_SPLASH;
 	menuGroups[ITEM_GROUP_FLUID] = ID_MENUG_FLUID;
 	menuGroups[ITEM_GROUP_DOOR] = ID_MENUG_DOOR;
@@ -907,22 +804,13 @@ void GUIWin::createGroupsTree(HWND htree)
 
 	rootItems[ITEM_GROUP_GROUND] = insertTreeItem(htree, "Ground", NULL, ITEM_GROUP_GROUND);
 	rootItems[ITEM_GROUP_CONTAINER] = insertTreeItem(htree, "Container", NULL, ITEM_GROUP_CONTAINER);
-	rootItems[ITEM_GROUP_WEAPON] = insertTreeItem(htree, "Weapon", NULL, ITEM_GROUP_WEAPON);
-	rootItems[ITEM_GROUP_AMMUNITION] = insertTreeItem(htree, "Ammunition", NULL, ITEM_GROUP_AMMUNITION);
-	rootItems[ITEM_GROUP_ARMOR] = insertTreeItem(htree, "Armor", NULL, ITEM_GROUP_ARMOR);
 	rootItems[ITEM_GROUP_RUNE] = insertTreeItem(htree, "Rune", NULL, ITEM_GROUP_RUNE);
 	rootItems[ITEM_GROUP_TELEPORT] = insertTreeItem(htree, "Teleport", NULL, ITEM_GROUP_TELEPORT);
 	rootItems[ITEM_GROUP_MAGICFIELD] = insertTreeItem(htree, "Magic Field", NULL, ITEM_GROUP_MAGICFIELD);
-	rootItems[ITEM_GROUP_WRITEABLE] = insertTreeItem(htree, "Writeable", NULL, ITEM_GROUP_WRITEABLE);
-	rootItems[ITEM_GROUP_KEY] = insertTreeItem(htree, "Key", NULL, ITEM_GROUP_KEY);
 	rootItems[ITEM_GROUP_SPLASH] = insertTreeItem(htree, "Splash", NULL, ITEM_GROUP_SPLASH);
 	rootItems[ITEM_GROUP_FLUID] = insertTreeItem(htree, "Fluid Container", NULL, ITEM_GROUP_FLUID);
 	rootItems[ITEM_GROUP_DOOR] = insertTreeItem(htree, "Door", NULL, ITEM_GROUP_DOOR);
 	rootItems[ITEM_GROUP_NONE] = insertTreeItem(htree, "Other", NULL, ITEM_GROUP_NONE);
-
-	//insertTreeItem(htree, "Container 1", rootItems[ITEM_GROUP_NONE], 1988);
-	//insertTreeItem(htree, "Container 2", rootItems[ITEM_GROUP_NONE],  1987);
-
 }
 
 HTREEITEM GUIWin::insertTreeItem(HWND h, const char* name, HTREEITEM parent, long entryID)
@@ -941,8 +829,27 @@ HTREEITEM GUIWin::insertTreeItemType(HWND h, const ItemType *iType)
 {
 	char name[160];
 	getItemTypeName(iType, name);
+	
+	HTREEITEM parent;
 
-	return insertTreeItem(h, name, rootItems[iType->group], iType->id);
+	switch(iType->group){
+	case ITEM_GROUP_GROUND:
+	case ITEM_GROUP_CONTAINER:
+	case ITEM_GROUP_RUNE:
+	case ITEM_GROUP_TELEPORT:
+	case ITEM_GROUP_MAGICFIELD:
+	case ITEM_GROUP_SPLASH:
+	case ITEM_GROUP_FLUID:
+	case ITEM_GROUP_DOOR:
+	case ITEM_GROUP_NONE:
+		parent = rootItems[iType->group];
+		break;
+	default:
+		parent = rootItems[ITEM_GROUP_NONE];
+		break;
+	}
+
+	return insertTreeItem(h, name, parent, iType->id);
 }
 
 LRESULT GUIWin::onSpinScroll(HWND h, HWND spin)
@@ -1006,20 +913,6 @@ bool GUIWin::saveCurrentItem(HWND h)
 	if(curItemServerId >= 100 && !(iType = g_itemsTypes->getType(curItemServerId))){
 		return false;
 	}
-	if(GetWindowTextLength(GetDlgItem(h, IDC_EDITNAME)) > 127 || GetWindowTextLength(GetDlgItem(h, IDC_EDITDESCR)) > 127){
-		MessageBox(h, "Name or description too long.", NULL, MB_OK | MB_ICONEXCLAMATION);
-		return false;
-	}
-
-	//validate and save values to itemType[curItemServerId] map
-	char buffer[128];
-	int len = GetDlgItemText(h, IDC_EDITNAME, buffer, 127);
-	if(len >= 0)
-		memcpy(iType->name, buffer, len+1);
-
-	len = GetDlgItemText(h, IDC_EDITDESCR, buffer, 127);
-	if(len >= 0)
-		memcpy(iType->descr, buffer, len+1);
 
 	if(!getEditTextInt(h, IDC_EDITCID, iType->clientid)){
 		return false;
@@ -1049,39 +942,15 @@ bool GUIWin::saveCurrentItem(HWND h)
 	}
 
 
-	if(!getEditTextInt(h, IDC_EDIT_DECAYTO, iType->decayTo)){
-		return false;
-	}
-	if(!getEditTextInt(h, IDC_EDIT_DECAYTIME, iType->decayTime)){
-		return false;
-	}
-	if(!getEditTextInt(h, IDC_EDIT_ATK, iType->attack)){
-		return false;
-	}
-	if(!getEditTextInt(h, IDC_EDIT_DEF, iType->defence)){
-		return false;
-	}
-	if(!getEditTextInt(h, IDC_EDIT_ARM, iType->armor)){
-		return false;
-	}
-	if(!getEditTextInt(h, IDC_EDIT_MAXITEMS, iType->maxItems)){
-		return false;
-	}
 	if(!getEditTextInt(h, IDC_EDIT_SPEED, iType->speed)){
 		return false;
 	}
-	if(!getEditTextInt(h, IDC_EDIT_READONLYID, iType->readOnlyId)){
+
+	int a;
+	if(!getEditTextInt(h, IDC_EDIT_TOPORDER, a)){
 		return false;
 	}
-	if(!getEditTextInt(h, IDC_EDIT_MAXTEXTLEN, iType->maxTextLen)){
-		return false;
-	}
-	if(!getEditTextInt(h, IDC_EDIT_ROTATETO, iType->rotateTo)){
-		return false;
-	}
-	if(!getEditTextDouble(h, IDC_EDIT_WEIGHT, iType->weight)){
-		return false;
-	}
+	iType->alwaysOnTopOrder = a;
 
 	iType->blockSolid = getCheckButton(h, IDC_OPT_BLOCKING);
 	iType->alwaysOnTop = getCheckButton(h, IDC_OPT_ATOP);
@@ -1094,13 +963,9 @@ bool GUIWin::saveCurrentItem(HWND h)
 	iType->readable = getCheckButton(h, IDC_OPT_READABLE);
 	iType->blockPathFind = getCheckButton(h, IDC_OPT_BLOCKPATHFIND);
 	iType->hasHeight = getCheckButton(h, IDC_OPT_HASHEIGHT);
-	iType->canNotDecay = getCheckButton(h, IDC_OPT_CANNOTDECAY);
 	iType->allowDistRead = getCheckButton(h, IDC_OPT_DISTREAD);
-
-	iType->slot_position = (enum slots_t)getComboValue(h, IDC_COMBO_SLOT);
-	iType->weaponType = (enum WeaponType)getComboValue(h, IDC_COMBO_SKILL);
-	iType->amuType = (enum amu_t)getComboValue(h, IDC_COMBO_AMU);
-	iType->shootType = (enum subfight_t)getComboValue(h, IDC_COMBO_SHOOT);
+	iType->isHangable = getCheckButton(h, IDC_OPT_HANGABLE);
+	iType->corpse = getCheckButton(h, IDC_OPT_CORPSE);
 
 	int comboFloor = getComboValue(h, IDC_COMBO_FLOOR);
 	if(comboFloor & FLOOR_DOWN){
@@ -1154,25 +1019,12 @@ void GUIWin::loadItem(HWND h)
 	ItemType *iType;
 	if(curItemServerId && (iType = g_itemsTypes->getType(curItemServerId))){
 		
-		SetDlgItemText(h, IDC_EDITNAME, iType->name);
-		SetDlgItemText(h, IDC_EDITDESCR, iType->descr);
-
 		setEditTextInt(h, IDC_SID, iType->id);
 		setEditTextInt(h, IDC_EDITCID, iType->clientid);
-		setEditTextInt(h, IDC_EDIT_DECAYTO, iType->decayTo);
-		setEditTextInt(h, IDC_EDIT_DECAYTIME, iType->decayTime);
-		setEditTextInt(h, IDC_EDIT_ATK, iType->attack);
-		setEditTextInt(h, IDC_EDIT_DEF, iType->defence);
-		setEditTextInt(h, IDC_EDIT_ARM, iType->armor);
-		setEditTextInt(h, IDC_EDIT_MAXITEMS, iType->maxItems);
 		setEditTextInt(h, IDC_EDIT_SPEED, iType->speed);
-		setEditTextInt(h, IDC_EDIT_READONLYID, iType->readOnlyId);
-		setEditTextInt(h, IDC_EDIT_MAXTEXTLEN, iType->maxTextLen);
-		setEditTextInt(h, IDC_EDIT_ROTATETO, iType->rotateTo);
-		setEditTextDouble(h, IDC_EDIT_WEIGHT, iType->weight);
 		setEditTextInt(h, IDC_EDIT_TOPORDER, iType->alwaysOnTopOrder);
-		setEditTextInt(h, IDC_LIGHT_LEVEL, iType->lightLevel);
-		setEditTextInt(h, IDC_LIGHT_COLOR, iType->lightColor);
+		setEditTextInt(h, IDC_EDIT_LIGHT_LEVEL, iType->lightLevel);
+		setEditTextInt(h, IDC_EDIT_LIGHT_COLOR, iType->lightColor);
 
 		setCheckButton(h, IDC_OPT_BLOCKING, iType->blockSolid);
 		setCheckButton(h, IDC_OPT_ATOP, iType->alwaysOnTop);
@@ -1185,17 +1037,11 @@ void GUIWin::loadItem(HWND h)
 		setCheckButton(h, IDC_OPT_READABLE, iType->readable);
 		setCheckButton(h, IDC_OPT_BLOCKPATHFIND, iType->blockPathFind);
 		setCheckButton(h, IDC_OPT_HASHEIGHT, iType->hasHeight);
-		setCheckButton(h, IDC_OPT_CANNOTDECAY, iType->canNotDecay);
 		setCheckButton(h, IDC_OPT_DISTREAD, iType->allowDistRead);
 		setCheckButton(h, IDC_OPT_VERTICAL, iType->isVertical);
 		setCheckButton(h, IDC_OPT_HORIZONTAL, iType->isHorizontal);
 		setCheckButton(h, IDC_OPT_CORPSE, iType->corpse);
-		
-
-		setComboValue(h, IDC_COMBO_SLOT, iType->slot_position);
-		setComboValue(h, IDC_COMBO_SKILL, iType->weaponType);
-		setComboValue(h, IDC_COMBO_AMU, iType->amuType);
-		setComboValue(h, IDC_COMBO_SHOOT, iType->shootType);
+		setCheckButton(h, IDC_OPT_HANGABLE, iType->isHangable);
 
 		if(iType->floorChangeDown)
 			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_DOWN);
@@ -1220,47 +1066,30 @@ void GUIWin::loadItem(HWND h)
 
 	}
 	else{
-		SetDlgItemText(h, IDC_EDITNAME, "");
-		SetDlgItemText(h, IDC_EDITDESCR, "");
 
 		setEditTextInt(h, IDC_SID, 0);
 		setEditTextInt(h, IDC_EDITCID, 0);
-		setEditTextInt(h, IDC_EDIT_DECAYTO, 0);
-		setEditTextInt(h, IDC_EDIT_DECAYTIME, 0);
-		setEditTextInt(h, IDC_EDIT_ATK, 0);
-		setEditTextInt(h, IDC_EDIT_DEF, 0);
-		setEditTextInt(h, IDC_EDIT_ARM, 0);
-		setEditTextInt(h, IDC_EDIT_MAXITEMS, 0);
 		setEditTextInt(h, IDC_EDIT_SPEED, 0);
-		setEditTextInt(h, IDC_EDIT_READONLYID, 0);
-		setEditTextInt(h, IDC_EDIT_MAXTEXTLEN, 0);
-		setEditTextInt(h, IDC_EDIT_ROTATETO, 0);
-		setEditTextDouble(h, IDC_EDIT_WEIGHT, 0);
 		setEditTextInt(h, IDC_EDIT_TOPORDER, 0);
-		setEditTextInt(h, IDC_LIGHT_LEVEL, 0);
-		setEditTextInt(h, IDC_LIGHT_COLOR, 0);
+		setEditTextInt(h, IDC_EDIT_LIGHT_LEVEL, 0);
+		setEditTextInt(h, IDC_EDIT_LIGHT_COLOR, 0);
 
 		setCheckButton(h, IDC_OPT_BLOCKING, false);
-		setCheckButton(h, IDC_OPT_ATOP, false);
-		setCheckButton(h, IDC_OPT_STACKABLE, false);
-		setCheckButton(h, IDC_OPT_USEABLE, false);
-		setCheckButton(h, IDC_OPT_NO_MOVE, false);
-		setCheckButton(h, IDC_OPT_PICKUP, false);
-		setCheckButton(h, IDC_OPT_ROTABLE, false);
 		setCheckButton(h, IDC_OPT_BLOCKPROJECTILE, false);
-		setCheckButton(h, IDC_OPT_READABLE, false);
 		setCheckButton(h, IDC_OPT_BLOCKPATHFIND, false);
+		setCheckButton(h, IDC_OPT_NO_MOVE, false);
+		setCheckButton(h, IDC_OPT_ATOP, false);
 		setCheckButton(h, IDC_OPT_HASHEIGHT, false);
-		setCheckButton(h, IDC_OPT_CANNOTDECAY, false);
+		setCheckButton(h, IDC_OPT_HANGABLE, false);
+		setCheckButton(h, IDC_OPT_PICKUP, false);
+		setCheckButton(h, IDC_OPT_USEABLE, false);
+		setCheckButton(h, IDC_OPT_ROTABLE, false);
+		setCheckButton(h, IDC_OPT_READABLE, false);
 		setCheckButton(h, IDC_OPT_DISTREAD, false);
 		setCheckButton(h, IDC_OPT_VERTICAL, false);
 		setCheckButton(h, IDC_OPT_HORIZONTAL, false);
 		setCheckButton(h, IDC_OPT_CORPSE, false);
-
-		setComboValue(h, IDC_COMBO_SLOT, SLOT_DEFAULT);
-		setComboValue(h, IDC_COMBO_SKILL, WEAPON_NONE);
-		setComboValue(h, IDC_COMBO_AMU, AMU_NONE);
-		setComboValue(h, IDC_COMBO_SHOOT, DIST_NONE);
+		setCheckButton(h, IDC_OPT_STACKABLE, false);
 
 		setComboValue(h, IDC_COMBO_FLOOR, FLOOR_NO_CHANGE);
 	}
@@ -1358,41 +1187,7 @@ void GUIWin::updateControls(HWND h)
 	//update controls depending on curItemServerId
 	ItemType *iType;
 	if(curItemServerId && (iType = g_itemsTypes->getType(curItemServerId))){
-		unsigned long editbase = IDC_EDITNAME_FLAG | IDC_EDITDSECR_FLAG | IDC_EDITCID_FLAG |
-						IDC_EDIT_DECAYTO_FLAG | IDC_EDIT_DECAYTIME_FLAG;
 		setControlState(h, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
-		//TODO
-		/*switch(iType->getGroup()){
-		case ITEM_GROUP_GROUND:
-			setControlState(h, editbase | ......, 0, 0, 0);
-			break
-		case ITEM_GROUP_CONTAINER:
-			break
-		case ITEM_GROUP_WEAPON:
-			break
-		case ITEM_GROUP_AMMUNITION:
-			break
-		case ITEM_GROUP_ARMOR:
-			break
-		case ITEM_GROUP_RUNE:
-			break
-		case ITEM_GROUP_TELEPORT:
-			break
-		case ITEM_GROUP_MAGICFIELD:
-			break
-		case ITEM_GROUP_WRITEABLE:
-			break
-		case ITEM_GROUP_KEY:
-			break
-		case ITEM_GROUP_SPLASH:
-			break
-		case ITEM_GROUP_FLUID:
-			break
-		case ITEM_GROUP_NONE:
-			break
-		default:
-			break;
-		}*/
 	}
 	else{
 		setControlState(h, IDC_EDITCID_FLAG, 0, 0, 0);
@@ -1402,21 +1197,13 @@ void GUIWin::updateControls(HWND h)
 
 void GUIWin::setControlState(HWND h, unsigned long flagsEdit, unsigned long flagsOpt, unsigned long flagsCombo, unsigned long flagsButton)
 {
-	EnableWindow(GetDlgItem(h, IDC_EDIT_NAME),getFlagState(flagsEdit, IDC_EDITNAME_FLAG));
-	EnableWindow(GetDlgItem(h, IDC_EDIT_DESCR),getFlagState(flagsEdit, IDC_EDITDSECR_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_EDIT_CID),getFlagState(flagsEdit, IDC_EDITCID_FLAG));
 
-	EnableWindow(GetDlgItem(h, IDC_EDIT_DECAYTO),getFlagState(flagsEdit, IDC_EDIT_DECAYTO_FLAG));
-	EnableWindow(GetDlgItem(h, IDC_EDIT_DECAYTIME),getFlagState(flagsEdit, IDC_EDIT_DECAYTIME_FLAG));
-	EnableWindow(GetDlgItem(h, IDC_EDIT_ATK),getFlagState(flagsEdit, IDC_EDIT_ATK_FLAG));
-	EnableWindow(GetDlgItem(h, IDC_EDIT_DEF),getFlagState(flagsEdit, IDC_EDIT_DEF_FLAG));
-	EnableWindow(GetDlgItem(h, IDC_EDIT_ARM),getFlagState(flagsEdit, IDC_EDIT_ARM_FLAG));
-	EnableWindow(GetDlgItem(h, IDC_EDIT_MAXITEMS),getFlagState(flagsEdit, IDC_EDIT_MAXITEMS_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_EDIT_SPEED),getFlagState(flagsEdit, IDC_EDIT_SPEED_FLAG));
-	EnableWindow(GetDlgItem(h, IDC_EDIT_READONLYID),getFlagState(flagsEdit, IDC_EDIT_READONLYID_FLAG));
-	EnableWindow(GetDlgItem(h, IDC_EDIT_MAXTEXTLEN),getFlagState(flagsEdit, IDC_EDIT_MAXTEXTLEN_FLAG));
-	EnableWindow(GetDlgItem(h, IDC_EDIT_ROTATETO),getFlagState(flagsEdit, IDC_EDIT_ROTATETO_FLAG));
-	EnableWindow(GetDlgItem(h, IDC_EDIT_WEIGHT),getFlagState(flagsEdit, IDC_EDIT_WEIGHT_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_EDIT_LIGHT_LEVEL),getFlagState(flagsEdit, IDC_EDIT_LIGHT_LEVEL_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_EDIT_LIGHT_COLOR),getFlagState(flagsEdit, IDC_EDIT_LIGHT_LEVEL_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_EDIT_TOPORDER),getFlagState(flagsEdit, IDC_EDIT_TOPORDER_FLAG ));
+
 
 	EnableWindow(GetDlgItem(h, IDC_OPT_BLOCKING),getFlagState(flagsOpt, IDC_OPT_BLOCKING_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_OPT_ATOP),getFlagState(flagsOpt, IDC_OPT_ATOP_FLAG));
@@ -1429,17 +1216,14 @@ void GUIWin::setControlState(HWND h, unsigned long flagsEdit, unsigned long flag
 	EnableWindow(GetDlgItem(h, IDC_OPT_READABLE),getFlagState(flagsOpt, IDC_OPT_READABLE_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_OPT_BLOCKPATHFIND),getFlagState(flagsOpt, IDC_OPT_BLOCKPATHFIND_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_OPT_HASHEIGHT),getFlagState(flagsOpt, IDC_OPT_HASHEIGHT_FLAG));
-	EnableWindow(GetDlgItem(h, IDC_OPT_CANNOTDECAY),getFlagState(flagsOpt, IDC_OPT_CANNOTDECAY_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_OPT_DISTREAD),getFlagState(flagsOpt, IDC_OPT_DISTREAD_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_OPT_HANGABLE),getFlagState(flagsOpt, IDC_OPT_HANGABLE_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_OPT_VERTICAL),getFlagState(flagsOpt, IDC_OPT_VERTICAL_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_OPT_HORIZONTAL),getFlagState(flagsOpt, IDC_OPT_HORIZONTAL_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_OPT_CORPSE),getFlagState(flagsOpt, IDC_OPT_CORPSE_FLAG));
 
-	EnableWindow(GetDlgItem(h, IDC_COMBO_SLOT),getFlagState(flagsCombo, IDC_COMBO_SLOT_FLAG));
-	EnableWindow(GetDlgItem(h, IDC_COMBO_SKILL),getFlagState(flagsCombo, IDC_COMBO_SKILL_FLAG));
-	EnableWindow(GetDlgItem(h, IDC_COMBO_AMU),getFlagState(flagsCombo, IDC_COMBO_AMU_FLAG));
-	EnableWindow(GetDlgItem(h, IDC_COMBO_SHOOT),getFlagState(flagsCombo, IDC_COMBO_SHOOT_FLAG));
+
 	EnableWindow(GetDlgItem(h, IDC_COMBO_FLOOR),getFlagState(flagsCombo, IDC_COMBO_FLOOR_FLAG));
-	EnableWindow(GetDlgItem(h, IDC_COMBO_EDITOR),getFlagState(flagsCombo, IDC_COMBO_EDITOR_FLAG));
-
-	EnableWindow(GetDlgItem(h, IDC_SET_CLIENT_OPT),getFlagState(flagsButton, IDC_SET_CLIENT_OPT_FLAG));
 }
 
 void GUIWin::loadTreeItemTypes(HWND h, bool notFound)
@@ -1550,12 +1334,12 @@ bool GUIDraw::drawSprite(HDC desthdc, long x, long y, long maxx, long maxy, unsi
 				}
 				HBITMAP itembmp = getBitmap(sprite);
 				if(sprite){
-					SelectObject(m_auxHDC,itembmp);
 					if(x - cx*32 >= 0 && y - cy*32 >= 0){
 						long x_draw = max(x - cx*32,0);
 						long y_draw = max(y - cy*32,0);
 						long w_draw = min(32 ,maxx - x + cx*32);
 						long h_draw = min(32 ,maxy - y + cy*32);
+						SelectObject(m_auxHDC,itembmp);
 						TransparentBlt(desthdc,x_draw,y_draw,w_draw, h_draw, m_auxHDC,0,0,w_draw,h_draw,0x111111);
 						//BitBlt(desthdc,x_draw,y_draw,w_draw, h_draw, m_auxHDC,0,0,SRCCOPY);
 					}

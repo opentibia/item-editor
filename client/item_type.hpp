@@ -308,7 +308,6 @@ public:
 	bool rotable;
 	bool readable;
 
-	bool canNotDecay;
 	bool allowDistRead;
 	bool corpse;
 
@@ -348,9 +347,6 @@ public:
 	
 	//teleport
 	
-	//magicfield
-	int magicfieldtype;
-	
 	//writeable
 	int readOnlyId;
 	int maxTextLen;
@@ -366,17 +362,6 @@ public:
 	bool isHorizontal;
 
 	bool isHangable;
-
-	//
-	//bool canWalkThrough;
-	//bool ladderUp;
-	//bool canSeeThrough;
-	//bool wallObject;
-	//bool hasAnimation;
-	//bool hasParameter14;
-	//unsigned short heightdisplacement;
-	//bool makeLight;
-
 	bool compareOptions(const SpriteType *stype);
 };
 
@@ -387,9 +372,6 @@ public:
 	ItemsTypes();
 	~ItemsTypes();
 	void clear();
-
-	bool loadFromDat(const char *filename);
-	bool loadFromXml(const char *filename);
 
 	bool importFromXml(const char *filename);
 	bool exportToXml(const char *filename);
@@ -410,7 +392,6 @@ public:
 private:
 	bool datLoaded;
 	static int loadstatus;
-	static void XMLCALL xmlstartNode(void *userData, const char *name, const char **atts);
 	static void XMLCALL xmlendNode(void *userData, const char *name);
 	static void XMLCALL xmlstartNodeImport(void *userData, const char *name, const char **atts);
 	

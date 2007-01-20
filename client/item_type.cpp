@@ -23,12 +23,13 @@
 
 #include "item_type.hpp"
 #include "item_sprite.hpp"
-#include <sstream>
 
-const char* readXmlProp(const char* propName, const xmlProp *props);
 extern ItemsTypes *g_itemsTypes;
 extern ItemsSprites *g_itemsSprites;
 extern void getImageHash(unsigned short cid, void* output);
+
+const char* readXmlProp(const char* propName, const xmlProp *props);
+
 
 long ItemType::minClientId = 0;
 long ItemType::maxClientId = 0;
@@ -58,7 +59,6 @@ ItemType::ItemType()
 	pickupable	= false;
 	rotable = false;
 	readable = false;
-	canNotDecay = false;
 	allowDistRead = false;
 	corpse = false;
 	
@@ -111,8 +111,6 @@ ItemType::ItemType()
 	//rune
 	runeMagLevel = -1;
 	
-	//magicfield
-	magicfieldtype = 0;
 	
 	//writeable
 	readOnlyId = 0;
@@ -149,9 +147,8 @@ ItemType::ItemType(unsigned short _id, const SpriteType *stype)
 	pickupable = stype->pickupable;
 	rotable = stype->rotable;
 	readable = stype->readable;
-	canNotDecay = false;
 	allowDistRead = false;
-	corpse = false;
+	corpse = stype->corpse;
 	speed = stype->speed;
 
 	miniMapColor = stype->miniMapColor;
@@ -205,8 +202,6 @@ ItemType::ItemType(unsigned short _id, const SpriteType *stype)
 	//rune
 	runeMagLevel = -1;
 	
-	//magicfield
-	magicfieldtype = 0;
 	
 	//writeable
 	readOnlyId = 0;
@@ -288,6 +283,9 @@ bool ItemType::compareOptions(const SpriteType *stype)
 	if(readable != stype->readable)
 		return false;
 
+	if(corpse != stype->corpse)
+		return false;
+
 	return true;
 }
 
@@ -313,708 +311,14 @@ void ItemsTypes::clear()
 	item.clear();
 }
 
-bool ItemsTypes::loadFromDat(const char *filename)
-{
-	if(datLoaded)
-		return false;
-	
-	unsigned short id = 100;  // tibia.dat start with id 100
-	FILE *fp;
-	long size;
-	int speed;
-	short read_short;
-	
-	fp = fopen(filename, "rb");
-	if(!fp)
-		return false;
-	
-	fseek(fp,0,SEEK_END);
-	size = ftell(fp);
-
-	//get max id
-	fseek(fp, 0x04, SEEK_SET);
-	fread(&read_short, 2, 1, fp); 
-	ItemType::maxClientId = read_short;
-	ItemType::minClientId = 100;
-
-	fseek(fp, 0x0C, SEEK_SET);
-	// loop throw all Items until we reach the end of file
-	while(ftell(fp) < size && id <= ItemType::maxClientId)
-	{
-		ItemType *sType = getType(id);
-		if(!sType) {
-			sType = new ItemType();
-
-			sType->id = id;
-			sType->clientid = id;
-			getImageHash(sType->clientid, sType->sprHash);
-			addType(id, sType);
-		}
-
-		// read the options until we find a 0xff
-		int optbyte;
-		
-		while (((optbyte = fgetc(fp)) >= 0) && (optbyte != 0xFF))
-		{                                                            
-			switch (optbyte)
-			{
-				case 0x00: //is groundtile
-				{
-					fread(&read_short, 2, 1, fp); 
-					speed = read_short;
-					sType->speed = speed;
-					sType->group = ITEM_GROUP_GROUND;
-					break;
-				}
-				case 0x01: //all on top
-				{
-					sType->alwaysOnTop = true;
-					break;
-				}
-				case 0x02: //can walk trough (open doors, arces, bug pen fence ??)
-				{
-					sType->alwaysOnTop = true;
-					//sType->canWalkThrough = true;
-					break;
-				}
-				case 0x03: //is a container
-				{
-					sType->group = ITEM_GROUP_CONTAINER;
-					break;
-				}
-				case 0x04: //is stackable
-				{
-					sType->stackable = true;
-					break;
-				}
-				case 0x05: //is useable
-				{
-					sType->useable = true;
-					break;
-				}
-				case 0x0A: //liquid with states
-				{
-					sType->group = ITEM_GROUP_SPLASH;
-					break;
-				}
-				case 0x0B: //is blocking
-				{
-					sType->blockSolid = true;
-					break;
-				}
-				case 0x0C: //is not moveable
-				{
-					sType->moveable = false;
-					break;
-				}
-				case 0x0F: //can be equipped
-				{
-					sType->pickupable = true;
-					break;
-				}
-				case 0x10: //makes light (skip 4 bytes)
-				{
-					unsigned short lightlevel;
-					fread(&lightlevel, sizeof(lightlevel), 1, fp);
-					sType->lightLevel = lightlevel;
-
-					unsigned short lightcolor;
-					fread(&lightcolor, sizeof(lightcolor), 1, fp);
-					sType->lightColor = lightcolor;
-
-					break;
-				}
-				case 0x06: //ladder up (id 1386)   why a group for just 1 item ???   
-				{
-					//sType->ladderUp = true;
-					break;
-				}
-				case 0x09: //can contain fluids
-				{
-					sType->group = ITEM_GROUP_FLUID;
-					break;
-				}
-				case 0x0D: //"visibility"- for drawing visible view
-				{
-					sType->blockProjectile = true;
-					break;
-				}
-				case 0x0E: //blocks creature movement (flowers, parcels etc)
-				{
-					sType->blockPathFind = true;
-					break;
-				}
-				case 0x11: //can see what is under (ladder holes, stairs holes etc)
-				{
-					//sType->canSeeThrough = true;
-					break;
-				}
-				case 0x12: //ground tiles that don't cause level change
-				{
-					//sType->floorchange = false;
-					break;
-				}
-				case 0x18: //draw with height offset for all parts (2x2) of the sprite
-				{
-					break;
-				}
-				case 0x14: //sprite-drawing related
-				{
-					//sType->hasParameter14 = true;
-					break;
-				}
-				case 0x07: //writtable objects
-				{
-					sType->group = ITEM_GROUP_WRITEABLE;
-					sType->readable = true;
-
-					unsigned short us;
-					fread(&us, sizeof(us), 1, fp); //unknown, values like 80, 200, 512, 1024, 2000
-					sType->subParam07 = us;
-					break;
-				}
-				case 0x08: //writtable objects that can't be edited
-				{
-					sType->readable = true;
-					unsigned short us;
-					fread(&us, sizeof(us), 1, fp); //unknown, all have the value 1024
-					sType->subParam08 = us;
-					break;
-				}
-				case 0x13: //items that have height
-				{
-					sType->hasHeight = true;
-
-					unsigned short heightdisp;
-					fread(&heightdisp, sizeof(heightdisp), 1, fp);
-					//sType->heightdisplacement = heightdisp;
-					break;
-				}
-				case 0x16: //minimap drawing
-				{
-					unsigned short color;
-					fread(&color, sizeof(color), 1, fp);
-					sType->miniMapColor = color;
-
-					break;
-				}
-				case 0x1A: //vertical objects (walls to hang objects on etc)
-				{
-					sType->isHorizontal = true;
-					break;  
-				}
-				case 0x1B: //walls 2 types of them same material (total 4 pairs)                  
-				{
-					sType->isVertical = true;
-					break;
-				}
-				case 0x1D: //line spot ...
-				{
-					int tmp;
-					tmp = fgetc(fp); // 86 -> openable holes, 77-> can be used to go down, 76 can be used to go up, 82 -> stairs up, 79 switch,    
-					if(tmp == 0x58)
-						sType->readable = true;
-					fgetc(fp); // always 4
-					break;         
-				}
-				case 0x19: //hangable objects
-				{
-					sType->isHangable = true;
-					break;    
-				}
-				case 0x17: //seems like decorables with 4 states of turning (exception first 4 are unique statues)                 
-				{
-					sType->rotable = true;
-					break;
-				}
-				case 0x1C: //monster has animation even when iddle (rot, wasp, slime, fe)
-				{
-					//sType->hasAnimation = true;
-					break;            
-				}
-				default:
-				{
-					//std::cout << "unknown byte: " << (unsigned short)optbyte << std::endl;
-					return false;
-					break;
-				}
-			}
-		}
-
-		// now skip the size and sprite data		
- 		int width  = fgetc(fp);
- 		int height = fgetc(fp);
- 		if ((width > 1) || (height > 1))
- 		   fgetc(fp);
- 		   
-		int blendframes = fgetc(fp);
-		int xdiv        = fgetc(fp);
-		int ydiv        = fgetc(fp);
-		int animcount   = fgetc(fp);
-
-		fseek(fp, width*height*blendframes*xdiv*ydiv*animcount*2, SEEK_CUR);
-		++id;
-	}
-
-	datLoaded = true;
-	return true;
-}
-
-int ItemsTypes::loadstatus;
-bool ItemsTypes::loadFromXml(const char *filename)
-{
-	void *buff;
-	int bytes_read;
-	int eof;
-
-	XML_Parser p = XML_ParserCreate(NULL);
-
-	eof = 0;
-	if(!p){
-		return false;
-	}
-
-	XML_SetElementHandler(p, xmlstartNode, xmlendNode);
-
-	FILE *f = fopen(filename,"rb");
-	if(!f){
-		XML_ParserFree(p);
-		return false;
-	}
-
-	loadstatus = 0;
-	do{
-		buff = XML_GetBuffer(p, 1024);
-
-		bytes_read = fread(buff, 1, 1024, f);
-		if(bytes_read != 1024){
-			if(feof(f) == 0){
-				//error
-				XML_ParserFree(p);
-				return false;
-			}
-			else{
-				eof = 1;
-			}
-		}
-
-		XML_Status status = XML_ParseBuffer(p, bytes_read, eof);
-		switch (status) {
-		case XML_STATUS_ERROR:
-			XML_ParserFree(p);
-			return false;
-		}
-	}while(eof == 0 && loadstatus == 0);
-
-	XML_ParserFree(p);
-	if(loadstatus != 0){
-		return false;
-	}
-	else{
-		return true;
-	}
-
-	return false;
-}
-
-const char* readXmlProp(const char* propName, const xmlProp *props)
-{
-	int i = 0;
-	while(props[i].name != NULL){
-		if(strcmp(props[i].name, propName) == 0){
-			return props[i].value;
-		}
-		i++;
-	}
-	return NULL;
-
-}
-
-void XMLCALL ItemsTypes::xmlstartNode(void *userData, const char *name, const char **atts)
-{
-	if(loadstatus == 1)
-		return;
-	
-	const xmlProp *props = (const xmlProp *)atts;
-
-	if(strcmp(name, "item") == 0){
-		int id;
-		const char* tmp;
-		ItemType* sType = NULL;
-
-		if((tmp = readXmlProp("id", props)) != 0){
-			id = atoi(tmp);
-			sType = g_itemsTypes->getType(id);
-			if(!sType) {
-				sType = new ItemType();
-
-				if(id < ItemType::minClientId){
-					sType->id = id + 20000;
-				}
-				else{
-					sType->id = id;
-				}
-
-				if(id > ItemType::maxClientId || id < ItemType::minClientId){
-					sType->clientid = 0;
-				}
-				else{
-					sType->clientid = id;
-				}
-					
-				g_itemsTypes->addType(sType->id, sType);
-			}
-		}
-		else
-			loadstatus = 1;
-
-		if(sType) {
-			if((tmp = readXmlProp("name", props)) != 0){
-				//sType->name = tmp;
-				strncpy(sType->name, tmp, 127);
-			}
-
-			if((tmp = readXmlProp("descr", props)) != 0){
-				//sType->descr = tmp;
-				strncpy(sType->descr, tmp, 127);
-			}
-
-			if((tmp = readXmlProp("weight", props)) != 0){
-				sType->weight = atof(tmp);
-			}
-
-			if((tmp = readXmlProp("decayto", props)) != 0){
-				sType->decayTo = atoi(tmp);
-			}
-
-			if((tmp = readXmlProp("decaytime", props)) != 0){
-				sType->decayTime = atoi(tmp);
-			}
-
-			if((tmp = readXmlProp("blockingprojectile", props)) != 0){
-				if(atoi(tmp) == 0)
-					sType->blockProjectile = false;
-				else
-					sType->blockProjectile = true;
-			}
-
-			if((tmp = readXmlProp("floorchange", props)) != 0){
-				sType->floorChangeDown = true;
-			}
-
-			if((tmp = readXmlProp("floorchangenorth", props)) != 0){
-				sType->floorChangeNorth = true;
-			}
-
-			if((tmp = readXmlProp("floorchangesouth", props)) != 0){
-				sType->floorChangeSouth = true;
-			}
-
-			if((tmp = readXmlProp("floorchangeeast", props)) != 0){
-				sType->floorChangeEast = true;
-			}
-
-			if((tmp = readXmlProp("floorchangewest", props)) != 0){
-				sType->floorChangeWest = true;
-			}
-			
-			if((tmp = readXmlProp("position", props)) != 0){
-				if (!strcmp(tmp, "helmet") || !strcmp(tmp, "head"))
-					sType->slot_position = SLOT_HEAD;
-				else if (!strcmp(tmp, "amulet"))
-					sType->slot_position = SLOT_AMULET;
-				else if (!strcmp(tmp, "body"))
-					sType->slot_position = SLOT_BODY;
-				else if (!strcmp(tmp, "legs"))
-					sType->slot_position = SLOT_LEGS;
-				else if (!strcmp(tmp, "boots"))
-					sType->slot_position = SLOT_FEET;
-				else if (!strcmp(tmp, "ring"))
-					sType->slot_position = SLOT_RING;
-				else if (!strcmp(tmp, "backpack"))					 	
-					sType->slot_position = SLOT_BACKPACK;
-				else if (!strcmp(tmp, "weapon"))
-					sType->slot_position = SLOT_HAND;
-				else if (!strcmp(tmp, "twohand"))
-					sType->slot_position = SLOT_2HAND;
-				else if (!strcmp(tmp, "hand"))
-					sType->slot_position = SLOT_HAND;
-				
-				//sType->slot_position = SLOT_HAND;
-			}
-			
-			// now set special properties...
-			// first we check the type...
-			const char* type;
-			if((type = readXmlProp("type", props)) != 0) {
-
-				//container
-				if(strcmp(type, "container") == 0) {
-					sType->group = ITEM_GROUP_CONTAINER;
-					if((tmp = readXmlProp("maxitems", props)) != 0){
-						sType->maxItems = atoi(tmp);
-					}
-				}
-				//weapon
-				else if(strcmp(type, "weapon") == 0) {
-					sType->group = ITEM_GROUP_WEAPON;
-
-					const char* skill;
-					if((skill = readXmlProp("skill", props)) != 0){
-						if (!strcmp(skill, "sword"))
-							sType->weaponType = WEAPON_SWORD;
-						else if (!strcmp(skill, "club"))
-							sType->weaponType = WEAPON_CLUB;
-						else if (!strcmp(skill, "axe"))
-							sType->weaponType = WEAPON_AXE;
-						else if (!strcmp(skill, "shielding"))
-							sType->weaponType = WEAPON_SHIELD;
-						else if (!strcmp(skill, "distance")){
-							sType->weaponType = WEAPON_DIST;
-
-							const char *amutype;
-							if((amutype = readXmlProp("amutype", props)) != 0){
-								if (!strcmp(amutype, "bolt"))
-									sType->amuType = AMU_BOLT;
-								else if (!strcmp(amutype, "arrow"))
-									sType->amuType = AMU_ARROW;
-							}
-							else{ //no ammunition, check shoottype
-								const char *sshoottype;
-								if((sshoottype = readXmlProp("shottype", props)) != 0){
-									if (!strcmp(sshoottype, "throwing-star"))
-							    	sType->shootType = DIST_THROWINGSTAR;
-							    else if (!strcmp(sshoottype, "throwing-knife"))
-							    	sType->shootType = DIST_THROWINGKNIFE;
-							    else if (!strcmp(sshoottype, "small-stone"))
-							    	sType->shootType = DIST_SMALLSTONE;
-							    else if (!strcmp(sshoottype, "sudden-death"))
-							    	sType->shootType = DIST_SUDDENDEATH;
-							    else if (!strcmp(sshoottype, "large-rock"))
-							    	sType->shootType = DIST_LARGEROCK;
-							    else if (!strcmp(sshoottype, "snowball"))
-							    	sType->shootType = DIST_SNOWBALL;
-							    else if (!strcmp(sshoottype, "spear"))
-							    	sType->shootType = DIST_SPEAR;
-
-                				/*else
-										std::cout << "wrong shootype tag" << std::endl;*/
-								}
-								/*else
-									std::cout << "missing shoottype type for distante-item: " << id << std::endl;*/
-							}
-						}
-						//magic
-						else if(!strcmp(skill, "magic")){
-							sType->weaponType = WEAPON_MAGIC;
-
-							const char *sshoottype;
-							if((sshoottype = readXmlProp("shottype", props)) != 0) {
-								if (!strcmp(sshoottype, "fire"))
-							    sType->shootType = DIST_FIRE;
-							  else if (!strcmp(sshoottype, "energy"))
-							    sType->shootType = DIST_ENERGY;
-							  /*else
-							    std::cout << "wrong shootype tag" << std::endl;*/
-							}								
-						}
-						//shielding
-						else if(!strcmp(skill, "shielding")) {
-							sType->weaponType = WEAPON_SHIELD;
-						/*else
-							std::cout << "wrong skill tag for weapon" << std::endl;*/
-						}
-					}//skills
-					
-					const char* attack;
-					if((attack = readXmlProp("attack", props)) != 0) {
-						sType->attack = atoi(attack);
-					}
-
-					const char* defence;
-					if((defence = readXmlProp("defence", props)) != 0) {
-						sType->defence = atoi(defence);
-					}
-				}
-				//ammunition
-				else if(strcmp(type, "amunition") == 0) {
-					sType->group = ITEM_GROUP_AMMUNITION;
-					
-					const char *amutype;
-					if((amutype = readXmlProp("amutype", props)) != 0) {
-						if (!strcmp(amutype, "bolt"))
-							sType->amuType = AMU_BOLT;
-						else if (!strcmp(amutype, "arrow"))
-							sType->amuType = AMU_ARROW;
-					}
-					/*else
-						std::cout << "wrong amutype tag for item: " << id << std::endl;*/
-
-					const char *sshoottype;
-					if((sshoottype = readXmlProp("shottype", props)) != 0) {
-						if (!strcmp(sshoottype, "bolt"))
-							sType->shootType = DIST_BOLT;
-						else if (!strcmp(sshoottype, "arrow"))
-							sType->shootType = DIST_ARROW;
-						else if (!strcmp(sshoottype, "poison-arrow"))
-							sType->shootType = DIST_POISONARROW;
-						else if (!strcmp(sshoottype, "burst-arrow"))
-							sType->shootType = DIST_BURSTARROW;
-						else if (!strcmp(sshoottype, "power-bolt"))
-							sType->shootType = DIST_POWERBOLT;
-						/*else
-							std::cout << "wrong shootype tag for item: " << id << std::endl;*/
-					}
-					/*else
-						std::cout << "missing shoottype for item: " << id <<  std::endl;*/
-
-					const char* attack;
-					if((attack = readXmlProp("attack", props)) != 0) {
-						sType->attack = atoi(attack);
-					}
-				}
-				//armor
-				else if(strcmp(type, "armor") == 0) {
-					sType->group = ITEM_GROUP_ARMOR;
-
-					if((tmp = readXmlProp("arm", props)) != 0) {
-						sType->armor = atoi(tmp);
-					}
-					/*else
-						std::cout << "missing arm tag for armor: " << id << std::endl;*/
-				}
-				//rune
-				else if (!strcmp(type, "rune")) {
-					sType->group = ITEM_GROUP_RUNE;
-
-					if((tmp = readXmlProp("maglevel", props)) != 0) {
-						sType->runeMagLevel = atoi(tmp);
-					}
-					/*else
-						std::cout << "missing maglevel for rune: " << id << std::endl;*/
-				}
-				//teleport
-				else if (!strcmp(type, "teleport")) {
-					sType->group = ITEM_GROUP_TELEPORT;
-				}
-				//magicfield
-				else if (!strcmp(type, "magicfield")) {
-					sType->group = ITEM_GROUP_MAGICFIELD;
-
-					if((tmp = readXmlProp("fieldtype", props)) != 0) {
-						if (!strcmp(tmp, "fire"))
-							sType->magicfieldtype = MAGIC_FIELD_FIRE;
-						else if (!strcmp(tmp, "energy"))
-							sType->magicfieldtype = MAGIC_FIELD_ENERGY;
-						else if (!strcmp(tmp, "poison"))
-							sType->magicfieldtype = MAGIC_FIELD_POISON;
-						/*else
-							std::cout << "wrong field type tag for item: " << id << std::endl;*/
-					}
-					/*else
-	       		std::cout << "missing field type for field: " << id << std::endl;*/
-				}
-				//oneTimeWrite
-				else if(!strcmp(type, "write1time")) {
-					sType->group = ITEM_GROUP_WRITEABLE;
-					sType->readable = true;;
-					if((tmp = readXmlProp("readonlyid", props)) != 0) {
-						sType->readOnlyId = atoi(tmp);
-					}
-				}
-				//key
-				else if(!strcmp(type, "key")) {
-					sType->group = ITEM_GROUP_KEY;
-				}
-				//splash
-				else if(!strcmp(type, "splash")) {
-					sType->group = ITEM_GROUP_SPLASH;
-				}
-			}
-		}
-		/*else
-			loadstatus = 1;*/
-	}
-}
-
-void XMLCALL ItemsTypes::xmlendNode(void *userData, const char *name)
-{
-	//
-}
-
-bool ItemsTypes::importFromXml(const char *filename)
-{
-	void *buff;
-	int bytes_read;
-	int eof;
-
-	XML_Parser p = XML_ParserCreate(NULL);
-
-	eof = 0;
-	if(!p){
-		return false;
-	}
-
-	XML_SetElementHandler(p, xmlstartNodeImport, xmlendNode);
-
-	FILE *f = fopen(filename,"rb");
-	if(!f){
-		XML_ParserFree(p);
-		return false;
-	}
-
-	loadstatus = 0;
-	do{
-		buff = XML_GetBuffer(p, 1024);
-
-		bytes_read = fread(buff, 1, 1024, f);
-		if(bytes_read != 1024){
-			if(feof(f) == 0){
-				//error
-				XML_ParserFree(p);
-				return false;
-			}
-			else{
-				eof = 1;
-			}
-		}
-
-		XML_Status status = XML_ParseBuffer(p, bytes_read, eof);
-		switch (status) {
-		case XML_STATUS_ERROR:
-			XML_ParserFree(p);
-			return false;
-		}
-	}while(eof == 0 && loadstatus == 0);
-
-	XML_ParserFree(p);
-	if(loadstatus != 0){
-		return false;
-	}
-	else{
-		return true;
-	}
-
-	return false;
-}
-
 void saveAttribute(FILE* f, const std::string& key, const std::string& value)
 {
-	std::stringstream ss;
-	ss << "\t\t<attribute key=\"" << key << "\" value=\"" << value << "\"/>" << "\r";
-
-	fprintf(f, ss.str().c_str());
-	//fprintf(f, "\t<attribute key=\"%s\" value=\"%s\"/>", key.c_str(), value);
+	fprintf(f, " <attribute key=\"%s\" value=\"%s\"/>", key.c_str(), value.c_str());
 }
 
 void saveAttribute(FILE* f, const std::string& key, int value)
 {
-	std::stringstream ss;
-	ss << "\t\t<attribute key=\"" << key << "\" value=\"" << value << "\"/>" << "\r";
-
-	fprintf(f, ss.str().c_str());
-
-	//fprintf(f, "\t<attribute key=\"%s\" value=\"%d\"/>", key.c_str(), value);
+	fprintf(f, " <attribute key=\"%s\" value=\"%d\"/>", key.c_str(), value);
 }
 
 bool ItemsTypes::exportToXml(const char *filename)
@@ -1028,9 +332,7 @@ bool ItemsTypes::exportToXml(const char *filename)
 
 	ItemMap::iterator it = getTypes();
 	for(;it != getEnd(); it++){
-		fprintf(f, "\t<item id=\"%d\">\r", it->second->id);
-
-		saveAttribute(f, "name", it->second->name);
+		fprintf(f, "<item id=\"%d\" name=\"%s\" >", it->second->id, it->second->name);
 
 		if(it->second->group == ITEM_GROUP_WEAPON){
 			saveAttribute(f, "group", "weapon");
@@ -1170,10 +472,10 @@ bool ItemsTypes::exportToXml(const char *filename)
 		//suppressDrunk
 		//field
 
-		fprintf(f, "\t</item>\r\r");
+		fprintf(f, " </item>\n");
 	}
 
-	fprintf(f, "</items>\r");
+	fprintf(f, "</items>\n");
 	fclose(f);
 	return true;
 }
@@ -1189,408 +491,6 @@ bool ItemsTypes::setGroup(int id, itemgroup_t newgroup)
 
 	return false;
 }
-
-void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, const char **atts)
-{
-	if(loadstatus == 1)
-		return;
-	
-	const xmlProp *props = (const xmlProp *)atts;
-
-	if(strcmp(name, "item") == 0){
-		int id;
-		const char* tmp;
-		ItemType* sType = NULL;
-
-		if((tmp = readXmlProp("id", props)) != 0){
-			id = atoi(tmp);
-			sType = g_itemsTypes->getType(id);
-			//sType = g_itemsTypes->getTypeBySrpite(id);
-		}
-		else
-			loadstatus = 1;
-
-		if(sType) {
-			if((tmp = readXmlProp("name", props)) != 0){
-				if(strlen(sType->name) != 0){
-					//__asm int 3
-					return;
-				}
-				strncpy(sType->name, tmp, 127);
-			}
-			else{
-				return;
-			}
-
-
-			if((tmp = readXmlProp("descr", props)) != 0){
-				strncpy(sType->descr, tmp, 127);
-			}
-
-			if((tmp = readXmlProp("weight", props)) != 0){
-				sType->weight = atof(tmp);
-			}
-
-			if((tmp = readXmlProp("decayto", props)) != 0){
-				sType->decayTo = atoi(tmp);
-			}
-
-			if((tmp = readXmlProp("decaytime", props)) != 0){
-				sType->decayTime = atoi(tmp);
-			}
-
-			if((tmp = readXmlProp("blockingprojectile", props)) != 0){
-				if(atoi(tmp) == 0)
-					sType->blockProjectile = false;
-				else
-					sType->blockProjectile = true;
-			}
-
-			if((tmp = readXmlProp("floorchange", props)) != 0){
-				sType->floorChangeDown = true;
-			}
-
-			if((tmp = readXmlProp("floorchangenorth", props)) != 0){
-				sType->floorChangeNorth = true;
-			}
-
-			if((tmp = readXmlProp("floorchangesouth", props)) != 0){
-				sType->floorChangeSouth = true;
-			}
-
-			if((tmp = readXmlProp("floorchangeeast", props)) != 0){
-				sType->floorChangeEast = true;
-			}
-
-			if((tmp = readXmlProp("floorchangewest", props)) != 0){
-				sType->floorChangeWest = true;
-			}
-			
-			if((tmp = readXmlProp("position", props)) != 0){
-				if (!strcmp(tmp, "helmet") || !strcmp(tmp, "head"))
-					sType->slot_position = SLOT_HEAD;
-				else if (!strcmp(tmp, "amulet"))
-					sType->slot_position = SLOT_AMULET;
-				else if (!strcmp(tmp, "body"))
-					sType->slot_position = SLOT_BODY;
-				else if (!strcmp(tmp, "legs"))
-					sType->slot_position = SLOT_LEGS;
-				else if (!strcmp(tmp, "boots"))
-					sType->slot_position = SLOT_FEET;
-				else if (!strcmp(tmp, "ring"))
-					sType->slot_position = SLOT_RING;
-				else if (!strcmp(tmp, "backpack"))					 	
-					sType->slot_position = SLOT_BACKPACK;
-				else if (!strcmp(tmp, "weapon"))
-					sType->slot_position = SLOT_HAND;
-				else if (!strcmp(tmp, "twohand"))
-					sType->slot_position = SLOT_2HAND;
-				else if (!strcmp(tmp, "hand"))
-					sType->slot_position = SLOT_HAND;
-				
-			}
-			
-			// now set special properties...
-			// first we check the type...
-			const char* type;
-			if((type = readXmlProp("type", props)) != 0) {
-
-				//container
-				if(strcmp(type, "container") == 0) {
-					sType->group = ITEM_GROUP_CONTAINER;
-					if((tmp = readXmlProp("maxitems", props)) != 0){
-						sType->maxItems = atoi(tmp);
-					}
-				}
-				//weapon
-				else if(strcmp(type, "weapon") == 0) {
-					sType->group = ITEM_GROUP_WEAPON;
-
-					const char* skill;
-					if((skill = readXmlProp("skill", props)) != 0){
-						if (!strcmp(skill, "sword"))
-							sType->weaponType = WEAPON_SWORD;
-						else if (!strcmp(skill, "club"))
-							sType->weaponType = WEAPON_CLUB;
-						else if (!strcmp(skill, "axe"))
-							sType->weaponType = WEAPON_AXE;
-						else if (!strcmp(skill, "shielding"))
-							sType->weaponType = WEAPON_SHIELD;
-						else if (!strcmp(skill, "distance")){
-							sType->weaponType = WEAPON_DIST;
-
-							const char *amutype;
-							if((amutype = readXmlProp("amutype", props)) != 0){
-								if (!strcmp(amutype, "bolt"))
-									sType->amuType = AMU_BOLT;
-								else if (!strcmp(amutype, "arrow"))
-									sType->amuType = AMU_ARROW;
-							}
-							else{ //no ammunition, check shoottype
-								const char *sshoottype;
-								if((sshoottype = readXmlProp("shottype", props)) != 0){
-									if (!strcmp(sshoottype, "throwing-star"))
-							    	sType->shootType = DIST_THROWINGSTAR;
-							    else if (!strcmp(sshoottype, "throwing-knife"))
-							    	sType->shootType = DIST_THROWINGKNIFE;
-							    else if (!strcmp(sshoottype, "small-stone"))
-							    	sType->shootType = DIST_SMALLSTONE;
-							    else if (!strcmp(sshoottype, "sudden-death"))
-							    	sType->shootType = DIST_SUDDENDEATH;
-							    else if (!strcmp(sshoottype, "large-rock"))
-							    	sType->shootType = DIST_LARGEROCK;
-							    else if (!strcmp(sshoottype, "snowball"))
-							    	sType->shootType = DIST_SNOWBALL;
-							    else if (!strcmp(sshoottype, "spear"))
-							    	sType->shootType = DIST_SPEAR;
-#ifdef WIN32
-                				else
-                					#ifdef _DEBUG
-									#ifdef __GNUC__
-                                    __asm__("int $3");
-                                    #else
-                                    __asm int 3
-                                    #endif
-                                    #else
-                                    return;
-                                    #endif
-#endif
-								}
-#ifdef WIN32
-								else
-									#ifdef _DEBUG
-									#ifdef __GNUC__
-                                    __asm__("int $3");
-                                    #else
-                                    __asm int 3
-                                    #endif
-                                    #else
-                                    return;
-                                    #endif
-#endif
-							}
-						}
-						//magic
-						else if(!strcmp(skill, "magic")){
-							sType->weaponType = WEAPON_MAGIC;
-
-							const char *sshoottype;
-							if((sshoottype = readXmlProp("shottype", props)) != 0) {
-								if (!strcmp(sshoottype, "fire"))
-							    sType->shootType = DIST_FIRE;
-							  else if (!strcmp(sshoottype, "energy"))
-							    sType->shootType = DIST_ENERGY;
-#ifdef WIN32
-							  else
-							  	#ifdef _DEBUG
-								#ifdef __GNUC__
-								__asm__("int $3");
-								#else
-								__asm int 3
-								#endif
-							    #else
-                                return;
-								#endif
-#endif
-							}								
-						}
-						//shielding
-						else if(!strcmp(skill, "shielding")) 
-							sType->weaponType = WEAPON_SHIELD;
-#ifdef WIN32
-						else
-							#ifdef _DEBUG
-							#ifdef __GNUC__
-							__asm__("int $3");
-							#else
-							__asm int 3
-							#endif
-							#else
-							return;
-							#endif
-#endif
-					}//skills
-					
-					const char* attack;
-					if((attack = readXmlProp("attack", props)) != 0) {
-						sType->attack = atoi(attack);
-					}
-
-					const char* defence;
-					if((defence = readXmlProp("defence", props)) != 0) {
-						sType->defence = atoi(defence);
-					}
-				}
-				//ammunition
-				else if(strcmp(type, "amunition") == 0) {
-					sType->group = ITEM_GROUP_AMMUNITION;
-					
-					const char *amutype;
-					if((amutype = readXmlProp("amutype", props)) != 0) {
-						if (!strcmp(amutype, "bolt"))
-							sType->amuType = AMU_BOLT;
-						else if (!strcmp(amutype, "arrow"))
-							sType->amuType = AMU_ARROW;
-					}
-#ifdef WIN32
-					else
-						#ifdef _DEBUG
-					    #ifdef __GNUC__
-						__asm__("int $3");
-						#else
-						__asm int 3
-						#endif
-						#else
-						return;
-						#endif
-#endif
-
-					const char *sshoottype;
-					if((sshoottype = readXmlProp("shottype", props)) != 0) {
-						if (!strcmp(sshoottype, "bolt"))
-							sType->shootType = DIST_BOLT;
-						else if (!strcmp(sshoottype, "arrow"))
-							sType->shootType = DIST_ARROW;
-						else if (!strcmp(sshoottype, "poison-arrow"))
-							sType->shootType = DIST_POISONARROW;
-						else if (!strcmp(sshoottype, "burst-arrow"))
-							sType->shootType = DIST_BURSTARROW;
-						else if (!strcmp(sshoottype, "power-bolt"))
-							sType->shootType = DIST_POWERBOLT;
-#ifdef WIN32
-						else
-							#ifdef _DEBUG
-						    #ifdef __GNUC__
-							__asm__("int $3");
-							#else
-							__asm int 3
-							#endif
-							#else
-							return;
-							#endif
-#endif
-					}
-#ifdef WIN32
-					else
-						#ifdef _DEBUG
-					    #ifdef __GNUC__
-						__asm__("int $3");
-						#else
-						__asm int 3
-						#endif
-						#else
-						return;
-						#endif
-#endif
-
-					const char* attack;
-					if((attack = readXmlProp("attack", props)) != 0) {
-						sType->attack = atoi(attack);
-					}
-				}
-				//armor
-				else if(strcmp(type, "armor") == 0) {
-					sType->group = ITEM_GROUP_ARMOR;
-
-					if((tmp = readXmlProp("arm", props)) != 0) {
-						sType->armor = atoi(tmp);
-					}
-#ifdef WIN32
-					else
-						#ifdef _DEBUG
-					    #ifdef __GNUC__
-						__asm__("int $3");
-						#else
-						__asm int 3
-						#endif
-						#else
-						return;
-						#endif
-#endif
-				}
-				//rune
-				else if (!strcmp(type, "rune")) {
-					sType->group = ITEM_GROUP_RUNE;
-
-					if((tmp = readXmlProp("maglevel", props)) != 0) {
-						sType->runeMagLevel = atoi(tmp);
-					}
-#ifdef WIN32
-					else
-						#ifdef _DEBUG
-					    #ifdef __GNUC__
-						__asm__("int $3");
-						#else
-						__asm int 3
-						#endif
-						#else
-						return;
-						#endif
-#endif
-				}
-				//teleport
-				else if (!strcmp(type, "teleport")) {
-					sType->group = ITEM_GROUP_TELEPORT;
-				}
-				//magicfield
-				else if (!strcmp(type, "magicfield")) {
-					sType->group = ITEM_GROUP_MAGICFIELD;
-
-					if((tmp = readXmlProp("fieldtype", props)) != 0) {
-						if (!strcmp(tmp, "fire"))
-							sType->magicfieldtype = MAGIC_FIELD_FIRE;
-						else if (!strcmp(tmp, "energy"))
-							sType->magicfieldtype = MAGIC_FIELD_ENERGY;
-						else if (!strcmp(tmp, "poison"))
-							sType->magicfieldtype = MAGIC_FIELD_POISON;
-#ifdef WIN32
-						else
-							#ifdef _DEBUG
-						    #ifdef __GNUC__
-							__asm__("int $3");
-							#else
-							__asm int 3
-							#endif
-							#else
-							return;
-							#endif
-#endif
-					}
-#ifdef WIN32
-					else
-						#ifdef _DEBUG
-					    #ifdef __GNUC__
-	       				__asm__("int $3");
-	       				#else
-	       				__asm int 3
-	       				#endif
-	       				#else
-						return;
-						#endif
-#endif
-				}
-				//oneTimeWrite
-				else if(!strcmp(type, "write1time")) {
-					sType->group = ITEM_GROUP_WRITEABLE;
-					sType->readable = true;;
-					if((tmp = readXmlProp("readonlyid", props)) != 0) {
-						sType->readOnlyId = atoi(tmp);
-					}
-				}
-				//key
-				else if(!strcmp(type, "key")) {
-					sType->group = ITEM_GROUP_KEY;
-				}
-				//splash
-				else if(!strcmp(type, "splash")) {
-					sType->group = ITEM_GROUP_SPLASH;
-				}
-			}
-
-		}
-	}
-}
-
 
 itemgroup_t ItemsTypes::getGroup(int id)
 {
@@ -1735,7 +635,6 @@ int ItemsTypes::loadOtb(const char *filename)
 							sType->isHangable = ((flags & FLAG_HANGABLE) == FLAG_HANGABLE);
 							sType->isVertical = ((flags & FLAG_VERTICAL) == FLAG_VERTICAL);
 							sType->isHorizontal = ((flags & FLAG_HORIZONTAL) == FLAG_HORIZONTAL);
-							sType->canNotDecay = ((flags & FLAG_CANNOTDECAY) == FLAG_CANNOTDECAY);
 							sType->allowDistRead = ((flags & FLAG_ALLOWDISTREAD) == FLAG_ALLOWDISTREAD);
 							sType->corpse = ((flags & FLAG_CORPSE) == FLAG_CORPSE);
 
@@ -1881,10 +780,9 @@ int ItemsTypes::loadOtb(const char *filename)
 								if(datalen != sizeof(unsigned char))
 									return ERROR_INVALID_FORMAT;
 								
-								memcpy(&sType->magicfieldtype, p, sizeof(unsigned char));
-
 								break;
 							}
+
 							case ITEM_ATTR_WRITEABLE:
 							{
 								if(datalen != sizeof(writeableBlock))
@@ -2106,42 +1004,35 @@ int ItemsTypes::saveOtb(const char *filename)
 	VERSIONINFO vi;
 	memset(&vi, '\0', sizeof(VERSIONINFO));
 
-	vi.dwMajorVersion = 1; //version
-	vi.dwMinorVersion = CLIENT_VERSION_792; //client
+	vi.dwMajorVersion = 2; //version
+	char clientString[32];
+	const graphicsVersion* spritesVersion;
+	if(spritesVersion = g_itemsSprites->getVersion()){
+		vi.dwMinorVersion = spritesVersion->otb;
+		sprintf(clientString, "%d.%d", spritesVersion->client/100, spritesVersion->client % 100);
+	}
+	else{
+		vi.dwMinorVersion = 0xFFFFFFFF;
+		strcpy(clientString,"Unk");
+	}
 	vi.dwBuildNumber = ItemType::dwBuildNumber + 1; //build
 	char str_version[128];
-	sprintf(str_version, "OTB %d.%d.%d-7.92", vi.dwMajorVersion, vi.dwMinorVersion, vi.dwBuildNumber);
+	sprintf(str_version, "OTB %d.%d.%d-%s", vi.dwMajorVersion, vi.dwMinorVersion, vi.dwBuildNumber, clientString);
 	strcpy(vi.CSDVersion, str_version);
 
 	f->setProps(ROOT_ATTR_VERSION, &vi, sizeof(VERSIONINFO));
 
 	ItemMap::iterator it;
 	for(it = item.begin(); it != item.end(); it++){
+		if(it->second->id >= 20000)
+			continue;
 
 		flags_t flags = 0;
 		std::list<itemattrib_t> saveAttr;
 		
 		saveAttr.push_back(ITEM_ATTR_SERVERID);
 		saveAttr.push_back(ITEM_ATTR_CLIENTID);
-
-		if(strlen(it->second->name) > 0)
-			saveAttr.push_back(ITEM_ATTR_NAME);
-
-		if(strlen(it->second->descr) > 0)
-			saveAttr.push_back(ITEM_ATTR_DESCR);
-
-		if(it->second->moveable || it->second->pickupable) {
-			saveAttr.push_back(ITEM_ATTR_WEIGHT);
-		}
 		
-		if(it->second->decayTo != 0 || it->second->decayTime != 0) {
-			saveAttr.push_back(ITEM_ATTR_DECAY2);
-		}
-
-		if(it->second->rotateTo != 0) {
-			saveAttr.push_back(ITEM_ATTR_ROTATETO);
-		}
-
 #ifdef __SPRITE_SEARCH__
 		if(it->second->id < 20000){
 			saveAttr.push_back(ITEM_ATTR_SPRITEHASH);
@@ -2188,11 +1079,6 @@ int ItemsTypes::saveOtb(const char *filename)
 				}
 				break;
 			}
-			it->second->readable = g_itemsSprites->getSprite(it->second->clientid)->readable;
-			it->second->speed = g_itemsSprites->getSprite(it->second->clientid)->speed;
-			it->second->useable = g_itemsSprites->getSprite(it->second->clientid)->useable;
-			it->second->blockSolid = g_itemsSprites->getSprite(it->second->clientid)->blockSolid;
-			it->second->alwaysOnTopOrder = g_itemsSprites->getSprite(it->second->clientid)->alwaysOnTopOrder;
 		}
 #endif
 		if(it->second->lightLevel != 0 || it->second->lightColor != 0) {
@@ -2208,70 +1094,24 @@ int ItemsTypes::saveOtb(const char *filename)
 			}			
 			case ITEM_GROUP_CONTAINER:
 			{
-				saveAttr.push_back(ITEM_ATTR_SLOT);
-				saveAttr.push_back(ITEM_ATTR_MAXITEMS);
-
 				break;
 			}
-			case ITEM_GROUP_WEAPON:
-			{				
-				saveAttr.push_back(ITEM_ATTR_SLOT);
-				saveAttr.push_back(ITEM_ATTR_WEAPON2);
-				break;
-			}
-
-			case ITEM_GROUP_AMMUNITION:
-			{
-				saveAttr.push_back(ITEM_ATTR_SLOT);
-				saveAttr.push_back(ITEM_ATTR_AMU2);
-				break;
-			}
-
-			case ITEM_GROUP_ARMOR:
-			{
-				saveAttr.push_back(ITEM_ATTR_SLOT);
-				saveAttr.push_back(ITEM_ATTR_ARMOR2);
-
-				break;
-			}
-
-			case ITEM_GROUP_RUNE:
-			{
-				saveAttr.push_back(ITEM_ATTR_MAGLEVEL);
-				break;
-			}
-
 			case ITEM_GROUP_TELEPORT:
 			{
 				break;
 			}
-
 			case ITEM_GROUP_MAGICFIELD:
 			{
-				saveAttr.push_back(ITEM_ATTR_MAGFIELDTYPE);
-
 				break;
 			}
-
 			case ITEM_GROUP_WRITEABLE:
 			{
-				if(it->second->readOnlyId || it->second->maxTextLen){
-					saveAttr.push_back(ITEM_ATTR_WRITEABLE3);
-				}
-
 				break;
 			}
-
-			case ITEM_GROUP_KEY:
-			{
-				break;
-			}
-
 			case ITEM_GROUP_SPLASH:
 			{
 				break;
 			}
-
 			case ITEM_GROUP_FLUID:
 			{
 				break;
@@ -2297,9 +1137,6 @@ int ItemsTypes::saveOtb(const char *filename)
 		
 		if(it->second->hasHeight)
 			flags |= FLAG_HAS_HEIGHT;
-		
-		if(it->second->canNotDecay)
-			flags |= FLAG_CANNOTDECAY;
 
 		if(it->second->useable)
 			flags |= FLAG_USEABLE;
@@ -2370,94 +1207,9 @@ int ItemsTypes::saveOtb(const char *filename)
 					f->setProps(ITEM_ATTR_CLIENTID, &it->second->clientid, sizeof(unsigned short));
 					break;
 				}
-				case ITEM_ATTR_NAME:
-				{
-					f->setProps(ITEM_ATTR_NAME, &it->second->name, strlen(it->second->name));
-					break;
-				}
-				case ITEM_ATTR_DESCR:
-				{
-					f->setProps(ITEM_ATTR_DESCR, &it->second->descr, strlen(it->second->descr));
-					break;
-				}
 				case ITEM_ATTR_SPEED:
 				{
 					f->setProps(ITEM_ATTR_SPEED, &it->second->speed, sizeof(unsigned short));
-					break;
-				}
-				case ITEM_ATTR_SLOT:
-				{
-					f->setProps(ITEM_ATTR_SLOT, &it->second->slot_position, sizeof(unsigned short));
-					break;
-				}
-				case ITEM_ATTR_MAXITEMS:
-				{
-					f->setProps(ITEM_ATTR_MAXITEMS, &it->second->maxItems, sizeof(unsigned short));
-					break;
-				}
-				case ITEM_ATTR_WEIGHT:
-				{
-					f->setProps(ITEM_ATTR_WEIGHT, &it->second->weight, sizeof(double));
-					break;
-				}
-				case ITEM_ATTR_WEAPON2:
-				{
-					weaponBlock2 wb2;
-					wb2.weaponType = it->second->weaponType;
-					wb2.shootType = it->second->shootType;
-					wb2.amuType = it->second->amuType;
-					wb2.attack = it->second->attack;
-					wb2.defence = it->second->defence;
-					f->setProps(ITEM_ATTR_WEAPON2, &wb2, sizeof(wb2));
-					break;
-				}
-				case ITEM_ATTR_AMU2:
-				{
-					amuBlock2 ab2;
-					ab2.shootType = it->second->shootType;
-					ab2.amuType = it->second->amuType;
-					ab2.attack = it->second->attack;
-					f->setProps(ITEM_ATTR_AMU2, &ab2, sizeof(ab2));
-					break;
-				}
-				case ITEM_ATTR_ARMOR2:
-				{
-					armorBlock2 ab2;
-					ab2.armor = it->second->armor;
-					ab2.slot_position = it->second->slot_position;
-					ab2.weight = it->second->weight;
-					f->setProps(ITEM_ATTR_ARMOR2, &ab2, sizeof(ab2));
-					break;
-				}
-				case ITEM_ATTR_MAGLEVEL:
-				{
-					f->setProps(ITEM_ATTR_MAGLEVEL, &it->second->runeMagLevel, sizeof(unsigned short));
-					break;
-				}
-				case ITEM_ATTR_MAGFIELDTYPE:
-				{
-					f->setProps(ITEM_ATTR_MAGFIELDTYPE, &it->second->magicfieldtype, sizeof(unsigned char));
-					break;
-				}
-				case ITEM_ATTR_WRITEABLE3:
-				{
-					struct writeableBlock3 wb3;
-					wb3.readOnlyId = it->second->readOnlyId;
-					wb3.maxTextLen = it->second->maxTextLen;
-					f->setProps(ITEM_ATTR_WRITEABLE3, &wb3, sizeof(wb3));
-					break;
-				}
-				case ITEM_ATTR_ROTATETO:
-				{
-					f->setProps(ITEM_ATTR_ROTATETO, &it->second->rotateTo, sizeof(unsigned short));
-					break;
-				}
-				case ITEM_ATTR_DECAY2:
-				{
-					struct decayBlock2 db2;
-					db2.decayTo = it->second->decayTo;
-					db2.decayTime = it->second->decayTime;
-					f->setProps(ITEM_ATTR_DECAY2, &db2, sizeof(db2));
 					break;
 				}
 				case ITEM_ATTR_SPRITEHASH:
@@ -2493,6 +1245,10 @@ int ItemsTypes::saveOtb(const char *filename)
 					f->setProps(ITEM_ATTR_TOPORDER, &it->second->alwaysOnTopOrder, sizeof(it->second->alwaysOnTopOrder));
 					break;
 				}
+				default:
+				{
+					break;
+				}
 			}
 		}
 
@@ -2506,3 +1262,112 @@ int ItemsTypes::saveOtb(const char *filename)
 	return 1;
 }
 
+int ItemsTypes::loadstatus;
+bool ItemsTypes::importFromXml(const char *filename)
+{
+	void *buff;
+	int bytes_read;
+	int eof;
+
+	XML_Parser p = XML_ParserCreate(NULL);
+
+	eof = 0;
+	if(!p){
+		return false;
+	}
+
+	XML_SetElementHandler(p, xmlstartNodeImport, xmlendNode);
+
+	FILE *f = fopen(filename,"rb");
+	if(!f){
+		XML_ParserFree(p);
+		return false;
+	}
+
+	loadstatus = 0;
+	do{
+		buff = XML_GetBuffer(p, 1024);
+
+		bytes_read = fread(buff, 1, 1024, f);
+		if(bytes_read != 1024){
+			if(feof(f) == 0){
+				//error
+				XML_ParserFree(p);
+				return false;
+			}
+			else{
+				eof = 1;
+			}
+		}
+
+		XML_Status status = XML_ParseBuffer(p, bytes_read, eof);
+		switch (status) {
+		case XML_STATUS_ERROR:
+			XML_ParserFree(p);
+			return false;
+		}
+	}while(eof == 0 && loadstatus == 0);
+
+	XML_ParserFree(p);
+	if(loadstatus != 0){
+		return false;
+	}
+	else{
+		return true;
+	}
+
+	return false;
+}
+
+void XMLCALL ItemsTypes::xmlendNode(void *userData, const char *name)
+{
+	//
+}
+
+
+void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, const char **atts)
+{
+	if(loadstatus == 1)
+		return;
+	
+	const xmlProp *props = (const xmlProp *)atts;
+
+	if(strcmp(name, "item") == 0){
+		int id;
+		const char* tmp;
+		ItemType* sType = NULL;
+
+		if((tmp = readXmlProp("id", props)) != 0){
+			id = atoi(tmp);
+			sType = g_itemsTypes->getType(id);
+		}
+		else
+			loadstatus = 1;
+
+		if(sType) {
+			if((tmp = readXmlProp("name", props)) != 0){
+				if(strlen(sType->name) != 0){
+					//__asm int 3
+					return;
+				}
+				strncpy(sType->name, tmp, 127);
+			}
+			else{
+				return;
+			}
+			
+		}
+	}
+}
+
+const char* readXmlProp(const char* propName, const xmlProp *props)
+{
+	int i = 0;
+	while(props[i].name != NULL){
+		if(strcmp(props[i].name, propName) == 0){
+			return props[i].value;
+		}
+		i++;
+	}
+	return NULL;
+}

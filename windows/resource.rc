@@ -32,7 +32,6 @@ BEGIN
     BEGIN
         MENUITEM "New",                         ID_FILE_NEWIT
         MENUITEM "Load otb...",                 ID_FILE_LOADOTB
-        MENUITEM "Import old...",               ID_FILE_IMPORTOLD
         MENUITEM SEPARATOR
         MENUITEM "Save as...",                  ID_FILE_SAVEAS
         MENUITEM SEPARATOR
@@ -41,7 +40,7 @@ BEGIN
     POPUP "Tools"
     BEGIN
         MENUITEM "Verify items",                ID_TOOLS_VERIFYITEMS
-        MENUITEM "Go to item...",               ID_TOOLS_GOTOITEM, GRAYED
+        MENUITEM "Go to item...",               ID_TOOLS_GOTOITEM
         MENUITEM SEPARATOR
         MENUITEM "Create missing client items", ID_TOOLS_CREATEMISSING
         MENUITEM "Add Item",                    ID_TOOLS_ADDITEM
@@ -50,8 +49,8 @@ BEGIN
         MENUITEM "Show not found images",       ID_TOOLS_SHOWNOTFOUN
         MENUITEM "Show all",                    ID_TOOLS_SHOWALL
         MENUITEM SEPARATOR
-        MENUITEM "Import xml names(new_items.xml)", ID_TOOLS_IMPORTXMLNAMES
-        MENUITEM "Export xml names",            ID_TOOLS_EXPORTXMLNAMES
+        MENUITEM "Export items.xml",            ID_TOOLS_EXPORTXML
+        MENUITEM "Load names",                  ID_TOOLS_GETXMLNAMES
     END
     POPUP "Help"
     BEGIN
@@ -65,16 +64,12 @@ BEGIN
     BEGIN
         MENUITEM "Ground",                      ID_MENUG_GROUND
         MENUITEM "Container",                   ID_MENUG_CONTAINER
-        MENUITEM "Weapon",                      ID_MENUG_WEAPON
-        MENUITEM "Ammunition",                  ID_MENUG_AMMUNITION
-        MENUITEM "Armor",                       ID_MENUG_ARMOR
         MENUITEM "Rune",                        ID_MENUG_RUNE
         MENUITEM "Teleport",                    ID_MENUG_TELEPORT
         MENUITEM "Magic Field",                 ID_MENUG_MAGICFIELD
-        MENUITEM "Writeable",                   ID_MENUG_WRITEABLE
-        MENUITEM "Key",                         ID_MENUG_KEY
         MENUITEM "Splash",                      ID_MENUG_SPLASH
         MENUITEM "Fluid",                       ID_MENUG_FLUID
+        MENUITEM "Door",                        ID_MENUG_DOOR
         MENUITEM "None",                        ID_MENUG_NONE
     END
 END
@@ -85,118 +80,70 @@ END
 // Dialog
 //
 
-DLG_MAIN DIALOG DISCARDABLE  0, 0, 423, 328
+DLG_MAIN DIALOG DISCARDABLE  0, 0, 427, 260
 STYLE DS_MODALFRAME | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
+CAPTION "OTItemEditor 0.3.0 - 7.92"
 MENU MENU_MAIN
 FONT 8, "MS Shell Dlg"
 BEGIN
     CONTROL         "",IDC_EDITOR_TREE,"SysTreeView32",TVS_HASBUTTONS | 
                     TVS_HASLINES | TVS_LINESATROOT | TVS_SHOWSELALWAYS | 
-                    WS_BORDER | WS_TABSTOP,7,15,119,304
-    GROUPBOX        "Settings",IDC_STATIC,133,15,283,304
-    CONTROL         "",IDC_ITEM_PIC,"Static",SS_BLACKFRAME,145,25,50,43
-    LTEXT           "Name:",IDC_STATIC,210,28,22,8
-    EDITTEXT        IDC_EDIT_NAME,210,40,191,12,ES_AUTOHSCROLL
-    LTEXT           "Description:",IDC_STATIC,210,56,42,8
-    LTEXT           "sid:",IDC_STATIC,144,70,12,8
-    LTEXT           "10000",IDC_SID,159,70,21,8
-    EDITTEXT        IDC_EDIT_DESCR,210,68,191,12,ES_AUTOHSCROLL
-    LTEXT           "cid:",IDC_STATIC,144,83,12,8
-    EDITTEXT        IDC_EDIT_CID,159,80,36,12,ES_AUTOHSCROLL | ES_NUMBER
+                    WS_BORDER | WS_TABSTOP,7,7,119,246
+    GROUPBOX        "Settings",IDC_STATIC,135,7,285,246
+    CONTROL         "",IDC_ITEM_PIC,"Static",SS_BLACKFRAME,144,31,49,44
+    LTEXT           "sid:",IDC_STATIC,144,85,12,10
+    LTEXT           "10000",IDC_SID,158,86,21,10
+    LTEXT           "cid:",IDC_STATIC,144,100,12,8
+    EDITTEXT        IDC_EDIT_CID,157,98,36,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "",IDC_SPINCID,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
-                    UDS_NOTHOUSANDS,187,80,8,11
-    GROUPBOX        "Options:",IDC_STATIC,139,101,259,209
-    CONTROL         "*Blocking",IDC_OPT_BLOCKING,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,150,112,60,8
-    CONTROL         "*Always Top",IDC_OPT_ATOP,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,150,125,60,8
-    CONTROL         "*Stackable",IDC_OPT_STACKABLE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,150,138,60,8
-    CONTROL         "*Useable",IDC_OPT_USEABLE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,150,151,60,8
-    CONTROL         "*Not Moveable",IDC_OPT_NO_MOVE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,150,164,60,8
-    CONTROL         "*Pickupable",IDC_OPT_PICKUP,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,150,203,60,8
-    CONTROL         "*Rotable",IDC_OPT_ROTABLE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,150,190,60,8
-    LTEXT           "Weight",IDC_STATIC,210,112,42,8
-    EDITTEXT        IDC_EDIT_WEIGHT,252,112,50,12,ES_AUTOHSCROLL
-    LTEXT           "DecayTo",IDC_STATIC,210,125,42,8
-    EDITTEXT        IDC_EDIT_DECAYTO,252,125,50,12,ES_AUTOHSCROLL | 
-                    ES_NUMBER
-    LTEXT           "DecayTime",IDC_STATIC,210,138,42,8
-    EDITTEXT        IDC_EDIT_DECAYTIME,252,138,50,12,ES_AUTOHSCROLL | 
-                    ES_NUMBER
-    LTEXT           "FloorChange",IDC_STATIC,210,151,42,8
-    COMBOBOX        IDC_COMBO_FLOOR,252,151,50,90,CBS_DROPDOWNLIST | 
+                    UDS_NOTHOUSANDS,185,99,8,11
+    GROUPBOX        "Options:",IDC_STATIC,210,25,202,97
+    CONTROL         "Blocking",IDC_OPT_BLOCKING,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,217,37,60,8
+    CONTROL         "Always Top",IDC_OPT_ATOP,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,217,85,60,8
+    CONTROL         "Stackable",IDC_OPT_STACKABLE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,344,73,60,8
+    CONTROL         "Useable",IDC_OPT_USEABLE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,281,61,60,8
+    CONTROL         "Not Moveable",IDC_OPT_NO_MOVE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,217,73,60,8
+    CONTROL         "Pickupable",IDC_OPT_PICKUP,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,281,37,60,8
+    CONTROL         "Rotable",IDC_OPT_ROTABLE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,281,73,60,8
+    LTEXT           "FloorChange",IDC_STATIC,144,128,42,10
+    COMBOBOX        IDC_COMBO_FLOOR,189,126,50,90,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "Block projectile",IDC_OPT_BLOCKPROJECTILE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,150,216,61,8
-    EDITTEXT        IDC_EDIT_ROTATETO,252,203,50,12,ES_AUTOHSCROLL | 
-                    ES_NUMBER
-    LTEXT           "RotateTo",IDC_STATIC,210,203,42,9
-    LTEXT           "Slot",IDC_STATIC,210,164,42,9
-    COMBOBOX        IDC_COMBO_SLOT,252,164,50,85,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "MaxItems",IDC_STATIC,307,112,36,9
-    EDITTEXT        IDC_EDIT_MAXITEMS,343,112,50,12,ES_AUTOHSCROLL | 
-                    ES_NUMBER
-    LTEXT           "Skill",IDC_STATIC,307,125,36,10
-    COMBOBOX        IDC_COMBO_SKILL,343,125,50,116,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "AmuType",IDC_STATIC,307,138,36,10
-    COMBOBOX        IDC_COMBO_AMU,343,138,50,103,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "ShootType",IDC_STATIC,307,151,36,10
-    COMBOBOX        IDC_COMBO_SHOOT,343,151,50,90,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Attack",IDC_STATIC,307,164,36,10
-    EDITTEXT        IDC_EDIT_ATK,343,164,50,12,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "Defence",IDC_STATIC,307,177,36,10
-    LTEXT           "Armor",IDC_STATIC,307,190,36,9
-    EDITTEXT        IDC_EDIT_DEF,343,177,50,12,ES_AUTOHSCROLL | ES_NUMBER
-    EDITTEXT        IDC_EDIT_ARM,343,190,50,12,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "ReadOnlyID",IDC_STATIC,210,177,42,11
-    EDITTEXT        IDC_EDIT_READONLYID,252,177,50,12,ES_AUTOHSCROLL | 
-                    ES_NUMBER
-    PUSHBUTTON      "Set Client *Opt",IDC_SET_CLIENT_OPT,252,295,55,11,
-                    WS_DISABLED
-    LTEXT           "*Speed",IDC_STATIC,210,216,42,10
-    EDITTEXT        IDC_EDIT_SPEED,252,216,50,12,ES_AUTOHSCROLL | ES_NUMBER
+                    BS_AUTOCHECKBOX | WS_TABSTOP,217,49,61,8
+    LTEXT           "Speed",IDC_STATIC,144,144,42,10
+    EDITTEXT        IDC_EDIT_SPEED,189,142,50,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "Readable",IDC_OPT_READABLE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,150,177,60,8
+                    WS_TABSTOP,281,85,60,8
     CONTROL         "Block pathfind",IDC_OPT_BLOCKPATHFIND,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,150,229,61,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,217,61,61,8
     CONTROL         "HasHeight",IDC_OPT_HASHEIGHT,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,150,242,61,8
-    LTEXT           "EditorType",IDC_STATIC,307,216,36,11
-    COMBOBOX        IDC_COMBO_EDITOR,343,216,50,90,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    CONTROL         "CanNotDecay",IDC_OPT_CANNOTDECAY,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,150,254,60,9
-    LTEXT           "MaxTextLen",IDC_STATIC,210,190,40,10
-    EDITTEXT        IDC_EDIT_MAXTEXTLEN,252,190,50,12,ES_AUTOHSCROLL | 
-                    ES_NUMBER
+                    WS_TABSTOP,217,97,61,8
     CONTROL         "DistRead",IDC_OPT_DISTREAD,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,150,263,60,12
+                    WS_TABSTOP,281,97,60,8
     CONTROL         "IsVertical",IDC_OPT_VERTICAL,"Button",BS_AUTOCHECKBOX | 
-                    WS_DISABLED | WS_TABSTOP,150,275,60,8
+                    WS_TABSTOP,344,37,60,8
     CONTROL         "IsHorizontal",IDC_OPT_HORIZONTAL,"Button",
-                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,150,284,60,10
-    LTEXT           "TopOrder",IDC_STATIC,211,229,34,11
-    EDITTEXT        IDC_EDIT_TOPORDER,252,229,50,12,ES_AUTOHSCROLL | 
-                    ES_NUMBER | WS_DISABLED
+                    BS_AUTOCHECKBOX | WS_TABSTOP,344,49,60,8
+    LTEXT           "TopOrder",IDC_STATIC,144,160,34,10
+    EDITTEXT        IDC_EDIT_TOPORDER,189,158,50,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
     CONTROL         "Corpse",IDC_OPT_CORPSE,"Button",BS_AUTOCHECKBOX | 
-                    WS_DISABLED | WS_TABSTOP,150,296,60,9
-    EDITTEXT        IDC_LIGHT_LEVEL,252,242,50,12,ES_AUTOHSCROLL | 
-                    WS_DISABLED
-    EDITTEXT        IDC_LIGHT_COLOR,252,254,50,12,ES_AUTOHSCROLL | 
-                    WS_DISABLED
-    LTEXT           "LightLevel",IDC_STATIC,211,242,34,11
-    LTEXT           "LightColor",IDC_STATIC,211,254,34,9
+                    WS_TABSTOP,344,61,60,8
+    EDITTEXT        IDC_EDIT_LIGHT_LEVEL,289,126,55,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_LIGHT_COLOR,289,142,55,12,ES_AUTOHSCROLL
+    LTEXT           "LightLevel",IDC_STATIC,247,128,34,10
+    LTEXT           "LightColor",IDC_STATIC,247,144,34,10
+    CONTROL         "Hangable",IDC_OPT_HANGABLE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,281,49,60,8
 END
 
 
@@ -211,31 +158,30 @@ BEGIN
     DLG_MAIN, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 416
+        RIGHTMARGIN, 420
         VERTGUIDE, 133
         VERTGUIDE, 144
-        VERTGUIDE, 150
-        VERTGUIDE, 159
-        VERTGUIDE, 195
-        VERTGUIDE, 210
-        VERTGUIDE, 252
-        VERTGUIDE, 302
-        VERTGUIDE, 307
-        VERTGUIDE, 343
-        VERTGUIDE, 393
-        VERTGUIDE, 401
+        VERTGUIDE, 189
+        VERTGUIDE, 193
+        VERTGUIDE, 217
+        VERTGUIDE, 247
+        VERTGUIDE, 281
+        VERTGUIDE, 289
+        VERTGUIDE, 344
         TOPMARGIN, 7
-        BOTTOMMARGIN, 327
-        HORZGUIDE, 15
-        HORZGUIDE, 25
-        HORZGUIDE, 40
-        HORZGUIDE, 52
-        HORZGUIDE, 68
-        HORZGUIDE, 80
-        HORZGUIDE, 91
-        HORZGUIDE, 101
-        HORZGUIDE, 310
-        HORZGUIDE, 319
+        BOTTOMMARGIN, 253
+        HORZGUIDE, 31
+        HORZGUIDE, 45
+        HORZGUIDE, 57
+        HORZGUIDE, 69
+        HORZGUIDE, 81
+        HORZGUIDE, 93
+        HORZGUIDE, 105
+        HORZGUIDE, 117
+        HORZGUIDE, 138
+        HORZGUIDE, 154
+        HORZGUIDE, 170
+        HORZGUIDE, 186
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -248,31 +194,17 @@ END
 
 IDR_POPUP_ITEM ACCELERATORS DISCARDABLE 
 BEGIN
-    "0",            ID_MENUG_SPLASH,        VIRTKEY, CONTROL, NOINVERT
-    "1",            ID_MENUG_TELEPORT,      VIRTKEY, CONTROL, NOINVERT
-    "2",            ID_MENUG_ARMOR,         VIRTKEY, CONTROL, NOINVERT
-    "3",            ID_MENUG_CONTAINER,     VIRTKEY, CONTROL, NOINVERT
-    "4",            ID_MENUG_FLUID,         VIRTKEY, CONTROL, NOINVERT
-    "5",            ID_MENUG_GROUND,        VIRTKEY, CONTROL, NOINVERT
-    "6",            ID_MENUG_KEY,           VIRTKEY, CONTROL, NOINVERT
-    "7",            ID_MENUG_MAGICFIELD,    VIRTKEY, CONTROL, NOINVERT
+    "0",            ID_MENUG_GROUND,        VIRTKEY, CONTROL, NOINVERT
+    "1",            ID_MENUG_CONTAINER,     VIRTKEY, CONTROL, NOINVERT
+    "2",            ID_MENUG_RUNE,          VIRTKEY, CONTROL, NOINVERT
+    "3",            ID_MENUG_TELEPORT,      VIRTKEY, CONTROL, NOINVERT
+    "4",            ID_MENUG_MAGICFIELD,    VIRTKEY, CONTROL, NOINVERT
+    "5",            ID_MENUG_SPLASH,        VIRTKEY, CONTROL, NOINVERT
+    "6",            ID_MENUG_FLUID,         VIRTKEY, CONTROL, NOINVERT
+    "7",            ID_MENUG_DOOR,          VIRTKEY, CONTROL, NOINVERT
     "8",            ID_MENUG_NONE,          VIRTKEY, CONTROL, NOINVERT
-    "9",            ID_MENUG_RUNE,          VIRTKEY, CONTROL, NOINVERT
-    "E",            ID_MENUG_WEAPON,        VIRTKEY, CONTROL, NOINVERT
-    "Q",            ID_MENUG_AMMUNITION,    VIRTKEY, CONTROL, NOINVERT
-    "R",            ID_MENUG_DOOR,          VIRTKEY, CONTROL, NOINVERT
-    "W",            ID_MENUG_WRITEABLE,     VIRTKEY, CONTROL, NOINVERT
 END
 
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Icon
-//
-
-// Icon with lowest ID value placed first to ensure application icon
-// remains consistent on all systems.
-IDI_ICON1               ICON    DISCARDABLE     "otitemeditor.ico"
 #endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 

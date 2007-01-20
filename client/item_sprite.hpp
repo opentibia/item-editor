@@ -22,6 +22,7 @@
 #define __OTITEMEDITOR_ITEM_SPRITE_H__
 
 #include <map>
+#include <vector>
 #include "item_type.hpp"
 
 typedef void* InternalSprite;
@@ -98,15 +99,23 @@ public:
 };
 
 
+struct graphicsVersion{
+	unsigned int dat;
+	unsigned int spr;
+	unsigned int client;
+	unsigned int otb;
+};
+
 
 class ItemsSprites
 {
 public:
 	ItemsSprites();
-	~ItemsSprites(){}
+	~ItemsSprites();
 	
 	bool loadFromDat(const char *filename);
 	bool loadFromSpr(const char *filename);
+	bool loadKnownVersions(const char* filename);
 	bool loadHash();
 	void unloadSpr();
 	void unloadDat();
@@ -120,6 +129,8 @@ public:
 
 	SpriteType* getSprite(int id);
 	
+	const graphicsVersion* getVersion();
+
 protected:
 	bool datLoaded;
 	bool sprLoaded;
@@ -132,6 +143,11 @@ protected:
 
 	SpriteType m_dummy;
 	
+	typedef std::vector<graphicsVersion*> versionVector;
+	versionVector versions;
+
+	unsigned int datVersion;
+	unsigned int sprVersion;
 };
 
 
