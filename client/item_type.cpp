@@ -328,26 +328,20 @@ bool ItemsTypes::exportToXml(const char *filename)
 	if(!f)
 		return false;
 
-	fprintf(f, "<?xml version=\"1.0\"?><items>\n");
+	fprintf(f, "<?xml version=\"1.0\"?>\n<items>\n");
 
 	ItemMap::iterator it = getTypes();
 	for(;it != getEnd(); it++){
-		fprintf(f, "<item id=\"%d\" name=\"%s\" >\n", it->second->id, it->second->name);
+		fprintf(f, "<item id=\"%d\" name=\"%s\">\n", it->second->id, it->second->name);
 
-		if(it->second->group == ITEM_GROUP_WEAPON){
-			saveAttribute(f, "group", "weapon");
+		if(it->second->group == ITEM_GROUP_KEY){
+			saveAttribute(f, "type", "key");
 		}
-		else if(it->second->group == ITEM_GROUP_AMMUNITION){
-			saveAttribute(f, "group", "ammunition");
+		else if(it->second->group == ITEM_GROUP_RUNE){
+			saveAttribute(f, "type", "rune");
 		}
-		else if(it->second->group == ITEM_GROUP_ARMOR){
-			saveAttribute(f, "group", "armor");
-		}
-		else if(it->second->group == ITEM_GROUP_WRITEABLE){
-			saveAttribute(f, "group", "writeable");
-		}
-		else if(it->second->group == ITEM_GROUP_KEY){
-			saveAttribute(f, "group", "key");
+		else if(it->second->group == ITEM_GROUP_MAGICFIELD){
+			saveAttribute(f, "type", "magicfield");
 		}
 
 		if(strlen(it->second->descr) > 0){
@@ -411,6 +405,10 @@ bool ItemsTypes::exportToXml(const char *filename)
 		}
 
 		if(it->second->amuType != AMU_NONE){
+			if(it->second->weaponType == WEAPON_NONE){
+				saveAttribute(f, "weaponType", "distance");
+			}
+
 			switch(it->second->amuType){
 				case AMU_ARROW: saveAttribute(f, "ammoType", "arrow"); break;
 				case AMU_BOLT: saveAttribute(f, "ammoType", "bolt"); break;
@@ -1088,7 +1086,6 @@ int ItemsTypes::saveOtb(const char *filename)
 		switch(it->second->group){
 		case ITEM_GROUP_GROUND:
 		case ITEM_GROUP_CONTAINER:
-		case ITEM_GROUP_RUNE:
 		case ITEM_GROUP_TELEPORT:
 		case ITEM_GROUP_MAGICFIELD:
 		case ITEM_GROUP_SPLASH:
