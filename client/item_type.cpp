@@ -313,12 +313,12 @@ void ItemsTypes::clear()
 
 void saveAttribute(FILE* f, const std::string& key, const std::string& value)
 {
-	fprintf(f, " <attribute key=\"%s\" value=\"%s\"/>", key.c_str(), value.c_str());
+	fprintf(f, "\t<attribute key=\"%s\" value=\"%s\"/>\n", key.c_str(), value.c_str());
 }
 
 void saveAttribute(FILE* f, const std::string& key, int value)
 {
-	fprintf(f, " <attribute key=\"%s\" value=\"%d\"/>", key.c_str(), value);
+	fprintf(f, "\t<attribute key=\"%s\" value=\"%d\"/>\n", key.c_str(), value);
 }
 
 bool ItemsTypes::exportToXml(const char *filename)
@@ -332,7 +332,7 @@ bool ItemsTypes::exportToXml(const char *filename)
 
 	ItemMap::iterator it = getTypes();
 	for(;it != getEnd(); it++){
-		fprintf(f, "<item id=\"%d\" name=\"%s\" >", it->second->id, it->second->name);
+		fprintf(f, "<item id=\"%d\" name=\"%s\" >\n", it->second->id, it->second->name);
 
 		if(it->second->group == ITEM_GROUP_WEAPON){
 			saveAttribute(f, "group", "weapon");
@@ -354,7 +354,7 @@ bool ItemsTypes::exportToXml(const char *filename)
 			saveAttribute(f, "description", it->second->descr);
 		}
 
-		if(it->second->moveable){
+		if(it->second->pickupable){
 			saveAttribute(f, "weight", it->second->weight * 100);
 		}
 
@@ -472,7 +472,7 @@ bool ItemsTypes::exportToXml(const char *filename)
 		//suppressDrunk
 		//field
 
-		fprintf(f, " </item>\n");
+		fprintf(f, "</item>\n");
 	}
 
 	fprintf(f, "</items>\n");
@@ -1085,7 +1085,23 @@ int ItemsTypes::saveOtb(const char *filename)
 			saveAttr.push_back(ITEM_ATTR_LIGHT2);
 		}
 
-		f->startNode(it->second->group);
+		switch(it->second->group){
+		case ITEM_GROUP_GROUND:
+		case ITEM_GROUP_CONTAINER:
+		case ITEM_GROUP_RUNE:
+		case ITEM_GROUP_TELEPORT:
+		case ITEM_GROUP_MAGICFIELD:
+		case ITEM_GROUP_SPLASH:
+		case ITEM_GROUP_FLUID:
+		case ITEM_GROUP_DOOR:
+		//case ITEM_GROUP_NONE:
+			f->startNode(it->second->group);
+			break;
+		default:
+			f->startNode(ITEM_GROUP_NONE);
+			break;
+		}
+
 		switch(it->second->group) {
 			case ITEM_GROUP_GROUND:
 			{				
@@ -1101,10 +1117,6 @@ int ItemsTypes::saveOtb(const char *filename)
 				break;
 			}
 			case ITEM_GROUP_MAGICFIELD:
-			{
-				break;
-			}
-			case ITEM_GROUP_WRITEABLE:
 			{
 				break;
 			}
