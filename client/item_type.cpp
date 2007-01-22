@@ -386,8 +386,9 @@ bool ItemsTypes::exportToXml(const char *filename)
 				case WEAPON_CLUB: saveAttribute(f, "weaponType", "club"); break;
 				case WEAPON_SWORD: saveAttribute(f, "weaponType", "sword"); break;
 				case WEAPON_DIST: saveAttribute(f, "weaponType", "distance"); break;
-				case WEAPON_MAGIC: saveAttribute(f, "weaponType", "wand"); break;
+				case WEAPON_WAND: saveAttribute(f, "weaponType", "wand"); break;
 				case WEAPON_SHIELD: saveAttribute(f, "weaponType", "shield"); break;
+				case WEAPON_AMMO: saveAttribute(f, "weaponType", "ammunition"); break;
 			}
 		}
 
@@ -406,7 +407,7 @@ bool ItemsTypes::exportToXml(const char *filename)
 
 		if(it->second->amuType != AMU_NONE){
 			if(it->second->weaponType == WEAPON_NONE){
-				saveAttribute(f, "weaponType", "distance");
+				saveAttribute(f, "weaponType", "ammunition");
 			}
 
 			switch(it->second->amuType){
