@@ -231,7 +231,8 @@ enum WeaponType {
 	WEAPON_AXE,
 	WEAPON_SHIELD,
 	WEAPON_DIST,
-	WEAPON_MAGIC,
+	WEAPON_WAND,
+	WEAPON_AMMO
 };
 
 enum subfight_t {
