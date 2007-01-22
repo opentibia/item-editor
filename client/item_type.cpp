@@ -337,9 +337,6 @@ bool ItemsTypes::exportToXml(const char *filename)
 		if(it->second->group == ITEM_GROUP_KEY){
 			saveAttribute(f, "type", "key");
 		}
-		else if(it->second->group == ITEM_GROUP_RUNE){
-			saveAttribute(f, "type", "rune");
-		}
 		else if(it->second->group == ITEM_GROUP_MAGICFIELD){
 			saveAttribute(f, "type", "magicfield");
 		}
@@ -1088,6 +1085,7 @@ int ItemsTypes::saveOtb(const char *filename)
 		case ITEM_GROUP_GROUND:
 		case ITEM_GROUP_CONTAINER:
 		case ITEM_GROUP_TELEPORT:
+		case ITEM_GROUP_RUNE:
 		case ITEM_GROUP_MAGICFIELD:
 		case ITEM_GROUP_SPLASH:
 		case ITEM_GROUP_FLUID:
