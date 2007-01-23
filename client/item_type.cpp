@@ -377,6 +377,9 @@ bool ItemsTypes::exportToXml(const char *filename)
 			}
 		}
 
+		if(it->second->group == ITEM_GROUP_AMMUNITION){
+			saveAttribute(f, "weaponType", "ammunition");
+		}
 		if(it->second->weaponType != WEAPON_NONE){
 			switch(it->second->weaponType){
 				case WEAPON_AXE: saveAttribute(f, "weaponType", "axe"); break;
@@ -385,7 +388,6 @@ bool ItemsTypes::exportToXml(const char *filename)
 				case WEAPON_DIST: saveAttribute(f, "weaponType", "distance"); break;
 				case WEAPON_WAND: saveAttribute(f, "weaponType", "wand"); break;
 				case WEAPON_SHIELD: saveAttribute(f, "weaponType", "shield"); break;
-				case WEAPON_AMMO: saveAttribute(f, "weaponType", "ammunition"); break;
 			}
 		}
 
@@ -1084,6 +1086,7 @@ int ItemsTypes::saveOtb(const char *filename)
 		switch(it->second->group){
 		case ITEM_GROUP_GROUND:
 		case ITEM_GROUP_CONTAINER:
+		case ITEM_GROUP_RUNE:
 		case ITEM_GROUP_TELEPORT:
 		case ITEM_GROUP_RUNE:
 		case ITEM_GROUP_MAGICFIELD:
