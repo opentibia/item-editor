@@ -373,7 +373,7 @@ bool ItemsTypes::exportToXml(const char *filename)
 			saveAttribute(f, "maxTextLen", it->second->maxTextLen);
 
 			if(it->second->readOnlyId != 0){
-				saveAttribute(f, "readOnceItemId", it->second->readOnlyId);
+				saveAttribute(f, "writeOnceItemId", it->second->readOnlyId);
 			}
 		}
 
