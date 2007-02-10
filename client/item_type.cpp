@@ -1088,7 +1088,6 @@ int ItemsTypes::saveOtb(const char *filename)
 		case ITEM_GROUP_CONTAINER:
 		case ITEM_GROUP_RUNE:
 		case ITEM_GROUP_TELEPORT:
-		case ITEM_GROUP_RUNE:
 		case ITEM_GROUP_MAGICFIELD:
 		case ITEM_GROUP_SPLASH:
 		case ITEM_GROUP_FLUID:
