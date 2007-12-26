@@ -780,6 +780,7 @@ LRESULT GUIWin::onInitDialog(HWND h)
 	menuGroups[ITEM_GROUP_SPLASH] = ID_MENUG_SPLASH;
 	menuGroups[ITEM_GROUP_FLUID] = ID_MENUG_FLUID;
 	menuGroups[ITEM_GROUP_DOOR] = ID_MENUG_DOOR;
+	menuGroups[ITEM_GROUP_DEPRECATED] = ID_MENUG_DEPRECATED;
 	menuGroups[ITEM_GROUP_NONE] = ID_MENUG_NONE;
 	popupMenu = GetSubMenu(LoadMenu(g_instance, MAKEINTRESOURCE(MENU_POPUP_ITEMS)), 0);
 
@@ -811,6 +812,7 @@ void GUIWin::createGroupsTree(HWND htree)
 	rootItems[ITEM_GROUP_FLUID] = insertTreeItem(htree, "Fluid Container", NULL, ITEM_GROUP_FLUID);
 	rootItems[ITEM_GROUP_DOOR] = insertTreeItem(htree, "Door", NULL, ITEM_GROUP_DOOR);
 	rootItems[ITEM_GROUP_NONE] = insertTreeItem(htree, "Other", NULL, ITEM_GROUP_NONE);
+	rootItems[ITEM_GROUP_DEPRECATED] = insertTreeItem(htree, "Deprecated", NULL, ITEM_GROUP_DEPRECATED);
 }
 
 HTREEITEM GUIWin::insertTreeItem(HWND h, const char* name, HTREEITEM parent, long entryID)
@@ -841,6 +843,7 @@ HTREEITEM GUIWin::insertTreeItemType(HWND h, const ItemType *iType)
 	case ITEM_GROUP_SPLASH:
 	case ITEM_GROUP_FLUID:
 	case ITEM_GROUP_DOOR:
+	case ITEM_GROUP_DEPRECATED:
 	case ITEM_GROUP_NONE:
 		parent = rootItems[iType->group];
 		break;
@@ -1020,7 +1023,13 @@ void GUIWin::loadItem(HWND h)
 	if(curItemServerId && (iType = g_itemsTypes->getType(curItemServerId))){
 		
 		setEditTextInt(h, IDC_SID, iType->id);
-		setEditTextInt(h, IDC_EDITCID, iType->clientid);
+
+		if(iType->group != ITEM_GROUP_DEPRECATED){
+			setEditTextInt(h, IDC_EDITCID, iType->clientid);
+		}
+		else{
+			setEditTextInt(h, IDC_EDITCID, 0);
+		}
 		setEditTextInt(h, IDC_EDIT_SPEED, iType->speed);
 		setEditTextInt(h, IDC_EDIT_TOPORDER, iType->alwaysOnTopOrder);
 		setEditTextInt(h, IDC_EDIT_LIGHT_LEVEL, iType->lightLevel);

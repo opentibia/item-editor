@@ -202,6 +202,7 @@ BEGIN
     "6",            ID_MENUG_FLUID,         VIRTKEY, CONTROL, NOINVERT
     "7",            ID_MENUG_DOOR,          VIRTKEY, CONTROL, NOINVERT
     "8",            ID_MENUG_NONE,          VIRTKEY, CONTROL, NOINVERT
+    "9",            ID_MENUG_DEPRECATED,    VIRTKEY, CONTROL, NOINVERT
 END
 
 

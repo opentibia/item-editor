@@ -609,6 +609,7 @@ int ItemsTypes::loadOtb(const char *filename)
 					case ITEM_GROUP_SPLASH:
 					case ITEM_GROUP_FLUID:
 					case ITEM_GROUP_DOOR:
+					case ITEM_GROUP_DEPRECATED:
 					{
 						if(!loadedFlags) {
 							//read 4 byte flags
@@ -1092,6 +1093,7 @@ int ItemsTypes::saveOtb(const char *filename)
 		case ITEM_GROUP_SPLASH:
 		case ITEM_GROUP_FLUID:
 		case ITEM_GROUP_DOOR:
+		case ITEM_GROUP_DEPRECATED:
 		//case ITEM_GROUP_NONE:
 			f->startNode(it->second->group);
 			break;
@@ -1104,34 +1106,6 @@ int ItemsTypes::saveOtb(const char *filename)
 			case ITEM_GROUP_GROUND:
 			{				
 				saveAttr.push_back(ITEM_ATTR_SPEED);
-				break;
-			}			
-			case ITEM_GROUP_CONTAINER:
-			{
-				break;
-			}
-			case ITEM_GROUP_TELEPORT:
-			{
-				break;
-			}
-			case ITEM_GROUP_MAGICFIELD:
-			{
-				break;
-			}
-			case ITEM_GROUP_SPLASH:
-			{
-				break;
-			}
-			case ITEM_GROUP_FLUID:
-			{
-				break;
-			}
-			case ITEM_GROUP_DOOR:
-			{
-				break;
-			}
-			case ITEM_GROUP_NONE:
-			{
 				break;
 			}
 		}
@@ -1201,6 +1175,13 @@ int ItemsTypes::saveOtb(const char *filename)
 
 		if(it->second->corpse)
 			flags |= FLAG_CORPSE;
+
+
+		if(it->second->group == ITEM_GROUP_DEPRECATED){
+			flags = 0;
+			saveAttr.clear();
+			saveAttr.push_back(ITEM_ATTR_SERVERID);
+		}
 
 		f->setFlags(flags);
 		
