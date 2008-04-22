@@ -76,7 +76,7 @@ protected:
 	inline bool safeTell(long &pos);
 	//inline bool writeData(void* data, int size, bool unescape);
 public:
-	inline bool FileLoader::writeData(const void* data, int size, bool unescape){
+	inline bool writeData(const void* data, int size, bool unescape){
 		for(int i = 0; i < size; ++i) {
 			unsigned char c = *(((unsigned char*)data) + i);
 			if(unescape && (c == NODE_START || c == NODE_END || c == ESCAPE_CHAR)) {

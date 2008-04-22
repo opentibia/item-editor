@@ -279,7 +279,7 @@ class ItemType
 {
 public:
 	ItemType();
-	ItemType::ItemType(unsigned short id, const SpriteType *stype);
+	ItemType(unsigned short id, const SpriteType *stype);
 	~ItemType(){}
 
 	static long minClientId;
