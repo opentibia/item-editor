@@ -968,6 +968,7 @@ bool GUIWin::saveCurrentItem(HWND h)
 	iType->hasHeight = getCheckButton(h, IDC_OPT_HASHEIGHT);
 	iType->allowDistRead = getCheckButton(h, IDC_OPT_DISTREAD);
 	iType->isHangable = getCheckButton(h, IDC_OPT_HANGABLE);
+	iType->corpse = getCheckButton(h, IDC_OPT_CORPSE);
 
 	int comboFloor = getComboValue(h, IDC_COMBO_FLOOR);
 	if(comboFloor & FLOOR_DOWN){
@@ -1048,6 +1049,7 @@ void GUIWin::loadItem(HWND h)
 		setCheckButton(h, IDC_OPT_DISTREAD, iType->allowDistRead);
 		setCheckButton(h, IDC_OPT_VERTICAL, iType->isVertical);
 		setCheckButton(h, IDC_OPT_HORIZONTAL, iType->isHorizontal);
+		setCheckButton(h, IDC_OPT_CORPSE, iType->corpse);
 		setCheckButton(h, IDC_OPT_HANGABLE, iType->isHangable);
 
 		if(iType->floorChangeDown)
@@ -1095,6 +1097,7 @@ void GUIWin::loadItem(HWND h)
 		setCheckButton(h, IDC_OPT_DISTREAD, false);
 		setCheckButton(h, IDC_OPT_VERTICAL, false);
 		setCheckButton(h, IDC_OPT_HORIZONTAL, false);
+		setCheckButton(h, IDC_OPT_CORPSE, false);
 		setCheckButton(h, IDC_OPT_STACKABLE, false);
 
 		setComboValue(h, IDC_COMBO_FLOOR, FLOOR_NO_CHANGE);
@@ -1226,6 +1229,9 @@ void GUIWin::setControlState(HWND h, unsigned long flagsEdit, unsigned long flag
 	EnableWindow(GetDlgItem(h, IDC_OPT_HANGABLE),getFlagState(flagsOpt, IDC_OPT_HANGABLE_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_OPT_VERTICAL),getFlagState(flagsOpt, IDC_OPT_VERTICAL_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_OPT_HORIZONTAL),getFlagState(flagsOpt, IDC_OPT_HORIZONTAL_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_OPT_CORPSE),getFlagState(flagsOpt, IDC_OPT_CORPSE_FLAG));
+
+
 	EnableWindow(GetDlgItem(h, IDC_COMBO_FLOOR),getFlagState(flagsCombo, IDC_COMBO_FLOOR_FLAG));
 }
 

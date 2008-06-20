@@ -121,7 +121,7 @@ enum itemflags_t {
  FLAG_HORIZONTAL = 262144,
  FLAG_CANNOTDECAY = 524288,
  FLAG_ALLOWDISTREAD = 1048576,
- FLAG_DEPRICATED = 2097152,
+ FLAG_CORPSE = 2097152,
 };
 
 struct decayBlock{
@@ -311,6 +311,7 @@ public:
 	bool readable;
 
 	bool allowDistRead;
+	bool corpse;
 
 	int rotateTo;
 	

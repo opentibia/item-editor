@@ -32,7 +32,7 @@
 #define IDC_OPT_DISTREAD                1048
 #define IDC_OPT_VERTICAL                1051
 #define IDC_OPT_HORIZONTAL              1052
-#define IDC_OPT_UNUSED                  1053
+#define IDC_OPT_CORPSE                  1053
 #define IDC_EDIT_LIGHT_LEVEL            1054
 #define IDC_EDIT_LIGHT_COLOR            1055
 #define IDC_OPT_HANGABLE                1056

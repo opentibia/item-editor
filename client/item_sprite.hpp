@@ -67,6 +67,7 @@ public:
 	bool pickupable;
 	bool rotable;
 	bool readable;
+	bool corpse;
 
 	int speed;
 
