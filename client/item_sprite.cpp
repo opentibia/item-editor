@@ -59,7 +59,6 @@ SpriteType::SpriteType()
 	pickupable = false;
 	rotable = false;
 	readable = false;
-	corpse = false;
 	
 	speed = 0;
 
@@ -152,9 +151,6 @@ bool SpriteType::compareOptions(const SpriteType *stype)
 		return false;
 
 	if(readable != stype->readable)
-		return false;
-
-	if(corpse != stype->corpse)
 		return false;
 
 	//if(alwaysOnTop != stype->alwaysOnTop)
@@ -403,7 +399,6 @@ bool ItemsSprites::loadFromDat(const char *filename)
 				sType->stackable = true;
 				break;
 			case 0x06: //ladders
-				sType->corpse = true;
 				break;
 			case 0x07: //is useable
 				sType->useable = true;

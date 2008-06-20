@@ -60,7 +60,6 @@ ItemType::ItemType()
 	rotable = false;
 	readable = false;
 	allowDistRead = false;
-	corpse = false;
 	
 	rotateTo = 0;
 
@@ -148,7 +147,6 @@ ItemType::ItemType(unsigned short _id, const SpriteType *stype)
 	rotable = stype->rotable;
 	readable = stype->readable;
 	allowDistRead = false;
-	corpse = stype->corpse;
 	speed = stype->speed;
 
 	miniMapColor = stype->miniMapColor;
@@ -281,9 +279,6 @@ bool ItemType::compareOptions(const SpriteType *stype)
 		return false;
 
 	if(readable != stype->readable)
-		return false;
-
-	if(corpse != stype->corpse)
 		return false;
 
 	return true;
@@ -635,8 +630,6 @@ int ItemsTypes::loadOtb(const char *filename)
 							sType->isVertical = ((flags & FLAG_VERTICAL) == FLAG_VERTICAL);
 							sType->isHorizontal = ((flags & FLAG_HORIZONTAL) == FLAG_HORIZONTAL);
 							sType->allowDistRead = ((flags & FLAG_ALLOWDISTREAD) == FLAG_ALLOWDISTREAD);
-							sType->corpse = ((flags & FLAG_CORPSE) == FLAG_CORPSE);
-
 
 							if(p >= data + len) //no attributes
 								break;
@@ -1172,10 +1165,6 @@ int ItemsTypes::saveOtb(const char *filename)
 
 		if(it->second->allowDistRead)
 			flags |= FLAG_ALLOWDISTREAD;
-
-		if(it->second->corpse)
-			flags |= FLAG_CORPSE;
-
 
 		if(it->second->group == ITEM_GROUP_DEPRECATED){
 			flags = 0;
