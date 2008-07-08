@@ -73,11 +73,6 @@ ItemType::ItemType()
 	subParam07 = 0;
 	subParam08 = 0;
 
-	//xml
-	memset(name, '\0', sizeof(name));
-	memset(descr, '\0', sizeof(descr));
-	memset(sprHash, '\0', sizeof(sprHash));
-	
 	weight = 0.00;
 	decayTo = 0;
 	decayTime = 0;
@@ -171,9 +166,6 @@ ItemType::ItemType(unsigned short _id, const SpriteType *stype)
 	
 	rotateTo = 0;
 
-	//xml
-	memset(name, '\0', sizeof(name));
-	memset(descr, '\0', sizeof(descr));
 	
 	weight = 0.00;
 	decayTo = 0;
@@ -341,12 +333,12 @@ bool ItemsTypes::exportToXml(const char *filename)
 			saveAttribute(f, "type", "magicfield");
 		}
 
-		if(strlen(it->second->descr) > 0){
+		if(it->second->descr.size() > 0){
 			saveAttribute(f, "description", it->second->descr);
 		}
 
 		if(it->second->pickupable){
-			saveAttribute(f, "weight", it->second->weight * 100);
+			saveAttribute(f, "weight", int(it->second->weight * 100));
 		}
 
 		if(it->second->armor != 0){
@@ -680,8 +672,7 @@ int ItemsTypes::loadOtb(const char *filename)
 								if(datalen >= sizeof(sType->name))
 									return ERROR_INVALID_FORMAT;
 
-								memcpy(sType->name, p, datalen);
-								sType->name[datalen] = 0;
+								sType->name = std::string((char*)p, datalen);
 								break;
 							}
 							case ITEM_ATTR_DESCR:
@@ -689,8 +680,7 @@ int ItemsTypes::loadOtb(const char *filename)
 								if(datalen >= sizeof(sType->descr))
 									return ERROR_INVALID_FORMAT;
 
-								memcpy(sType->descr, p, datalen);
-								sType->descr[datalen] = 0;
+								sType->name = std::string((char*)p, datalen);
 								break;
 							}
 							case ITEM_ATTR_SPEED:
@@ -1260,105 +1250,41 @@ bool ItemsTypes::importFromXml(const char *filename)
 	int bytes_read;
 	int eof;
 
-	XML_Parser p = XML_ParserCreate(NULL);
+	xmlDocPtr doc = xmlParseFile(filename);
 
 	eof = 0;
-	if(!p){
+	if(!doc){
+		return false;
+	}
+	
+	
+	xmlNodePtr root = xmlDocGetRootElement(doc);
+
+	if(xmlStrcmp(root->name,(const xmlChar*)"items") != 0){
+		xmlFreeDoc(doc);
 		return false;
 	}
 
-	XML_SetElementHandler(p, xmlstartNodeImport, xmlendNode);
+	char* nodeValue;
+	for(xmlNodePtr itemNode = root->children; itemNode != NULL; itemNode = itemNode->next){
+		int id;
+		std::string name;
 
-	FILE *f = fopen(filename,"rb");
-	if(!f){
-		XML_ParserFree(p);
-		return false;
-	}
+		nodeValue = (char*)xmlGetProp(itemNode, (xmlChar*)"id");
+		if(nodeValue){
+			id = atoi(nodeValue);
+			xmlFree(nodeValue);
+		} else continue;
 
-	loadstatus = 0;
-	do{
-		buff = XML_GetBuffer(p, 1024);
-
-		bytes_read = fread(buff, 1, 1024, f);
-		if(bytes_read != 1024){
-			if(feof(f) == 0){
-				//error
-				XML_ParserFree(p);
-				return false;
-			}
-			else{
-				eof = 1;
-			}
-		}
-
-		XML_Status status = XML_ParseBuffer(p, bytes_read, eof);
-		switch (status) {
-		case XML_STATUS_ERROR:
-			XML_ParserFree(p);
-			return false;
-		}
-	}while(eof == 0 && loadstatus == 0);
-
-	XML_ParserFree(p);
-	if(loadstatus != 0){
-		return false;
-	}
-	else{
-		return true;
+		nodeValue = (char*)xmlGetProp(itemNode, (xmlChar*)"name");
+		if(nodeValue){
+			name = nodeValue;
+			xmlFree(nodeValue);
+		} else continue;
+		
+		ItemType* iType = g_itemsTypes->getType(id);
+		if(iType) iType->name = name.c_str();
 	}
 
 	return false;
-}
-
-void XMLCALL ItemsTypes::xmlendNode(void *userData, const char *name)
-{
-	//
-}
-
-
-void XMLCALL ItemsTypes::xmlstartNodeImport(void *userData, const char *name, const char **atts)
-{
-	if(loadstatus == 1)
-		return;
-	
-	const xmlProp *props = (const xmlProp *)atts;
-
-	if(strcmp(name, "item") == 0){
-		int id;
-		const char* tmp;
-		ItemType* sType = NULL;
-
-		if((tmp = readXmlProp("id", props)) != 0){
-			id = atoi(tmp);
-			sType = g_itemsTypes->getType(id);
-		}
-		else
-			loadstatus = 1;
-
-		if(sType) {
-			if((tmp = readXmlProp("name", props)) != 0){
-				if(strlen(sType->name) != 0){
-					//__asm int 3
-					return;
-				}
-				strncpy(sType->name, tmp, 127);
-			}
-			else{
-				return;
-			}
-			
-		}
-	}
-}
-
-const char* readXmlProp(const char* propName, const xmlProp *props)
-{
-	int i = 0;
-	while(props[i].name != NULL){
-		if(strcmp(props[i].name, propName) == 0){
-			return props[i].value;
-		}
-		i++;
-	}
-	return NULL;
 }

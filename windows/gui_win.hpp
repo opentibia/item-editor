@@ -110,6 +110,7 @@ protected:
 	static LRESULT onVerify(HWND h);
 	static LRESULT onCreateMissing(HWND h);
 	static LRESULT onAddItem(HWND h);
+	static LRESULT onCopyItem(HWND h);
 	static LRESULT onGotoItem(HWND h);
 	static LRESULT onContextMenu(HWND h, unsigned long lParam);
 	static LRESULT onContextMenuClick(HWND h, unsigned long newgroup);

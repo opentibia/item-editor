@@ -22,6 +22,7 @@
 #define __OTITEMEDITOR_FILELOADER_H__
 
 #include <string>
+#include <assert.h>
 #include "stdio.h"
 
 typedef unsigned long NODE;
@@ -81,13 +82,13 @@ public:
 			unsigned char c = *(((unsigned char*)data) + i);
 			if(unescape && (c == NODE_START || c == NODE_END || c == ESCAPE_CHAR)) {
 				unsigned char escape = ESCAPE_CHAR;
-				int value = fwrite(&escape, 1, 1, m_file);
+				size_t value = fwrite(&escape, 1, 1, m_file);
 				if(value != 1) {
 					m_lastError = ERROR_COULDNOTWRITE;
 					return false;
 				}
 			}
-			int value = fwrite(&c, 1, 1, m_file);
+			size_t value = fwrite(&c, 1, 1, m_file);
 			if(value != 1) {
 				m_lastError = ERROR_COULDNOTWRITE;
 				return false;
@@ -183,7 +184,7 @@ public:
 	
 	
 protected:
-	long size(){return end - p;};
+	ptrdiff_t size(){return end - p;};
 	char* p;
 	char* end;
 };
@@ -238,7 +239,8 @@ public:
 	}
 	
 	inline bool ADD_STRING(const std::string& add){
-		unsigned short str_len = add.size();
+		assert(add.size() <= 0xffff);
+		unsigned short str_len = unsigned short(add.size());
 		
 		if(!ADD_USHORT(str_len)){
 			return false;

@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
+// Microsoft Visual C++ generated include file.
 // Used by resource.rc
 //
 #define DLG_MAIN                        101
@@ -61,13 +61,17 @@
 #define ID_TOOLS_ADDITEM                40038
 #define ID_TOOLS_GETXMLNAMES            40041
 #define ID_MENUG_DEPRECATED             40042
+#define ID_TOOLS_COPYITEM               40043
+#define ID_Menu                         40043
+#define ID_Menu40044                    40044
+#define ID_COPYITEM                     40045
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        122
-#define _APS_NEXT_COMMAND_VALUE         40043
+#define _APS_NEXT_COMMAND_VALUE         40046
 #define _APS_NEXT_CONTROL_VALUE         1057
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

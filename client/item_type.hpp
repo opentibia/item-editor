@@ -21,7 +21,8 @@
 #ifndef __OTITEMEDITOR_ITEM_TYPE_H__
 #define __OTITEMEDITOR_ITEM_TYPE_H__
 
-#include "expat.h"
+#include <libxml/xmlmemory.h>
+#include <libxml/parser.h>
 #include "item_loader.hpp"
 #include <map>
 #include <list>
@@ -315,8 +316,8 @@ public:
 
 	int rotateTo;
 	
-	char name[128];
-	char descr[128];
+	std::string name;
+	std::string descr;
 	char sprHash[16];
 	double weight;
 	int decayTo;
@@ -394,8 +395,6 @@ public:
 private:
 	bool datLoaded;
 	static int loadstatus;
-	static void XMLCALL xmlendNode(void *userData, const char *name);
-	static void XMLCALL xmlstartNodeImport(void *userData, const char *name, const char **atts);
 	
 	ItemMap item;
 };

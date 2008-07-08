@@ -71,7 +71,7 @@ void getImageHash(unsigned short cid, void*output)
 		for(long cy = 0; cy < it->height; cy++) {
 			for(long cx = 0; cx < it->width; cx++) {
 				unsigned long frameindex = spriteBase + cx + cy*it->width + frame*it->width*it->height;
-				InternalSprite sprite = g_itemsSprites->getSpriteInternalFormat(cid,frameindex);
+				InternalSprite sprite = g_itemsSprites->getSpriteInternalFormat((unsigned short)cid, (unsigned short)frameindex);
 				if(sprite)
 					MD5Update(&m_md5, (const unsigned char*)sprite, 32*32*4);
 			}
@@ -329,6 +329,9 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 		case ID_TOOLS_ADDITEM:
 			return onAddItem(h);
 			break;
+		case ID_TOOLS_COPYITEM:
+			return onCopyItem(h);
+			break;
 		case ID_HELP_ABOUT:
 			MessageBox(h, OTIE_VERSION_STRING, "OTItemEditor", MB_OK | MB_ICONINFORMATION) ;
 			break;
@@ -348,7 +351,7 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 
 LRESULT GUIWin::onDragBegin(HWND h, const NMTREEVIEW* nmTree)
 {
-	long id = nmTree->itemNew.lParam;
+	long id = (long)nmTree->itemNew.lParam;
 	if(id > 100){
 		m_dragItem = nmTree->itemNew.hItem;
 		m_dragging = true;
@@ -375,7 +378,7 @@ LRESULT GUIWin::onDragMove(HWND h, LPARAM lParam)
 			TreeView_SelectDropTarget(m_hwndTree, hitTarget);
 		}
 		else{
-			TreeView_SelectDropTarget(m_hwndTree,  rootItems[g_itemsTypes->getGroup(itemInfo.lParam)]);
+			TreeView_SelectDropTarget(m_hwndTree,  rootItems[g_itemsTypes->getGroup((long)itemInfo.lParam)]);
 		}
 	} 
 	return TRUE;
@@ -392,7 +395,7 @@ LRESULT GUIWin::onDragEnd(HWND h)
 		itemInfo.mask = TVIF_PARAM;
 		itemInfo.hItem = m_dragItem;
 		TreeView_GetItem(m_hwndTree, &itemInfo);
-		id = itemInfo.lParam;
+		id = (long)itemInfo.lParam;
 
 		itemInfo.hItem = hitTarget;
 		TreeView_GetItem(m_hwndTree, &itemInfo);
@@ -439,7 +442,7 @@ LRESULT GUIWin::onTreeSelChange(HWND h, const NMTREEVIEW* nmTree)
 
 	if(nmTree->itemNew.lParam >= 100){
 		curItem = nmTree->itemNew.hItem;
-		curItemServerId = nmTree->itemNew.lParam;
+		curItemServerId = (long)nmTree->itemNew.lParam;
 	}
 	else{
 		curItem = NULL;
@@ -456,7 +459,7 @@ LRESULT GUIWin::onClientIdChange(HWND h, HWND hEdit)
 {
 	char *tmp;
 	long new_id;
-	long len = SendMessage(hEdit, WM_GETTEXTLENGTH, 0, 0);
+	long len = (long)SendMessage(hEdit, WM_GETTEXTLENGTH, 0, 0);
 	tmp = new char[len+1];
 	SendMessage(hEdit, WM_GETTEXT , len + 1, (LPARAM)tmp);
 	tmp[len] = 0;
@@ -505,7 +508,7 @@ LRESULT GUIWin::onContextMenu(HWND h, unsigned long lParam)
 			itemInfo.hItem = hitTarget;
 			TreeView_GetItem(m_hwndTree, &itemInfo);
 			if(itemInfo.lParam >= 100){
-				setContextMenuGroup(g_itemsTypes->getGroup(itemInfo.lParam));
+				setContextMenuGroup(g_itemsTypes->getGroup((long)itemInfo.lParam));
 				TrackPopupMenuEx(popupMenu, 0, screen_coords.x, screen_coords.y, h, NULL);
 			}
 		}
@@ -720,11 +723,8 @@ LRESULT GUIWin::onAddItem(HWND h)
 		return TRUE;
 
 	ItemType *new_it;
-	if(n < 20000){
-		if(n != ItemType::maxServerId + 1){
-			MessageBox(h, "Not valid item id.", NULL, MB_OK | MB_ICONERROR);
-			return TRUE;
-		}
+	if(n < 20000) {
+		n = ItemType::maxServerId + 1;
 	}
 
 	if(g_itemsTypes->getType(n) != NULL){
@@ -737,6 +737,33 @@ LRESULT GUIWin::onAddItem(HWND h)
 	new_it->id = n;
 	new_it->clientid = 0;
 	g_itemsTypes->addType(n, new_it);
+	
+
+	loadTreeItemTypes(h);
+	return TRUE;
+}
+
+LRESULT GUIWin::onCopyItem(HWND h)
+{
+	if(!saveCurrentItem(h)){
+		return TRUE;
+	}
+
+	if(ItemType::minServerId == 0 || ItemType::maxServerId == 0){
+		MessageBox(h, "Wrong items set.", NULL, MB_OK | MB_ICONERROR);
+		return TRUE;
+	}
+
+	int n;
+	if(!getEditTextInt(h, IDC_SID, n))
+		return TRUE;
+	
+	int newn = ItemType::maxServerId + 1;
+	
+	ItemType *new_it;
+	new_it = new ItemType(*g_itemsTypes->getType(n));
+	new_it->id = newn;
+	g_itemsTypes->addType(newn, new_it);
 	
 
 	loadTreeItemTypes(h);
@@ -1282,7 +1309,7 @@ void GUIWin::getItemTypeName(const ItemType *iType, char* name)
 		tmp = name;
 	}
 	if(iType->name[0] != 0){
-		strcpy(tmp, iType->name);
+		strcpy(tmp, iType->name.c_str());
 	}
 	else{
 		sprintf(tmp, "Item number %d", iType->id);
@@ -1336,10 +1363,10 @@ bool GUIDraw::drawSprite(HDC desthdc, long x, long y, long maxx, long maxy, unsi
 				unsigned long frameindex = spriteBase + cx + cy*it->width + frame*it->width*it->height;
 				InternalSprite sprite;
 				if(count == 0){
-					sprite = g_itemsSprites->getSpriteInternalFormat(itemid,frameindex);
+					sprite = g_itemsSprites->getSpriteInternalFormat((unsigned short)itemid, (unsigned short)frameindex);
 				}
 				else{
-					sprite = g_itemsSprites->getSpriteInternalFormat(itemid, count);
+					sprite = g_itemsSprites->getSpriteInternalFormat((unsigned short)itemid, (unsigned short)count);
 				}
 				HBITMAP itembmp = getBitmap(sprite);
 				if(sprite){

@@ -1,4 +1,4 @@
-//Microsoft Developer Studio generated resource script.
+// Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
 
@@ -26,7 +26,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 // Menu
 //
 
-MENU_MAIN MENU DISCARDABLE 
+MENU_MAIN MENU 
 BEGIN
     POPUP "File"
     BEGIN
@@ -43,6 +43,7 @@ BEGIN
         MENUITEM "Go to item...",               ID_TOOLS_GOTOITEM
         MENUITEM SEPARATOR
         MENUITEM "Create missing client items", ID_TOOLS_CREATEMISSING
+        MENUITEM "Copy Item",                   ID_TOOLS_COPYITEM
         MENUITEM "Add Item",                    ID_TOOLS_ADDITEM
         MENUITEM SEPARATOR
         MENUITEM "Autofind client id",          ID_TOOLS_AUTOFIND
@@ -58,7 +59,7 @@ BEGIN
     END
 END
 
-MENU_POPUP_ITEMS MENU DISCARDABLE 
+MENU_POPUP_ITEMS MENU 
 BEGIN
     POPUP ""
     BEGIN
@@ -80,69 +81,46 @@ END
 // Dialog
 //
 
-DLG_MAIN DIALOG DISCARDABLE  0, 0, 427, 260
-STYLE DS_MODALFRAME | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | 
-    WS_SYSMENU
+DLG_MAIN DIALOG  0, 0, 427, 260
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 MENU MENU_MAIN
 FONT 8, "MS Shell Dlg"
 BEGIN
-    CONTROL         "",IDC_EDITOR_TREE,"SysTreeView32",TVS_HASBUTTONS | 
-                    TVS_HASLINES | TVS_LINESATROOT | TVS_SHOWSELALWAYS | 
-                    WS_BORDER | WS_TABSTOP,7,7,119,246
+    CONTROL         "",IDC_EDITOR_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | TVS_SHOWSELALWAYS | WS_BORDER | WS_TABSTOP,7,7,119,246
     GROUPBOX        "Settings",IDC_STATIC,135,7,285,246
     CONTROL         "",IDC_ITEM_PIC,"Static",SS_BLACKFRAME,144,31,49,44
     LTEXT           "sid:",IDC_STATIC,144,85,12,10
     LTEXT           "10000",IDC_SID,158,86,21,10
     LTEXT           "cid:",IDC_STATIC,144,100,12,8
     EDITTEXT        IDC_EDIT_CID,157,98,36,12,ES_AUTOHSCROLL | ES_NUMBER
-    CONTROL         "",IDC_SPINCID,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
-                    UDS_NOTHOUSANDS,185,99,8,11
+    CONTROL         "",IDC_SPINCID,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,185,99,8,11
     GROUPBOX        "Options:",IDC_STATIC,210,25,202,97
-    CONTROL         "Blocking",IDC_OPT_BLOCKING,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,217,37,60,8
-    CONTROL         "Always Top",IDC_OPT_ATOP,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,217,85,60,8
-    CONTROL         "Stackable",IDC_OPT_STACKABLE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,344,73,60,8
-    CONTROL         "Useable",IDC_OPT_USEABLE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,281,61,60,8
-    CONTROL         "Not Moveable",IDC_OPT_NO_MOVE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,217,73,60,8
-    CONTROL         "Pickupable",IDC_OPT_PICKUP,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,281,37,60,8
-    CONTROL         "Rotable",IDC_OPT_ROTABLE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,281,73,60,8
+    CONTROL         "Blocking",IDC_OPT_BLOCKING,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,217,37,60,8
+    CONTROL         "Always Top",IDC_OPT_ATOP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,217,85,60,8
+    CONTROL         "Stackable",IDC_OPT_STACKABLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,344,73,60,8
+    CONTROL         "Useable",IDC_OPT_USEABLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,281,61,60,8
+    CONTROL         "Not Moveable",IDC_OPT_NO_MOVE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,217,73,60,8
+    CONTROL         "Pickupable",IDC_OPT_PICKUP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,281,37,60,8
+    CONTROL         "Rotable",IDC_OPT_ROTABLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,281,73,60,8
     LTEXT           "FloorChange",IDC_STATIC,144,128,42,10
-    COMBOBOX        IDC_COMBO_FLOOR,189,126,50,90,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Block projectile",IDC_OPT_BLOCKPROJECTILE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,217,49,61,8
+    COMBOBOX        IDC_COMBO_FLOOR,189,126,50,90,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Block projectile",IDC_OPT_BLOCKPROJECTILE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,217,49,61,8
     LTEXT           "Speed",IDC_STATIC,144,144,42,10
     EDITTEXT        IDC_EDIT_SPEED,189,142,50,12,ES_AUTOHSCROLL | ES_NUMBER
-    CONTROL         "Readable",IDC_OPT_READABLE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,281,85,60,8
-    CONTROL         "Block pathfind",IDC_OPT_BLOCKPATHFIND,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,217,61,61,8
-    CONTROL         "HasHeight",IDC_OPT_HASHEIGHT,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,217,97,61,8
-    CONTROL         "DistRead",IDC_OPT_DISTREAD,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,281,97,60,8
-    CONTROL         "IsVertical",IDC_OPT_VERTICAL,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,344,37,60,8
-    CONTROL         "IsHorizontal",IDC_OPT_HORIZONTAL,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,344,49,60,8
+    CONTROL         "Readable",IDC_OPT_READABLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,281,85,60,8
+    CONTROL         "Block pathfind",IDC_OPT_BLOCKPATHFIND,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,217,61,61,8
+    CONTROL         "HasHeight",IDC_OPT_HASHEIGHT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,217,97,61,8
+    CONTROL         "DistRead",IDC_OPT_DISTREAD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,281,97,60,8
+    CONTROL         "IsVertical",IDC_OPT_VERTICAL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,344,37,60,8
+    CONTROL         "IsHorizontal",IDC_OPT_HORIZONTAL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,344,49,60,8
     LTEXT           "TopOrder",IDC_STATIC,144,160,34,10
-    EDITTEXT        IDC_EDIT_TOPORDER,189,158,50,12,ES_AUTOHSCROLL | 
-                    ES_NUMBER
-    CONTROL         "Corpse",IDC_OPT_CORPSE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,344,61,60,8
+    EDITTEXT        IDC_EDIT_TOPORDER,189,158,50,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "Corpse",IDC_OPT_CORPSE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,344,61,60,8
     EDITTEXT        IDC_EDIT_LIGHT_LEVEL,289,126,55,12,ES_AUTOHSCROLL
     EDITTEXT        IDC_EDIT_LIGHT_COLOR,289,142,55,12,ES_AUTOHSCROLL
     LTEXT           "LightLevel",IDC_STATIC,247,128,34,10
     LTEXT           "LightColor",IDC_STATIC,247,144,34,10
-    CONTROL         "Hangable",IDC_OPT_HANGABLE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,281,49,60,8
+    CONTROL         "Hangable",IDC_OPT_HANGABLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,281,49,60,8
 END
 
 
@@ -152,7 +130,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO MOVEABLE PURE 
+GUIDELINES DESIGNINFO 
 BEGIN
     DLG_MAIN, DIALOG
     BEGIN
@@ -191,7 +169,7 @@ END
 // Accelerator
 //
 
-IDR_POPUP_ITEM ACCELERATORS DISCARDABLE 
+IDR_POPUP_ITEM ACCELERATORS 
 BEGIN
     "0",            ID_MENUG_GROUND,        VIRTKEY, CONTROL, NOINVERT
     "1",            ID_MENUG_CONTAINER,     VIRTKEY, CONTROL, NOINVERT
@@ -213,7 +191,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ICON1               ICON    DISCARDABLE     "otitemeditor.ico"
+IDI_ICON1               ICON                    "otitemeditor.ico"
 #endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
@@ -233,18 +211,18 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE MOVEABLE PURE 
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE MOVEABLE PURE 
+2 TEXTINCLUDE 
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE MOVEABLE PURE 
+3 TEXTINCLUDE 
 BEGIN
     "\r\n"
     "\0"

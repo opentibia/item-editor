@@ -121,8 +121,8 @@ public:
 	void unloadDat();
 	
 	unsigned short getSpriteDump(unsigned short id, char *dump);
-	unsigned short getSpriteMapSize() { return sprite.size();}
-	unsigned short getItemMapSize() { return item.size();}
+	size_t getSpriteMapSize() { return sprite.size();}
+	size_t getItemMapSize() { return item.size();}
 	unsigned short getItemSpriteID(unsigned short item_id, unsigned short frame );
 	
 	InternalSprite getSpriteInternalFormat(unsigned short item_id, unsigned short frame);

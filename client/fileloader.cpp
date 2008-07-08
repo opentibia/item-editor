@@ -108,7 +108,8 @@ const unsigned char* FileLoader::getProps(const NODE node, unsigned long &size)
 		return NULL;
 	}
 	
-	int byte, position;
+	unsigned long position;
+	int byte;
 	if(!readByte(byte))
 		return NULL;
 
@@ -326,7 +327,7 @@ inline bool FileLoader::readByte(int &value)
 			m_lastError = ERROR_CACHE_ERROR;
 			return false;
 		}
-		if(m_cache_offset >= m_cached_data[m_cache_index].size){
+		if((unsigned long)m_cache_offset >= m_cached_data[m_cache_index].size){
 			long pos = m_cache_offset + m_cached_data[m_cache_index].base;
 			long tmp = getCacheBlock(pos);
 			if(tmp < 0)
@@ -465,7 +466,7 @@ long FileLoader::loadCacheBlock(unsigned long pos)
 	}
 	if(loading_cache == -1){
 		for(i = 0; i < CACHE_BLOCKS; i++){
-			if(abs(m_cached_data[i].base - base_pos) > 2*m_cache_size){
+			if((unsigned long)abs(m_cached_data[i].base - base_pos) > 2*m_cache_size){
 				loading_cache = i;
 				break;
 			}
@@ -486,10 +487,10 @@ long FileLoader::loadCacheBlock(unsigned long pos)
 		return -1;
 	}
 
-	long size = fread(m_cached_data[loading_cache].data, 1, m_cache_size, m_file);
-	m_cached_data[loading_cache].size = size;
+	size_t size = fread(m_cached_data[loading_cache].data, 1, m_cache_size, m_file);
+	m_cached_data[loading_cache].size = (unsigned long)size;
 
-	if(size < pos - m_cached_data[loading_cache].base){
+	if(size < (long)pos - m_cached_data[loading_cache].base){
 		m_lastError = ERROR_SEEK_ERROR;
 		return -1;
 	}
