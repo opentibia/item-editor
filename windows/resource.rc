@@ -43,6 +43,7 @@ BEGIN
         MENUITEM "Go to item...",               ID_TOOLS_GOTOITEM
         MENUITEM SEPARATOR
         MENUITEM "Create missing client items", ID_TOOLS_CREATEMISSING
+		MENUITEM "Reload item attributes",		ID_TOOLS_RELOADATTR
         MENUITEM "Copy Item",                   ID_TOOLS_COPYITEM
         MENUITEM "Add Item",                    ID_TOOLS_ADDITEM
         MENUITEM SEPARATOR

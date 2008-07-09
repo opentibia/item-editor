@@ -65,13 +65,14 @@
 #define ID_Menu                         40043
 #define ID_Menu40044                    40044
 #define ID_COPYITEM                     40045
+#define ID_TOOLS_RELOADATTR				40046
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        122
-#define _APS_NEXT_COMMAND_VALUE         40046
+#define _APS_NEXT_COMMAND_VALUE         40047
 #define _APS_NEXT_CONTROL_VALUE         1057
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

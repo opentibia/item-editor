@@ -107,6 +107,7 @@ protected:
 	static LRESULT onSaveOtb(HWND h);
 	static LRESULT onLoadOtb(HWND h);
 	static LRESULT onAutoFindImages(HWND h);
+	static LRESULT onReloadAttributes(HWND h);
 	static LRESULT onVerify(HWND h);
 	static LRESULT onCreateMissing(HWND h);
 	static LRESULT onAddItem(HWND h);

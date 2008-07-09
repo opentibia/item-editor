@@ -332,6 +332,9 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 		case ID_TOOLS_COPYITEM:
 			return onCopyItem(h);
 			break;
+		case ID_TOOLS_RELOADATTR:
+			return onReloadAttributes(h);
+			break;
 		case ID_HELP_ABOUT:
 			MessageBox(h, OTIE_VERSION_STRING, "OTItemEditor", MB_OK | MB_ICONINFORMATION) ;
 			break;
@@ -607,6 +610,29 @@ LRESULT GUIWin::onAutoFindImages(HWND h)
 
 	autoFindPerformed = true;
 	loadTreeItemTypes(h);
+
+	return TRUE;
+}
+
+LRESULT GUIWin::onReloadAttributes(HWND h)
+{
+	if(!saveCurrentItem(h)){
+		return TRUE;
+	}
+
+	//look through all items and verify if their attributes are correct
+	//if they aren't, make them correct.
+	int n = 0;
+	for(ItemMap::iterator it = g_itemsTypes->getTypes(); it != g_itemsTypes->getEnd(); it++){
+		if(!it->second->compareOptions(g_itemsSprites->getSprite(it->second->clientid))){
+			it->second->reloadOptions(g_itemsSprites->getSprite(it->second->clientid));
+			n++;
+		}
+	}
+
+	char str[64];
+	sprintf(str , "Reloaded %d of %d.", n, SpriteType::maxClientId - SpriteType::minClientId + 1);
+	MessageBox(h, str, NULL, MB_OK | MB_ICONINFORMATION);
 
 	return TRUE;
 }

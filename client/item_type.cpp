@@ -281,6 +281,51 @@ bool ItemType::compareOptions(const SpriteType *stype)
 	return true;
 }
 
+void ItemType::reloadOptions(const SpriteType *stype)
+{
+	if(!stype)
+		return;
+
+	group = stype->group;
+	clientid = stype->id;
+	foundNewImage = false;
+
+	blockSolid = stype->blockSolid;
+	hasHeight = stype->hasHeight;
+	blockProjectile = stype->blockProjectile;
+	blockPathFind = stype->blockPathFind;
+
+	alwaysOnTop = stype->alwaysOnTop;
+	alwaysOnTopOrder = stype->alwaysOnTopOrder;
+	stackable = stype->stackable ;
+	useable = stype->useable;
+	moveable = stype->moveable;
+	pickupable = stype->pickupable;
+	rotable = stype->rotable;
+	readable = stype->readable;
+	allowDistRead = false;
+	corpse = stype->corpse;
+	speed = stype->speed;
+
+	miniMapColor = stype->miniMapColor;
+	subParam07 = stype->subParam07;
+	subParam08 = stype->subParam08;
+
+	lightLevel = stype->lightLevel;
+	lightColor = stype->lightColor;
+
+	isVertical = stype->isVertical;
+	isHorizontal = stype->isHorizontal;
+
+	isHangable = stype->isHangable;
+
+	#ifdef __SPRITE_SEARCH__
+	memcpy(sprHash, stype->sprHash, 16);
+	#else
+	getImageHash(stype->id, sprHash);
+	#endif
+}
+
 
 
 ItemsTypes::ItemsTypes()

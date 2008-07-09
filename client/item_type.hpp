@@ -366,6 +366,7 @@ public:
 
 	bool isHangable;
 	bool compareOptions(const SpriteType *stype);
+	void reloadOptions(const SpriteType *stype);
 };
 
 typedef std::map<unsigned short, ItemType*> ItemMap;
