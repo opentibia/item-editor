@@ -827,9 +827,9 @@ LRESULT GUIWin::onInitDialog(HWND h)
 	//initialize menu entryes
 	menuGroups[ITEM_GROUP_GROUND] = ID_MENUG_GROUND;
 	menuGroups[ITEM_GROUP_CONTAINER] = ID_MENUG_CONTAINER;
-	menuGroups[ITEM_GROUP_RUNE] = ID_MENUG_RUNE;
-	menuGroups[ITEM_GROUP_TELEPORT] = ID_MENUG_TELEPORT;
-	menuGroups[ITEM_GROUP_MAGICFIELD] = ID_MENUG_MAGICFIELD;
+	//menuGroups[ITEM_GROUP_CHARGES] = ID_MENUG_CHARGES;
+	//menuGroups[ITEM_GROUP_TELEPORT] = ID_MENUG_TELEPORT;
+	//menuGroups[ITEM_GROUP_MAGICFIELD] = ID_MENUG_MAGICFIELD;
 	menuGroups[ITEM_GROUP_SPLASH] = ID_MENUG_SPLASH;
 	menuGroups[ITEM_GROUP_FLUID] = ID_MENUG_FLUID;
 	menuGroups[ITEM_GROUP_DOOR] = ID_MENUG_DOOR;
@@ -858,12 +858,12 @@ void GUIWin::createGroupsTree(HWND htree)
 
 	rootItems[ITEM_GROUP_GROUND] = insertTreeItem(htree, "Ground", NULL, ITEM_GROUP_GROUND);
 	rootItems[ITEM_GROUP_CONTAINER] = insertTreeItem(htree, "Container", NULL, ITEM_GROUP_CONTAINER);
-	rootItems[ITEM_GROUP_RUNE] = insertTreeItem(htree, "Rune", NULL, ITEM_GROUP_RUNE);
-	rootItems[ITEM_GROUP_TELEPORT] = insertTreeItem(htree, "Teleport", NULL, ITEM_GROUP_TELEPORT);
-	rootItems[ITEM_GROUP_MAGICFIELD] = insertTreeItem(htree, "Magic Field", NULL, ITEM_GROUP_MAGICFIELD);
+	//rootItems[ITEM_GROUP_CHARGES] = insertTreeItem(htree, "Charges", NULL, ITEM_GROUP_CHARGES);
+	//rootItems[ITEM_GROUP_TELEPORT] = insertTreeItem(htree, "Teleport", NULL, ITEM_GROUP_TELEPORT);
+	//rootItems[ITEM_GROUP_MAGICFIELD] = insertTreeItem(htree, "Magic Field", NULL, ITEM_GROUP_MAGICFIELD);
+	//rootItems[ITEM_GROUP_DOOR] = insertTreeItem(htree, "Door", NULL, ITEM_GROUP_DOOR);
 	rootItems[ITEM_GROUP_SPLASH] = insertTreeItem(htree, "Splash", NULL, ITEM_GROUP_SPLASH);
 	rootItems[ITEM_GROUP_FLUID] = insertTreeItem(htree, "Fluid Container", NULL, ITEM_GROUP_FLUID);
-	rootItems[ITEM_GROUP_DOOR] = insertTreeItem(htree, "Door", NULL, ITEM_GROUP_DOOR);
 	rootItems[ITEM_GROUP_NONE] = insertTreeItem(htree, "Other", NULL, ITEM_GROUP_NONE);
 	rootItems[ITEM_GROUP_DEPRECATED] = insertTreeItem(htree, "Deprecated", NULL, ITEM_GROUP_DEPRECATED);
 }
@@ -890,12 +890,12 @@ HTREEITEM GUIWin::insertTreeItemType(HWND h, const ItemType *iType)
 	switch(iType->group){
 	case ITEM_GROUP_GROUND:
 	case ITEM_GROUP_CONTAINER:
-	case ITEM_GROUP_RUNE:
-	case ITEM_GROUP_TELEPORT:
-	case ITEM_GROUP_MAGICFIELD:
+	//case ITEM_GROUP_CHARGES:
+	//case ITEM_GROUP_TELEPORT:
+	//case ITEM_GROUP_MAGICFIELD:
+	case ITEM_GROUP_DOOR:
 	case ITEM_GROUP_SPLASH:
 	case ITEM_GROUP_FLUID:
-	case ITEM_GROUP_DOOR:
 	case ITEM_GROUP_DEPRECATED:
 	case ITEM_GROUP_NONE:
 		parent = rootItems[iType->group];
@@ -1021,8 +1021,9 @@ bool GUIWin::saveCurrentItem(HWND h)
 	iType->hasHeight = getCheckButton(h, IDC_OPT_HASHEIGHT);
 	iType->allowDistRead = getCheckButton(h, IDC_OPT_DISTREAD);
 	iType->isHangable = getCheckButton(h, IDC_OPT_HANGABLE);
-	iType->corpse = getCheckButton(h, IDC_OPT_CORPSE);
+	iType->clientCharges = getCheckButton(h, IDC_OPT_CHARGES);
 
+	/*
 	int comboFloor = getComboValue(h, IDC_COMBO_FLOOR);
 	if(comboFloor & FLOOR_DOWN){
 		iType->floorChangeDown = true;
@@ -1054,6 +1055,7 @@ bool GUIWin::saveCurrentItem(HWND h)
 	else{
 		iType->floorChangeWest = false;
 	}
+	*/
 	
 	//change name in tree
 	TVITEM itemInfo;
@@ -1102,9 +1104,10 @@ void GUIWin::loadItem(HWND h)
 		setCheckButton(h, IDC_OPT_DISTREAD, iType->allowDistRead);
 		setCheckButton(h, IDC_OPT_VERTICAL, iType->isVertical);
 		setCheckButton(h, IDC_OPT_HORIZONTAL, iType->isHorizontal);
-		setCheckButton(h, IDC_OPT_CORPSE, iType->corpse);
+		setCheckButton(h, IDC_OPT_CHARGES, iType->clientCharges);
 		setCheckButton(h, IDC_OPT_HANGABLE, iType->isHangable);
 
+		/*
 		if(iType->floorChangeDown)
 			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_DOWN);
 		else if(iType->floorChangeNorth && iType->floorChangeEast)
@@ -1125,7 +1128,7 @@ void GUIWin::loadItem(HWND h)
 			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_U_W);
 		else
 			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_NO_CHANGE);
-
+		*/
 	}
 	else{
 
@@ -1150,7 +1153,7 @@ void GUIWin::loadItem(HWND h)
 		setCheckButton(h, IDC_OPT_DISTREAD, false);
 		setCheckButton(h, IDC_OPT_VERTICAL, false);
 		setCheckButton(h, IDC_OPT_HORIZONTAL, false);
-		setCheckButton(h, IDC_OPT_CORPSE, false);
+		setCheckButton(h, IDC_OPT_CHARGES, false);
 		setCheckButton(h, IDC_OPT_STACKABLE, false);
 
 		setComboValue(h, IDC_COMBO_FLOOR, FLOOR_NO_CHANGE);
@@ -1282,7 +1285,7 @@ void GUIWin::setControlState(HWND h, unsigned long flagsEdit, unsigned long flag
 	EnableWindow(GetDlgItem(h, IDC_OPT_HANGABLE),getFlagState(flagsOpt, IDC_OPT_HANGABLE_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_OPT_VERTICAL),getFlagState(flagsOpt, IDC_OPT_VERTICAL_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_OPT_HORIZONTAL),getFlagState(flagsOpt, IDC_OPT_HORIZONTAL_FLAG));
-	EnableWindow(GetDlgItem(h, IDC_OPT_CORPSE),getFlagState(flagsOpt, IDC_OPT_CORPSE_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_OPT_CHARGES),getFlagState(flagsOpt, IDC_OPT_CHARGES_FLAG));
 
 
 	EnableWindow(GetDlgItem(h, IDC_COMBO_FLOOR),getFlagState(flagsCombo, IDC_COMBO_FLOOR_FLAG));

@@ -45,9 +45,6 @@ public:
 
 	virtual void initGUI() = 0;
 	virtual void messageBox(const char* text, MesageBoxType_t type) = 0;
-	//return
-	//true. can free dump
-	//false. can not free dump
 	virtual bool loadSpriteInternal(const unsigned char *, const unsigned long, InternalSprite* ){return true;};
 	virtual void loadSpriteInternalTransparent(unsigned long color,  InternalSprite *sprite){};
 	virtual void unloadSpriteInternal(InternalSprite){};

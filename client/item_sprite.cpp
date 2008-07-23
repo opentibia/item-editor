@@ -59,7 +59,6 @@ SpriteType::SpriteType()
 	pickupable = false;
 	rotable = false;
 	readable = false;
-	corpse = false;
 	
 	speed = 0;
 
@@ -98,7 +97,7 @@ bool SpriteType::compareOptions(const SpriteType *stype)
 	case ITEM_GROUP_SPLASH:
 	case ITEM_GROUP_FLUID:
 	case ITEM_GROUP_WRITEABLE:
-	case ITEM_GROUP_RUNE:
+	case ITEM_GROUP_CHARGES:
 		if(group != stype->group)
 			return false;
 	}
@@ -154,7 +153,7 @@ bool SpriteType::compareOptions(const SpriteType *stype)
 	if(readable != stype->readable)
 		return false;
 
-	if(corpse != stype->corpse)
+	if(clientCharges != stype->clientCharges)
 		return false;
 
 	//if(alwaysOnTop != stype->alwaysOnTop)
@@ -403,13 +402,13 @@ bool ItemsSprites::loadFromDat(const char *filename)
 				sType->stackable = true;
 				break;
 			case 0x06: //ladders
-				sType->corpse = true;
 				break;
 			case 0x07: //is useable
 				sType->useable = true;
 				break;
-			case 0x08: //runes
-				sType->group = ITEM_GROUP_RUNE;
+			case 0x08: //charges
+				//sType->group = ITEM_GROUP_CHARGES;
+				sType->clientCharges = true;
 				break;
 			case 0x09: //writtable objects
 				sType->group = ITEM_GROUP_WRITEABLE;

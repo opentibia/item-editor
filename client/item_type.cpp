@@ -60,7 +60,7 @@ ItemType::ItemType()
 	rotable = false;
 	readable = false;
 	allowDistRead = false;
-	corpse = false;
+	clientCharges = false;
 	
 	rotateTo = 0;
 
@@ -78,11 +78,13 @@ ItemType::ItemType()
 	decayTime = 0;
 	slot_position = SLOT_HAND;
 
+	/*
 	floorChangeDown = false;
 	floorChangeNorth = false;
 	floorChangeSouth = false;
 	floorChangeEast = false;
 	floorChangeWest = false;
+	*/
 
 	lightLevel = 0;
 	lightColor = 0;
@@ -142,9 +144,10 @@ ItemType::ItemType(unsigned short _id, const SpriteType *stype)
 	pickupable = stype->pickupable;
 	rotable = stype->rotable;
 	readable = stype->readable;
-	allowDistRead = false;
-	corpse = stype->corpse;
+	clientCharges = stype->clientCharges;
 	speed = stype->speed;
+
+	allowDistRead = false;
 
 	miniMapColor = stype->miniMapColor;
 	subParam07 = stype->subParam07;
@@ -172,11 +175,13 @@ ItemType::ItemType(unsigned short _id, const SpriteType *stype)
 	decayTime = 0;
 	slot_position = SLOT_HAND;
 
+	/*
 	floorChangeDown = false;
 	floorChangeNorth = false;
 	floorChangeSouth = false;
 	floorChangeEast = false;
 	floorChangeWest = false;
+	*/
 
 	//container
 	maxItems = 8;
@@ -212,7 +217,7 @@ bool ItemType::compareOptions(const SpriteType *stype)
 	case ITEM_GROUP_SPLASH:
 	case ITEM_GROUP_FLUID:
 	case ITEM_GROUP_WRITEABLE:
-	case ITEM_GROUP_RUNE:
+	case ITEM_GROUP_CHARGES:
 		if(group != stype->group)
 			return false;
 	}
@@ -275,7 +280,7 @@ bool ItemType::compareOptions(const SpriteType *stype)
 	if(readable != stype->readable)
 		return false;
 
-	if(corpse != stype->corpse)
+	if(clientCharges != stype->clientCharges)
 		return false;
 
 	return true;
@@ -303,9 +308,10 @@ void ItemType::reloadOptions(const SpriteType *stype)
 	pickupable = stype->pickupable;
 	rotable = stype->rotable;
 	readable = stype->readable;
-	allowDistRead = false;
-	corpse = stype->corpse;
+	clientCharges = stype->clientCharges;
 	speed = stype->speed;
+
+	allowDistRead = false;
 
 	miniMapColor = stype->miniMapColor;
 	subParam07 = stype->subParam07;
@@ -638,7 +644,7 @@ int ItemsTypes::loadOtb(const char *filename)
 					case ITEM_GROUP_WEAPON:
 					case ITEM_GROUP_AMMUNITION:
 					case ITEM_GROUP_ARMOR:
-					case ITEM_GROUP_RUNE:
+					case ITEM_GROUP_CHARGES:
 					case ITEM_GROUP_TELEPORT:
 					case ITEM_GROUP_MAGICFIELD:
 					case ITEM_GROUP_WRITEABLE:
@@ -648,6 +654,12 @@ int ItemsTypes::loadOtb(const char *filename)
 					case ITEM_GROUP_DOOR:
 					case ITEM_GROUP_DEPRECATED:
 					{
+						if(ItemType::dwMajorVersion == 2){
+							if(type == ITEM_GROUP_CHARGES){
+								sType->clientCharges = true;
+							}
+						}
+
 						if(!loadedFlags) {
 							//read 4 byte flags
 							memcpy((void*)&flags, p, sizeof(flags_t)); p+= sizeof(flags_t);
@@ -660,11 +672,13 @@ int ItemsTypes::loadOtb(const char *filename)
 							sType->pickupable = ((flags & FLAG_PICKUPABLE) == FLAG_PICKUPABLE);
 							sType->moveable = ((flags & FLAG_MOVEABLE) == FLAG_MOVEABLE);
 							sType->stackable = ((flags & FLAG_STACKABLE) == FLAG_STACKABLE);
+							/*
 							sType->floorChangeDown = ((flags & FLAG_FLOORCHANGEDOWN) == FLAG_FLOORCHANGEDOWN);
 							sType->floorChangeNorth = ((flags & FLAG_FLOORCHANGENORTH) == FLAG_FLOORCHANGENORTH);
 							sType->floorChangeEast = ((flags & FLAG_FLOORCHANGEEAST) == FLAG_FLOORCHANGEEAST);
 							sType->floorChangeSouth = ((flags & FLAG_FLOORCHANGESOUTH) == FLAG_FLOORCHANGESOUTH);
 							sType->floorChangeWest = ((flags & FLAG_FLOORCHANGEWEST) == FLAG_FLOORCHANGEWEST);
+							*/
 							sType->alwaysOnTop = ((flags & FLAG_ALWAYSONTOP) == FLAG_ALWAYSONTOP);
 							sType->readable = ((flags & FLAG_READABLE) == FLAG_READABLE);
 							sType->rotable = ((flags & FLAG_ROTABLE) == FLAG_ROTABLE);
@@ -672,8 +686,7 @@ int ItemsTypes::loadOtb(const char *filename)
 							sType->isVertical = ((flags & FLAG_VERTICAL) == FLAG_VERTICAL);
 							sType->isHorizontal = ((flags & FLAG_HORIZONTAL) == FLAG_HORIZONTAL);
 							sType->allowDistRead = ((flags & FLAG_ALLOWDISTREAD) == FLAG_ALLOWDISTREAD);
-							sType->corpse = ((flags & FLAG_CORPSE) == FLAG_CORPSE);
-
+							sType->clientCharges = ((flags & FLAG_CLIENTCHARGES) == FLAG_CLIENTCHARGES);
 
 							if(p >= data + len) //no attributes
 								break;
@@ -1038,7 +1051,8 @@ int ItemsTypes::saveOtb(const char *filename)
 	VERSIONINFO vi;
 	memset(&vi, '\0', sizeof(VERSIONINFO));
 
-	vi.dwMajorVersion = 2; //version
+	//vi.dwMajorVersion = 2; //version
+	vi.dwMajorVersion = 3; //version
 	char clientString[32];
 	const graphicsVersion* spritesVersion;
 	if(spritesVersion = g_itemsSprites->getVersion()){
@@ -1057,9 +1071,21 @@ int ItemsTypes::saveOtb(const char *filename)
 	f->setProps(ROOT_ATTR_VERSION, &vi, sizeof(VERSIONINFO));
 
 	ItemMap::iterator it;
+
 	for(it = item.begin(); it != item.end(); it++){
 		if(it->second->id >= 20000)
 			continue;
+
+		/*
+		if(it->second->alwaysOnTopOrder > 0){
+			SpriteType* sType = g_itemsSprites->getSprite(it->second->clientid);
+			if(it->second->alwaysOnTop != sType->alwaysOnTop){
+				std::cout << it->second->id << std::endl;
+				it->second->alwaysOnTop = sType->alwaysOnTop;
+				it->second->alwaysOnTopOrder = sType->alwaysOnTopOrder;
+			}
+		}
+		*/
 
 		flags_t flags = 0;
 		std::list<itemattrib_t> saveAttr;
@@ -1122,12 +1148,12 @@ int ItemsTypes::saveOtb(const char *filename)
 		switch(it->second->group){
 		case ITEM_GROUP_GROUND:
 		case ITEM_GROUP_CONTAINER:
-		case ITEM_GROUP_RUNE:
-		case ITEM_GROUP_TELEPORT:
-		case ITEM_GROUP_MAGICFIELD:
+		//case ITEM_GROUP_CHARGES:
+		//case ITEM_GROUP_TELEPORT:
+		//case ITEM_GROUP_MAGICFIELD:
+		//case ITEM_GROUP_DOOR:
 		case ITEM_GROUP_SPLASH:
 		case ITEM_GROUP_FLUID:
-		case ITEM_GROUP_DOOR:
 		case ITEM_GROUP_DEPRECATED:
 		//case ITEM_GROUP_NONE:
 			f->startNode(it->second->group);
@@ -1169,6 +1195,7 @@ int ItemsTypes::saveOtb(const char *filename)
 		if(it->second->stackable)
 			flags |= FLAG_STACKABLE;
 		
+		/*
 		if(it->second->floorChangeDown)
 			flags |= FLAG_FLOORCHANGEDOWN;
 		
@@ -1183,7 +1210,8 @@ int ItemsTypes::saveOtb(const char *filename)
 		
 		if(it->second->floorChangeWest)
 			flags |= FLAG_FLOORCHANGEWEST;
-		
+		*/
+
 		if(it->second->alwaysOnTop){
 			flags |= FLAG_ALWAYSONTOP;
 
@@ -1208,8 +1236,8 @@ int ItemsTypes::saveOtb(const char *filename)
 		if(it->second->allowDistRead)
 			flags |= FLAG_ALLOWDISTREAD;
 
-		if(it->second->corpse)
-			flags |= FLAG_CORPSE;
+		if(it->second->clientCharges)
+			flags |= FLAG_CLIENTCHARGES;
 
 
 		if(it->second->group == ITEM_GROUP_DEPRECATED){
@@ -1291,17 +1319,10 @@ int ItemsTypes::saveOtb(const char *filename)
 int ItemsTypes::loadstatus;
 bool ItemsTypes::importFromXml(const char *filename)
 {
-	void *buff;
-	int bytes_read;
-	int eof;
-
 	xmlDocPtr doc = xmlParseFile(filename);
-
-	eof = 0;
 	if(!doc){
 		return false;
 	}
-	
 	
 	xmlNodePtr root = xmlDocGetRootElement(doc);
 

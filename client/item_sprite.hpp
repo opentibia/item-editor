@@ -67,7 +67,7 @@ public:
 	bool pickupable;
 	bool rotable;
 	bool readable;
-	bool corpse;
+	bool clientCharges;
 
 	int speed;
 

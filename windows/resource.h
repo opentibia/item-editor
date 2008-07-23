@@ -32,7 +32,7 @@
 #define IDC_OPT_DISTREAD                1048
 #define IDC_OPT_VERTICAL                1051
 #define IDC_OPT_HORIZONTAL              1052
-#define IDC_OPT_CORPSE                  1053
+#define IDC_OPT_CHARGES                 1053
 #define IDC_EDIT_LIGHT_LEVEL            1054
 #define IDC_EDIT_LIGHT_COLOR            1055
 #define IDC_OPT_HANGABLE                1056
@@ -44,7 +44,7 @@
 #define ID_TOOLS_CREATEMISSING          40007
 #define ID_TOOLS_GOTOITEM               40008
 #define ID_MENUG_CONTAINER              40011
-#define ID_MENUG_RUNE                   40015
+#define ID_MENUG_CHARGES                40015
 #define ID_MENUG_TELEPORT               40016
 #define ID_MENUG_MAGICFIELD             40017
 #define ID_MENUG_SPLASH                 40020

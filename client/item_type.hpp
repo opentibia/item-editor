@@ -34,7 +34,7 @@ enum itemgroup_t{
 	ITEM_GROUP_WEAPON,
 	ITEM_GROUP_AMMUNITION,
 	ITEM_GROUP_ARMOR,
-	ITEM_GROUP_RUNE,
+	ITEM_GROUP_CHARGES,
 	ITEM_GROUP_TELEPORT,
 	ITEM_GROUP_MAGICFIELD,
 	ITEM_GROUP_WRITEABLE,
@@ -55,6 +55,10 @@ enum clientVersion_t{
 	CLIENT_VERSION_780 = 4,
 	CLIENT_VERSION_790 = 5,
 	CLIENT_VERSION_792 = 6,
+	CLIENT_VERSION_800 = 7,
+	CLIENT_VERSION_810 = 8,
+	CLIENT_VERSION_811 = 9,
+	CLIENT_VERSION_820 = 10
 };
 
 enum rootattrib_t{
@@ -122,7 +126,8 @@ enum itemflags_t {
  FLAG_HORIZONTAL = 262144,
  FLAG_CANNOTDECAY = 524288,
  FLAG_ALLOWDISTREAD = 1048576,
- FLAG_CORPSE = 2097152,
+ FLAG_CORPSE = 2097152, //depricated
+ FLAG_CLIENTCHARGES = 4194304
 };
 
 struct decayBlock{
@@ -312,7 +317,7 @@ public:
 	bool readable;
 
 	bool allowDistRead;
-	bool corpse;
+	bool clientCharges;
 
 	int rotateTo;
 	
@@ -323,11 +328,13 @@ public:
 	int decayTo;
 	int decayTime;
 	slots_t slot_position;
+	/*
 	bool floorChangeDown;
 	bool floorChangeNorth;
 	bool floorChangeSouth;
 	bool floorChangeEast;
 	bool floorChangeWest;
+	*/
 
 	//ground
 	int speed;
