@@ -66,9 +66,9 @@ int main(int argc, char *argv[])
 	if(!g_itemsSprites->loadFromSpr("tibia.spr"))
 		g_gui->messageBox("Error while loading client's tibia.spr.", MESSAGE_TYPE_FATAL_ERROR);
 
-	#ifdef __SPRITE_SEARCH__
+	//#ifdef __SPRITE_SEARCH__
 	g_itemsSprites->loadHash();
-	#endif
+	//#endif
 
 	if(g_gui)
 	{

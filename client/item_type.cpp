@@ -42,8 +42,8 @@ long ItemType::dwBuildNumber = 0;
 ItemType::ItemType()
 {
 	group     = ITEM_GROUP_NONE;
-	id			  = 100;
-	clientid	= 100;
+	id		  = 100;
+	clientid  = 100;
 	foundNewImage = false;
 
 	blockSolid	= false;
@@ -161,11 +161,13 @@ ItemType::ItemType(unsigned short _id, const SpriteType *stype)
 
 	isHangable = stype->isHangable;
 
-	#ifdef __SPRITE_SEARCH__
+	//#ifdef __SPRITE_SEARCH__
 	memcpy(sprHash, stype->sprHash, 16);
+	/*
 	#else
 	getImageHash(stype->id, sprHash);
 	#endif
+	*/
 	
 	rotateTo = 0;
 
@@ -216,7 +218,7 @@ bool ItemType::compareOptions(const SpriteType *stype)
 	case ITEM_GROUP_CONTAINER:
 	case ITEM_GROUP_SPLASH:
 	case ITEM_GROUP_FLUID:
-	case ITEM_GROUP_WRITEABLE:
+	//case ITEM_GROUP_WRITEABLE:
 	case ITEM_GROUP_CHARGES:
 		if(group != stype->group)
 			return false;
@@ -325,11 +327,13 @@ void ItemType::reloadOptions(const SpriteType *stype)
 
 	isHangable = stype->isHangable;
 
-	#ifdef __SPRITE_SEARCH__
+	//#ifdef __SPRITE_SEARCH__
 	memcpy(sprHash, stype->sprHash, 16);
+	/*
 	#else
 	getImageHash(stype->id, sprHash);
 	#endif
+	*/
 }
 
 
@@ -1079,10 +1083,17 @@ int ItemsTypes::saveOtb(const char *filename)
 		/*
 		if(it->second->alwaysOnTopOrder > 0){
 			SpriteType* sType = g_itemsSprites->getSprite(it->second->clientid);
-			if(it->second->alwaysOnTop != sType->alwaysOnTop){
-				std::cout << it->second->id << std::endl;
+			if(it->second->alwaysOnTopOrder != sType->alwaysOnTopOrder){
 				it->second->alwaysOnTop = sType->alwaysOnTop;
 				it->second->alwaysOnTopOrder = sType->alwaysOnTopOrder;
+				it->second->blockProjectile = sType->blockProjectile;
+			}
+		}
+
+		if(it->second->group != ITEM_GROUP_DEPRECATED){
+			SpriteType* sType = g_itemsSprites->getSprite(it->second->clientid);
+			if(!it->second->compareOptions(sType)){
+				it->second->compareOptions(sType);
 			}
 		}
 		*/
@@ -1093,54 +1104,62 @@ int ItemsTypes::saveOtb(const char *filename)
 		saveAttr.push_back(ITEM_ATTR_SERVERID);
 		saveAttr.push_back(ITEM_ATTR_CLIENTID);
 		
-#ifdef __SPRITE_SEARCH__
+//#ifdef __SPRITE_SEARCH__
 		if(it->second->id < 20000){
 			saveAttr.push_back(ITEM_ATTR_SPRITEHASH);
 			getImageHash(it->second->clientid, it->second->sprHash);
-			it->second->miniMapColor = g_itemsSprites->getSprite(it->second->clientid)->miniMapColor;
-			if(it->second->miniMapColor){
-				saveAttr.push_back(ITEM_ATTR_MINIMAPCOLOR);
-			}
-
-			if(g_itemsSprites->getSprite(it->second->clientid)->subParam07 != 0){
-				saveAttr.push_back(ITEM_ATTR_07);
-				it->second->subParam07 = g_itemsSprites->getSprite(it->second->clientid)->subParam07;
-			}
-
-			if(g_itemsSprites->getSprite(it->second->clientid)->subParam08 != 0){
-				saveAttr.push_back(ITEM_ATTR_08);
-				it->second->subParam08 = g_itemsSprites->getSprite(it->second->clientid)->subParam08;
-			}
-			if(g_itemsSprites->getSprite(it->second->clientid)->lightLevel != 0 || 
-				g_itemsSprites->getSprite(it->second->clientid)->lightColor != 0 || 
-				it->second->lightLevel != 0 ||
-				it->second->lightColor != 0){
-				it->second->lightLevel = g_itemsSprites->getSprite(it->second->clientid)->lightLevel;
-				it->second->lightColor = g_itemsSprites->getSprite(it->second->clientid)->lightColor;
-				saveAttr.push_back(ITEM_ATTR_LIGHT2);
-			}
-
-			switch(g_itemsSprites->getSprite(it->second->clientid)->group){
-			case ITEM_GROUP_GROUND:
-			case ITEM_GROUP_CONTAINER:
-			case ITEM_GROUP_SPLASH:
-			case ITEM_GROUP_FLUID:
-			case ITEM_GROUP_WRITEABLE:
-				it->second->group = g_itemsSprites->getSprite(it->second->clientid)->group;
-				break;
-			default:
-				switch(it->second->group){
-				case ITEM_GROUP_GROUND:
-				case ITEM_GROUP_CONTAINER:
-				case ITEM_GROUP_SPLASH:
-				case ITEM_GROUP_FLUID:
-					it->second->group = ITEM_GROUP_NONE;
-					break;
+			SpriteType* sprite = g_itemsSprites->getSprite(it->second->clientid);
+			if(sprite){
+				if(sprite->miniMapColor){
+					saveAttr.push_back(ITEM_ATTR_MINIMAPCOLOR);
+					it->second->miniMapColor = sprite->miniMapColor;
 				}
-				break;
+
+				if(sprite->subParam07 != 0){
+					saveAttr.push_back(ITEM_ATTR_07);
+					it->second->subParam07 = g_itemsSprites->getSprite(it->second->clientid)->subParam07;
+				}
+
+				if(sprite->subParam08 != 0){
+					saveAttr.push_back(ITEM_ATTR_08);
+					it->second->subParam08 = g_itemsSprites->getSprite(it->second->clientid)->subParam08;
+				}
+
+				if(sprite->lightLevel != 0 || 
+					sprite->lightColor != 0 || 
+					it->second->lightLevel != 0 ||
+					it->second->lightColor != 0){
+					it->second->lightLevel = sprite->lightLevel;
+					it->second->lightColor = sprite->lightColor;
+					saveAttr.push_back(ITEM_ATTR_LIGHT2);
+				}
+
+				if(it->second->group != ITEM_GROUP_DEPRECATED){
+					switch(sprite->group){
+						case ITEM_GROUP_GROUND:
+						case ITEM_GROUP_CONTAINER:
+						case ITEM_GROUP_SPLASH:
+						case ITEM_GROUP_FLUID:
+						case ITEM_GROUP_WRITEABLE:
+							it->second->group = sprite->group;
+							break;
+
+						default:
+							switch(it->second->group){
+								case ITEM_GROUP_GROUND:
+								case ITEM_GROUP_CONTAINER:
+								case ITEM_GROUP_SPLASH:
+								case ITEM_GROUP_FLUID:
+									it->second->group = ITEM_GROUP_NONE;
+									break;
+							}
+							break;
+					}
+				}
 			}
 		}
-#endif
+
+//#endif
 		if(it->second->lightLevel != 0 || it->second->lightColor != 0) {
 			saveAttr.push_back(ITEM_ATTR_LIGHT2);
 		}

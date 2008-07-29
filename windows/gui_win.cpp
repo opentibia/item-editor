@@ -586,11 +586,13 @@ LRESULT GUIWin::onAutoFindImages(HWND h)
 
 	n = 0;
 	for(i = SpriteType::minClientId; i <= SpriteType::maxClientId ; i++){
-		#ifdef __SPRITE_SEARCH__
+		//#ifdef __SPRITE_SEARCH__
 		memcpy(hash, g_itemsSprites->getSprite(i)->sprHash, 16);
+		/*
 		#else
 		getImageHash(i, hash);
 		#endif
+		*/
 		ItemMap::iterator it;
 		for(it = g_itemsTypes->getTypes(); it != g_itemsTypes->getEnd(); it++){
 			if(it->second->foundNewImage == false && memcmp(hash, it->second->sprHash, 16) == 0){
@@ -893,7 +895,7 @@ HTREEITEM GUIWin::insertTreeItemType(HWND h, const ItemType *iType)
 	//case ITEM_GROUP_CHARGES:
 	//case ITEM_GROUP_TELEPORT:
 	//case ITEM_GROUP_MAGICFIELD:
-	case ITEM_GROUP_DOOR:
+	//case ITEM_GROUP_DOOR:
 	case ITEM_GROUP_SPLASH:
 	case ITEM_GROUP_FLUID:
 	case ITEM_GROUP_DEPRECATED:

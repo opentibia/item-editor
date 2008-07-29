@@ -59,6 +59,7 @@ SpriteType::SpriteType()
 	pickupable = false;
 	rotable = false;
 	readable = false;
+	clientCharges = false;
 	
 	speed = 0;
 
