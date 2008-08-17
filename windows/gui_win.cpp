@@ -1,13 +1,13 @@
 //////////////////////////////////////////////////////////////////////
 // OTItemEditor
 //////////////////////////////////////////////////////////////////////
-// 
+//
 //////////////////////////////////////////////////////////////////////
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation; either version 2
 // of the License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -23,7 +23,7 @@
 #include "resource.h"
 
 #ifdef __GNUC__
-#define _WIN32_IE	0x0500 
+#define _WIN32_IE	0x0500
 #define  WINVER  0x0500
 #define _WIN32_WINNT 0x0501
 #define max(a, b)       ((a) >? (b))
@@ -64,7 +64,7 @@ void getImageHash(unsigned short cid, void*output)
 
 	spriteSize = it->width*it->height*it->blendframes;
 	spriteBase = 0;
-	
+
 	//hash sprite
 	MD5Init(&m_md5, 0);
 	for(long frame = 0; frame < it->blendframes; frame++) {
@@ -114,20 +114,20 @@ void GUIWin::initGUI()
 	InitCommonControlsEx(&icc);
 
 	//DialogBoxParam(g_instance,MAKEINTRESOURCE(DLG_MAIN),NULL,reinterpret_cast<DLGPROC>(GUIWin::DlgProcMain),NULL);
-	
-	MSG msg; 
+
+	MSG msg;
 	int ret;
-	HACCEL haccel = LoadAccelerators(g_instance, MAKEINTRESOURCE(IDR_POPUP_ITEM)); 
-	HWND hDlg = CreateDialog(g_instance, MAKEINTRESOURCE(DLG_MAIN), NULL, reinterpret_cast<DLGPROC>(GUIWin::DlgProcMain)); 
+	HACCEL haccel = LoadAccelerators(g_instance, MAKEINTRESOURCE(IDR_POPUP_ITEM));
+	HWND hDlg = CreateDialog(g_instance, MAKEINTRESOURCE(DLG_MAIN), NULL, reinterpret_cast<DLGPROC>(GUIWin::DlgProcMain));
 	ShowWindow(hDlg, SW_SHOW);
 	while(ret = GetMessage (&msg, NULL, 0, 0)){
 		if(ret == -1){
 			return;
 		}
 
-		if((!TranslateAccelerator(hDlg, haccel, &msg)) && !IsDialogMessage(hDlg, &msg)){ 
-			TranslateMessage (&msg); 
-			DispatchMessage (&msg); 
+		if((!TranslateAccelerator(hDlg, haccel, &msg)) && !IsDialogMessage(hDlg, &msg)){
+			TranslateMessage (&msg);
+			DispatchMessage (&msg);
 		}
 	}
 	DestroyWindow(hDlg);
@@ -152,7 +152,7 @@ void GUIWin::messageBox(const char *text, MesageBoxType_t type)
 		mtype = MB_OK;
 		break;
 	}
-	MessageBox(NULL, text, NULL, mtype);
+	MessageBoxA(NULL, text, NULL, mtype);
 }
 
 bool GUIWin::loadSpriteInternal(const unsigned char *dump, const unsigned long size, InternalSprite *sprite)
@@ -160,7 +160,7 @@ bool GUIWin::loadSpriteInternal(const unsigned char *dump, const unsigned long s
 	unsigned long i, state, pos;
 	unsigned short npix;
 	unsigned char tmprgb[32*32*3];
-	
+
 	unsigned char *rgb = new unsigned char[32*32*4];
 	memset(tmprgb,0x11,32*32*3);
 
@@ -195,7 +195,7 @@ bool GUIWin::loadSpriteInternal(const unsigned char *dump, const unsigned long s
 			rgb[i*32*4+j*4+3] = 0;
 		}
 	}
-	
+
 	*sprite = rgb;
 	return true;
 }
@@ -265,12 +265,12 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 	case WM_PAINT:
 		HDC tmp;
 		tmp = GetDC(GetDlgItem(h,IDC_ITEM_PIC));
-		
+
 		HWND hwnd;
 		hwnd = GetDlgItem(h, IDC_ITEM_PIC);
 		RECT rect;
 		GetClientRect(hwnd, &rect);
-		
+
 		Rectangle(tmp, 0, 0, rect.right, rect.bottom);
 		drawEngine->drawSprite(tmp, 34, 34, rect.right, rect.bottom, curItemClientIdSprite, curItemClientCountSprite);
 		drawEngine->releaseBitmaps();
@@ -336,7 +336,7 @@ LRESULT CALLBACK GUIWin::DlgProcMain(HWND h, UINT Msg,WPARAM wParam, LPARAM lPar
 			return onReloadAttributes(h);
 			break;
 		case ID_HELP_ABOUT:
-			MessageBox(h, OTIE_VERSION_STRING, "OTItemEditor", MB_OK | MB_ICONINFORMATION) ;
+			MessageBoxA(h, OTIE_VERSION_STRING, "OTItemEditor", MB_OK | MB_ICONINFORMATION) ;
 			break;
 		default:
 			//context menu
@@ -368,7 +368,7 @@ LRESULT GUIWin::onDragMove(HWND h, LPARAM lParam)
 	HTREEITEM hitTarget;
 	TVHITTESTINFO tvht;
 	TVITEM itemInfo;
-	tvht.pt.x = lParam & 0xFFFF; 
+	tvht.pt.x = lParam & 0xFFFF;
 	tvht.pt.y = (lParam & 0xFFFF0000) >> 16;
 	tvht.flags = TVHT_ONITEM;
 	ClientToScreen(h, &tvht.pt);
@@ -383,7 +383,7 @@ LRESULT GUIWin::onDragMove(HWND h, LPARAM lParam)
 		else{
 			TreeView_SelectDropTarget(m_hwndTree,  rootItems[g_itemsTypes->getGroup((long)itemInfo.lParam)]);
 		}
-	} 
+	}
 	return TRUE;
 }
 
@@ -394,7 +394,7 @@ LRESULT GUIWin::onDragEnd(HWND h)
 	HTREEITEM hitTarget = TreeView_GetDropHilight(m_hwndTree);
 	if(hitTarget){
 		TreeView_SelectDropTarget(m_hwndTree, NULL);
-		
+
 		itemInfo.mask = TVIF_PARAM;
 		itemInfo.hItem = m_dragItem;
 		TreeView_GetItem(m_hwndTree, &itemInfo);
@@ -409,7 +409,7 @@ LRESULT GUIWin::onDragEnd(HWND h)
 			}
 		}
 	}
-	
+
 	m_dragging = false;
 	m_dragItem = NULL;
 	ReleaseCapture();
@@ -608,7 +608,7 @@ LRESULT GUIWin::onAutoFindImages(HWND h)
 
 	char str[64];
 	sprintf(str , "Found %d of %d.", n, SpriteType::maxClientId - SpriteType::minClientId + 1);
-	MessageBox(h, str, NULL, MB_OK | MB_ICONINFORMATION);
+	MessageBoxA(h, str, NULL, MB_OK | MB_ICONINFORMATION);
 
 	autoFindPerformed = true;
 	loadTreeItemTypes(h);
@@ -634,7 +634,7 @@ LRESULT GUIWin::onReloadAttributes(HWND h)
 
 	char str[64];
 	sprintf(str , "Reloaded %d of %d.", n, SpriteType::maxClientId - SpriteType::minClientId + 1);
-	MessageBox(h, str, NULL, MB_OK | MB_ICONINFORMATION);
+	MessageBoxA(h, str, NULL, MB_OK | MB_ICONINFORMATION);
 
 	return TRUE;
 }
@@ -645,7 +645,7 @@ LRESULT GUIWin::onVerify(HWND h)
 	int n;
 	if(!saveCurrentItem(h)){
 		return TRUE;
-	}	
+	}
 	n = 0;
 	ItemMap::iterator it;
 	for(it = g_itemsTypes->getTypes(); it != g_itemsTypes->getEnd(); it++){
@@ -667,7 +667,7 @@ LRESULT GUIWin::onVerify(HWND h)
 
 	char str[64];
 	sprintf(str , "Found %d of %d.", n, SpriteType::maxClientId - SpriteType::minClientId + 1);
-	MessageBox(h, str, NULL, MB_OK | MB_ICONINFORMATION);
+	MessageBoxA(h, str, NULL, MB_OK | MB_ICONINFORMATION);
 
 	return TRUE;
 }
@@ -679,7 +679,7 @@ LRESULT GUIWin::onCreateMissing(HWND h)
 	}
 
 	if(ItemType::minServerId == 0 || ItemType::maxServerId == 0){
-		MessageBox(h, "Wrong items set.", NULL, MB_OK | MB_ICONERROR);
+		MessageBoxA(h, "Wrong items set.", NULL, MB_OK | MB_ICONERROR);
 		return TRUE;
 	}
 
@@ -728,7 +728,7 @@ LRESULT GUIWin::onCreateMissing(HWND h)
 	//fclose(f);
 	char str[64];
 	sprintf(str , "Created %d items.", counter);
-	MessageBox(h, str, NULL, MB_OK | MB_ICONINFORMATION);
+	MessageBoxA(h, str, NULL, MB_OK | MB_ICONINFORMATION);
 
 	delete usedSprites;
 	loadTreeItemTypes(h);
@@ -742,7 +742,7 @@ LRESULT GUIWin::onAddItem(HWND h)
 	}
 
 	if(ItemType::minServerId == 0 || ItemType::maxServerId == 0){
-		MessageBox(h, "Wrong items set.", NULL, MB_OK | MB_ICONERROR);
+		MessageBoxA(h, "Wrong items set.", NULL, MB_OK | MB_ICONERROR);
 		return TRUE;
 	}
 
@@ -756,16 +756,16 @@ LRESULT GUIWin::onAddItem(HWND h)
 	}
 
 	if(g_itemsTypes->getType(n) != NULL){
-		MessageBox(h, "Used item id.", NULL, MB_OK | MB_ICONERROR);
+		MessageBoxA(h, "Used item id.", NULL, MB_OK | MB_ICONERROR);
 		return TRUE;
 	}
-	
+
 
 	new_it = new ItemType();
 	new_it->id = n;
 	new_it->clientid = 0;
 	g_itemsTypes->addType(n, new_it);
-	
+
 
 	loadTreeItemTypes(h);
 	return TRUE;
@@ -778,21 +778,21 @@ LRESULT GUIWin::onCopyItem(HWND h)
 	}
 
 	if(ItemType::minServerId == 0 || ItemType::maxServerId == 0){
-		MessageBox(h, "Wrong items set.", NULL, MB_OK | MB_ICONERROR);
+		MessageBoxA(h, "Wrong items set.", NULL, MB_OK | MB_ICONERROR);
 		return TRUE;
 	}
 
 	int n;
 	if(!getEditTextInt(h, IDC_SID, n))
 		return TRUE;
-	
+
 	int newn = ItemType::maxServerId + 1;
-	
+
 	ItemType *new_it;
 	new_it = new ItemType(*g_itemsTypes->getType(n));
 	new_it->id = newn;
 	g_itemsTypes->addType(newn, new_it);
-	
+
 
 	loadTreeItemTypes(h);
 	return TRUE;
@@ -840,7 +840,7 @@ LRESULT GUIWin::onInitDialog(HWND h)
 	popupMenu = GetSubMenu(LoadMenu(g_instance, MAKEINTRESOURCE(MENU_POPUP_ITEMS)), 0);
 
 	updateControls(h);
-	
+
 	return TRUE;
 }
 
@@ -879,14 +879,14 @@ HTREEITEM GUIWin::insertTreeItem(HWND h, const char* name, HTREEITEM parent, lon
 	itemstruct.itemex.pszText = (char*)name;
 	itemstruct.itemex.lParam = entryID;
 	itemstruct.itemex.cchTextMax = strlen(name);
-	return (HTREEITEM)SendMessage(h, TVM_INSERTITEM, 0, (long)&itemstruct); 
+	return (HTREEITEM)SendMessage(h, TVM_INSERTITEM, 0, (long)&itemstruct);
 }
 
 HTREEITEM GUIWin::insertTreeItemType(HWND h, const ItemType *iType)
 {
 	char name[160];
 	getItemTypeName(iType, name);
-	
+
 	HTREEITEM parent;
 
 	switch(iType->group){
@@ -952,7 +952,7 @@ void GUIWin::changeGroup(HWND h, HTREEITEM htItem, HTREEITEM newParent)
 	id = itemInfo.lParam;
 	insertTreeItem(m_hwndTree, itemInfo.pszText, newParent, itemInfo.lParam);
 	TreeView_DeleteItem(m_hwndTree, htItem);
-	
+
 	delete buffer;
 	//update type
 	itemInfo.mask = TVIF_PARAM;
@@ -1058,7 +1058,7 @@ bool GUIWin::saveCurrentItem(HWND h)
 		iType->floorChangeWest = false;
 	}
 	*/
-	
+
 	//change name in tree
 	TVITEM itemInfo;
 	char name[160];
@@ -1078,7 +1078,7 @@ void GUIWin::loadItem(HWND h)
 	//load ItemType[curItemServerId] options in gui
 	ItemType *iType;
 	if(curItemServerId && (iType = g_itemsTypes->getType(curItemServerId))){
-		
+
 		setEditTextInt(h, IDC_SID, iType->id);
 
 		if(iType->group != ITEM_GROUP_DEPRECATED){
@@ -1227,7 +1227,7 @@ bool GUIWin::getEditTextInt(HWND h, int button, int &value)
 	int tmp;
 	if(!GetDlgItemText(h, button, buffer, 15))
 		return false;
-	
+
 	if(sscanf(buffer, "%d", &tmp) != 1)
 		return false;
 
@@ -1241,7 +1241,7 @@ bool GUIWin::getEditTextDouble(HWND h, int button, double &value)
 	double tmp;
 	if(!GetDlgItemText(h, button, buffer, 15))
 		return false;
-	
+
 	if(sscanf(buffer, "%lf", &tmp) != 1)
 		return false;
 
@@ -1386,7 +1386,7 @@ bool GUIDraw::drawSprite(HDC desthdc, long x, long y, long maxx, long maxy, unsi
 
 	spriteSize = it->width*it->height*it->blendframes;
 	spriteBase = 0;
-	
+
 	//draw sprite
 	for(long frame = 0; frame < it->blendframes; frame++) {
 		for(long cy = 0; cy < it->height; cy++) {
@@ -1435,12 +1435,12 @@ HBITMAP GUIDraw::getBitmap(const InternalSprite sprite)
 	void * dest;
 
 	BitmapMap::iterator it = m_bitmaps.find((unsigned long)sprite);
-	
+
 	if(it != m_bitmaps.end())
 	{
 		return it->second;
 	}
-	else 
+	else
 	{
 		hdc = CreateCompatibleDC(NULL);
 		memset(&binfo,0,sizeof(BITMAPINFO));
@@ -1451,7 +1451,7 @@ HBITMAP GUIDraw::getBitmap(const InternalSprite sprite)
 		binfo.bmiHeader.biBitCount = 32;
 		binfo.bmiHeader.biSizeImage = 32*32*4;
 		binfo.bmiHeader.biCompression = BI_RGB;
-	
+
 		HBITMAP bitmap = CreateDIBSection(hdc, &binfo, DIB_RGB_COLORS, &dest, NULL,0);
 		ASSERT(dest != NULL && bitmap != 0);
 		if(dest){
