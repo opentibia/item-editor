@@ -579,12 +579,25 @@ LRESULT GUIWin::onLoadOtb(HWND h)
 LRESULT GUIWin::onAutoFindImages(HWND h)
 {
 	char hash[16];
-	int i,n;
+	int n = 0;
+
 	if(!saveCurrentItem(h)){
 		return TRUE;
 	}
 
-	n = 0;
+	// Maybe the IDs haven't moved at all (this prevents IDs moving around when CiP adds new duplicate items)
+	for(ItemMap::iterator it = g_itemsTypes->getTypes(); it != g_itemsTypes->getEnd(); it++){
+		memcpy(hash, g_itemsSprites->getSprite(it->second->clientid)->sprHash, 16);
+		if(memcmp(hash, it->second->sprHash, 16) == 0){
+			if(it->second->compareOptions(g_itemsSprites->getSprite(it->second->clientid))){
+				it->second->foundNewImage = true;
+				n++;
+				break;
+			}
+		}
+	}
+
+	int i = 0;
 	for(i = SpriteType::minClientId; i <= SpriteType::maxClientId ; i++){
 		//#ifdef __SPRITE_SEARCH__
 		memcpy(hash, g_itemsSprites->getSprite(i)->sprHash, 16);
@@ -593,8 +606,7 @@ LRESULT GUIWin::onAutoFindImages(HWND h)
 		getImageHash(i, hash);
 		#endif
 		*/
-		ItemMap::iterator it;
-		for(it = g_itemsTypes->getTypes(); it != g_itemsTypes->getEnd(); it++){
+		for(ItemMap::iterator it = g_itemsTypes->getTypes(); it != g_itemsTypes->getEnd(); it++){
 			if(it->second->foundNewImage == false && memcmp(hash, it->second->sprHash, 16) == 0){
 				if(it->second->compareOptions(g_itemsSprites->getSprite(i))){
 					it->second->foundNewImage = true;
@@ -650,18 +662,12 @@ LRESULT GUIWin::onVerify(HWND h)
 	ItemMap::iterator it;
 	for(it = g_itemsTypes->getTypes(); it != g_itemsTypes->getEnd(); it++){
 		if(it->first < 20000){
-			//getImageHash(it->second->clientid, hash);
-			//if(memcmp(hash, it->second->sprHash, 16) == 0){
-				if(it->second->compareOptions(g_itemsSprites->getSprite(it->second->clientid))){
-					n++;
-				}
-				else{
-					int u = it->first;
-				}
-//			}
-//			else{
-//				int u = it->first;
-//			}
+			if(it->second->compareOptions(g_itemsSprites->getSprite(it->second->clientid))){
+				n++;
+			}
+			else{
+				int u = it->first;
+			}
 		}
 	}
 
