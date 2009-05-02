@@ -592,7 +592,7 @@ LRESULT GUIWin::onAutoFindImages(HWND h)
 			if(it->second->compareOptions(g_itemsSprites->getSprite(it->second->clientid))){
 				it->second->foundNewImage = true;
 				n++;
-				break;
+				continue;
 			}
 		}
 	}
@@ -606,6 +606,7 @@ LRESULT GUIWin::onAutoFindImages(HWND h)
 		getImageHash(i, hash);
 		#endif
 		*/
+
 		for(ItemMap::iterator it = g_itemsTypes->getTypes(); it != g_itemsTypes->getEnd(); it++){
 			if(it->second->foundNewImage == false && memcmp(hash, it->second->sprHash, 16) == 0){
 				if(it->second->compareOptions(g_itemsSprites->getSprite(i))){
@@ -621,6 +622,20 @@ LRESULT GUIWin::onAutoFindImages(HWND h)
 	char str[64];
 	sprintf(str , "Found %d of %d.", n, SpriteType::maxClientId - SpriteType::minClientId + 1);
 	MessageBoxA(h, str, NULL, MB_OK | MB_ICONINFORMATION);
+
+	/*
+	int spriteCount = std::distance(g_itemsTypes->getTypes(), g_itemsTypes->getEnd());
+	int itemCount = std::distance(g_itemsTypes->getTypes(), g_itemsTypes->getEnd());
+	int depricatedCount = 0;
+
+	for(ItemMap::iterator it = g_itemsTypes->getTypes(); it != g_itemsTypes->getEnd(); it++){
+		if(it->second->group == ITEM_GROUP_DEPRECATED){
+			++depricatedCount;
+		}
+	}
+	sprintf(str , "itemCount: %d  spriteCount: %d, depricatedCount: %d", itemCount, spriteCount, depricatedCount);
+	MessageBoxA(h, str, NULL, MB_OK | MB_ICONINFORMATION);
+	*/
 
 	autoFindPerformed = true;
 	loadTreeItemTypes(h);
@@ -638,6 +653,9 @@ LRESULT GUIWin::onReloadAttributes(HWND h)
 	//if they aren't, make them correct.
 	int n = 0;
 	for(ItemMap::iterator it = g_itemsTypes->getTypes(); it != g_itemsTypes->getEnd(); it++){
+		if(it->second->group == ITEM_GROUP_DEPRECATED)
+			continue;
+
 		if(!it->second->compareOptions(g_itemsSprites->getSprite(it->second->clientid))){
 			it->second->reloadOptions(g_itemsSprites->getSprite(it->second->clientid));
 			n++;
@@ -1031,40 +1049,6 @@ bool GUIWin::saveCurrentItem(HWND h)
 	iType->isHangable = getCheckButton(h, IDC_OPT_HANGABLE);
 	iType->clientCharges = getCheckButton(h, IDC_OPT_CHARGES);
 
-	/*
-	int comboFloor = getComboValue(h, IDC_COMBO_FLOOR);
-	if(comboFloor & FLOOR_DOWN){
-		iType->floorChangeDown = true;
-	}
-	else{
-		iType->floorChangeDown = false;
-	}
-	if(comboFloor & FLOOR_U_N){
-		iType->floorChangeNorth = true;
-	}
-	else{
-		iType->floorChangeNorth = false;
-	}
-	if(comboFloor & FLOOR_U_S){
-		iType->floorChangeSouth = true;
-	}
-	else{
-		iType->floorChangeSouth = false;
-	}
-	if(comboFloor & FLOOR_U_E){
-		iType->floorChangeEast = true;
-	}
-	else{
-		iType->floorChangeEast = false;
-	}
-	if(comboFloor & FLOOR_U_W){
-		iType->floorChangeWest = true;
-	}
-	else{
-		iType->floorChangeWest = false;
-	}
-	*/
-
 	//change name in tree
 	TVITEM itemInfo;
 	char name[160];
@@ -1093,10 +1077,94 @@ void GUIWin::loadItem(HWND h)
 		else{
 			setEditTextInt(h, IDC_EDITCID, 0);
 		}
+		//
+		SpriteType *sType;
+		sType = g_itemsSprites->getSprite(iType->clientid);
+		if(sType){
+			if(memcmp(iType->sprHash, sType->sprHash, 16) != 0){
+				SetDlgItemText(h, IDC_DIFF_SPRITE, "[x]");
+			}
+
+			if(iType->blockSolid != sType->blockSolid){
+				SetDlgItemText(h, IDC_DIFF_BLOCKING, "[x]");
+			}
+			if(iType->blockProjectile != sType->blockProjectile){
+				SetDlgItemText(h, IDC_DIFF_BLOCKPROJECTILE, "[x]");
+			}
+			if(iType->blockPathFind != sType->blockPathFind){
+				SetDlgItemText(h, IDC_DIFF_BLOCKPATHFIND, "[x]");
+			}
+			if(iType->moveable != sType->moveable){
+				SetDlgItemText(h, IDC_DIFF_NO_MOVE, "[x]");
+			}
+			if(iType->alwaysOnTop != sType->alwaysOnTop){
+				SetDlgItemText(h, IDC_DIFF_ATOP, "[x]");
+			}
+			if(iType->hasHeight != sType->hasHeight){
+				SetDlgItemText(h, IDC_DIFF_HASHEIGHT, "[x]");
+			}
+			if(iType->pickupable != sType->pickupable){
+				SetDlgItemText(h, IDC_DIFF_PICKUP, "[x]");
+			}
+			if(iType->isHangable != sType->isHangable){
+				SetDlgItemText(h, IDC_DIFF_HANGABLE, "[x]");
+			}
+			if(iType->useable != sType->useable){
+				SetDlgItemText(h, IDC_DIFF_USEABLE, "[x]");
+			}
+			if(iType->rotable != sType->rotable){
+				SetDlgItemText(h, IDC_DIFF_ROTABLE, "[x]");
+			}
+			if(iType->readable != sType->readable){
+				SetDlgItemText(h, IDC_DIFF_READABLE, "[x]");
+			}
+			/*
+			if(iType->allowDistRead != sType->allowDistRead){
+				SetDlgItemText(h, IDC_DIFF_DISTREAD, "[x]");
+			}
+			*/
+			if(iType->isVertical != sType->isVertical){
+				SetDlgItemText(h, IDC_DIFF_VERTICAL, "[x]");
+			}
+			if(iType->isHorizontal != sType->isHorizontal){
+				SetDlgItemText(h, IDC_DIFF_HORIZONTAL, "[x]");
+			}
+			if(iType->clientCharges != sType->clientCharges){
+				SetDlgItemText(h, IDC_DIFF_CHARGES, "[x]");
+			}
+			if(iType->stackable != sType->stackable){
+				SetDlgItemText(h, IDC_DIFF_STACKABLE, "[x]");
+			}
+			if(iType->speed != sType->speed){
+				SetDlgItemText(h, IDC_DIFF_SPEED, "[x]");
+			}
+			if(iType->alwaysOnTopOrder != sType->alwaysOnTopOrder){
+				SetDlgItemText(h, IDC_DIFF_TOPORDER, "[x]");
+			}
+			if(iType->subParam07 != sType->subParam07){
+				SetDlgItemText(h, IDC_DIFF_PARAM7, "[x]");
+			}
+			if(iType->subParam08 != sType->subParam08){
+				SetDlgItemText(h, IDC_DIFF_PARAM8, "[x]");
+			}
+			if(iType->lightLevel != sType->lightLevel){
+				SetDlgItemText(h, IDC_DIFF_LIGHT_LEVEL, "[x]");
+			}
+			if(iType->lightColor != sType->lightColor){
+				SetDlgItemText(h, IDC_DIFF_LIGHT_COLOR, "[x]");
+			}
+			if(iType->miniMapColor != sType->miniMapColor){
+				SetDlgItemText(h, IDC_DIFF_MINIMAP_COLOR, "[x]");
+			}
+		}
+		//
 		setEditTextInt(h, IDC_EDIT_SPEED, iType->speed);
 		setEditTextInt(h, IDC_EDIT_TOPORDER, iType->alwaysOnTopOrder);
 		setEditTextInt(h, IDC_EDIT_LIGHT_LEVEL, iType->lightLevel);
 		setEditTextInt(h, IDC_EDIT_LIGHT_COLOR, iType->lightColor);
+		setEditTextInt(h, IDC_EDIT_MINIMAP_COLOR, iType->miniMapColor);
+		setEditTextInt(h, IDC_EDIT_PARAM7, iType->subParam07);
+		setEditTextInt(h, IDC_EDIT_PARAM8, iType->subParam08);
 
 		setCheckButton(h, IDC_OPT_BLOCKING, iType->blockSolid);
 		setCheckButton(h, IDC_OPT_ATOP, iType->alwaysOnTop);
@@ -1114,29 +1182,6 @@ void GUIWin::loadItem(HWND h)
 		setCheckButton(h, IDC_OPT_HORIZONTAL, iType->isHorizontal);
 		setCheckButton(h, IDC_OPT_CHARGES, iType->clientCharges);
 		setCheckButton(h, IDC_OPT_HANGABLE, iType->isHangable);
-
-		/*
-		if(iType->floorChangeDown)
-			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_DOWN);
-		else if(iType->floorChangeNorth && iType->floorChangeEast)
-			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_U_NE);
-		else if(iType->floorChangeSouth && iType->floorChangeEast)
-			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_U_SE);
-		else if(iType->floorChangeNorth && iType->floorChangeWest)
-			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_U_NW);
-		else if(iType->floorChangeSouth && iType->floorChangeWest)
-			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_U_SW);
-		else if(iType->floorChangeNorth)
-			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_U_N);
-		else if(iType->floorChangeSouth)
-			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_U_S);
-		else if(iType->floorChangeEast)
-			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_U_E);
-		else if(iType->floorChangeWest)
-			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_U_W);
-		else
-			setComboValue(h, IDC_COMBO_FLOOR, FLOOR_NO_CHANGE);
-		*/
 	}
 	else{
 
@@ -1146,6 +1191,9 @@ void GUIWin::loadItem(HWND h)
 		setEditTextInt(h, IDC_EDIT_TOPORDER, 0);
 		setEditTextInt(h, IDC_EDIT_LIGHT_LEVEL, 0);
 		setEditTextInt(h, IDC_EDIT_LIGHT_COLOR, 0);
+		setEditTextInt(h, IDC_EDIT_MINIMAP_COLOR, 0);
+		setEditTextInt(h, IDC_EDIT_PARAM7, 0);
+		setEditTextInt(h, IDC_EDIT_PARAM8, 0);
 
 		setCheckButton(h, IDC_OPT_BLOCKING, false);
 		setCheckButton(h, IDC_OPT_BLOCKPROJECTILE, false);
@@ -1276,7 +1324,7 @@ void GUIWin::setControlState(HWND h, unsigned long flagsEdit, unsigned long flag
 	EnableWindow(GetDlgItem(h, IDC_EDIT_LIGHT_LEVEL),getFlagState(flagsEdit, IDC_EDIT_LIGHT_LEVEL_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_EDIT_LIGHT_COLOR),getFlagState(flagsEdit, IDC_EDIT_LIGHT_LEVEL_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_EDIT_TOPORDER),getFlagState(flagsEdit, IDC_EDIT_TOPORDER_FLAG ));
-
+	EnableWindow(GetDlgItem(h, IDC_EDIT_MINIMAP_COLOR),getFlagState(flagsEdit, IDC_EDIT_MINIMAP_COLOR_FLAG ));
 
 	EnableWindow(GetDlgItem(h, IDC_OPT_BLOCKING),getFlagState(flagsOpt, IDC_OPT_BLOCKING_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_OPT_ATOP),getFlagState(flagsOpt, IDC_OPT_ATOP_FLAG));

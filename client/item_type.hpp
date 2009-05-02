@@ -61,6 +61,8 @@ enum clientVersion_t{
 	CLIENT_VERSION_820 = 10,
 	CLIENT_VERSION_830 = 11,
 	CLIENT_VERSION_840 = 12,
+	CLIENT_VERSION_841 = 13,
+	CLIENT_VERSION_842 = 14,
 };
 
 enum rootattrib_t{
@@ -321,25 +323,40 @@ public:
 	bool allowDistRead;
 	bool clientCharges;
 
-	int rotateTo;
 	
 	std::string name;
-	std::string descr;
 	char sprHash[16];
+
+	//ground
+	int speed;
+
+	unsigned short miniMapColor;
+	unsigned short subParam07;
+	unsigned short subParam08;
+
+	int lightLevel;
+	int lightColor;
+
+	bool isVertical;
+	bool isHorizontal;
+
+	bool isHangable;
+	bool compareOptions(const SpriteType *stype);
+	void reloadOptions(const SpriteType *stype);
+
+	/*
+	std::string descr;
+	int rotateTo;
 	double weight;
 	int decayTo;
 	int decayTime;
+
 	slots_t slot_position;
-	/*
 	bool floorChangeDown;
 	bool floorChangeNorth;
 	bool floorChangeSouth;
 	bool floorChangeEast;
 	bool floorChangeWest;
-	*/
-
-	//ground
-	int speed;
 
 	//container
 	int maxItems;
@@ -362,20 +379,7 @@ public:
 	//writeable
 	int readOnlyId;
 	int maxTextLen;
-	
-	unsigned short miniMapColor;
-	unsigned short subParam07;
-	unsigned short subParam08;
-
-	int lightLevel;
-	int lightColor;
-
-	bool isVertical;
-	bool isHorizontal;
-
-	bool isHangable;
-	bool compareOptions(const SpriteType *stype);
-	void reloadOptions(const SpriteType *stype);
+	*/
 };
 
 typedef std::map<unsigned short, ItemType*> ItemMap;

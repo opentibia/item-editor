@@ -62,7 +62,7 @@ ItemType::ItemType()
 	allowDistRead = false;
 	clientCharges = false;
 	
-	rotateTo = 0;
+	//rotateTo = 0;
 
 	isVertical = false;
 	isHorizontal = false;
@@ -73,18 +73,10 @@ ItemType::ItemType()
 	subParam07 = 0;
 	subParam08 = 0;
 
-	weight = 0.00;
-	decayTo = 0;
-	decayTime = 0;
-	slot_position = SLOT_HAND;
-
-	/*
-	floorChangeDown = false;
-	floorChangeNorth = false;
-	floorChangeSouth = false;
-	floorChangeEast = false;
-	floorChangeWest = false;
-	*/
+	//weight = 0.00;
+	//decayTo = 0;
+	//decayTime = 0;
+	//slot_position = SLOT_HAND;
 
 	lightLevel = 0;
 	lightColor = 0;
@@ -93,35 +85,24 @@ ItemType::ItemType()
 	speed = 0;
 
 	//container
-	maxItems = 8;
+	//maxItems = 8;
 	
 	//weapon
-	amuType = AMU_NONE;
-	weaponType = WEAPON_NONE;
-	shootType = DIST_NONE;
-	attack = 0;
-	defence = 0;
+	//amuType = AMU_NONE;
+	//weaponType = WEAPON_NONE;
+	//shootType = DIST_NONE;
+	//attack = 0;
+	//defence = 0;
 	
 	//armor
-	armor = 0;
+	//armor = 0;
 	
 	//rune
-	runeMagLevel = -1;
-	
+	//runeMagLevel = -1;
 	
 	//writeable
-	readOnlyId = 0;
-	maxTextLen = 0;
-
-	//
-	//canWalkThrough = false;
-	//ladderUp = false;
-	//canSeeThrough = false;
-	//wallObject = false;
-	//container	= false;
-	//isammo = false;
-	//groundtile	= false;
-	//fluid = false;
+	//readOnlyId = 0;
+	//maxTextLen = 0;
 }
 
 ItemType::ItemType(unsigned short _id, const SpriteType *stype)
@@ -168,22 +149,19 @@ ItemType::ItemType(unsigned short _id, const SpriteType *stype)
 	getImageHash(stype->id, sprHash);
 	#endif
 	*/
-	
-	rotateTo = 0;
 
-	
+	/*
+	rotateTo = 0;
 	weight = 0.00;
 	decayTo = 0;
 	decayTime = 0;
 	slot_position = SLOT_HAND;
 
-	/*
 	floorChangeDown = false;
 	floorChangeNorth = false;
 	floorChangeSouth = false;
 	floorChangeEast = false;
 	floorChangeWest = false;
-	*/
 
 	//container
 	maxItems = 8;
@@ -205,7 +183,7 @@ ItemType::ItemType(unsigned short _id, const SpriteType *stype)
 	//writeable
 	readOnlyId = 0;
 	maxTextLen = 0;
-
+	*/
 }
 
 bool ItemType::compareOptions(const SpriteType *stype)
@@ -388,6 +366,7 @@ bool ItemsTypes::exportToXml(const char *filename)
 			saveAttribute(f, "type", "magicfield");
 		}
 
+		/*
 		if(it->second->descr.size() > 0){
 			saveAttribute(f, "description", it->second->descr);
 		}
@@ -486,6 +465,7 @@ bool ItemsTypes::exportToXml(const char *filename)
 			saveAttribute(f, "decayTo", it->second->decayTo);
 			saveAttribute(f, "duration", it->second->decayTime);
 		}
+		*/
 
 		//stopduration
 		//transformEquipTo
@@ -739,10 +719,12 @@ int ItemsTypes::loadOtb(const char *filename)
 							}
 							case ITEM_ATTR_DESCR:
 							{
+								/*
 								if(datalen >= sizeof(sType->descr))
 									return ERROR_INVALID_FORMAT;
 
-								sType->name = std::string((char*)p, datalen);
+								sType->desc = std::string((char*)p, datalen);
+								*/
 								break;
 							}
 							case ITEM_ATTR_SPEED:
@@ -758,7 +740,7 @@ int ItemsTypes::loadOtb(const char *filename)
 								if(datalen != sizeof(unsigned short))
 									return ERROR_INVALID_FORMAT;
 
-								memcpy(&sType->slot_position, p, sizeof(unsigned short));
+								//memcpy(&sType->slot_position, p, sizeof(unsigned short));
 								break;
 							}
 							case ITEM_ATTR_MAXITEMS:
@@ -766,7 +748,7 @@ int ItemsTypes::loadOtb(const char *filename)
 								if(datalen != sizeof(unsigned short))
 									return ERROR_INVALID_FORMAT;
 
-								memcpy(&sType->maxItems, p, sizeof(unsigned short));
+								//memcpy(&sType->maxItems, p, sizeof(unsigned short));
 								break;
 							}
 							case ITEM_ATTR_WEIGHT:
@@ -774,7 +756,7 @@ int ItemsTypes::loadOtb(const char *filename)
 								if(datalen != sizeof(double))
 									return ERROR_INVALID_FORMAT;
 
-								memcpy(&sType->weight, p, sizeof(double));
+								//memcpy(&sType->weight, p, sizeof(double));
 								break;
 							}
 							case ITEM_ATTR_WEAPON:
@@ -784,11 +766,13 @@ int ItemsTypes::loadOtb(const char *filename)
 
 								weaponBlock wb;
 								memcpy(&wb, p, sizeof(weaponBlock));
+								/*
 								sType->weaponType = (WeaponType)wb.weaponType;
 								sType->shootType = (subfight_t)wb.shootType;
 								sType->amuType = (amu_t)wb.amuType;
 								sType->attack = wb.attack;
 								sType->defence = wb.defence;
+								*/
 								break;
 							}
 							case ITEM_ATTR_AMU:
@@ -798,9 +782,11 @@ int ItemsTypes::loadOtb(const char *filename)
 
 								amuBlock ab;
 								memcpy(&ab, p, sizeof(amuBlock));
+								/*
 								sType->shootType = (subfight_t)ab.shootType;
 								sType->amuType = (amu_t)ab.amuType;
 								sType->attack = ab.attack;
+								*/
 								break;
 							}
 							case ITEM_ATTR_ARMOR:
@@ -810,10 +796,11 @@ int ItemsTypes::loadOtb(const char *filename)
 
 								armorBlock ab;
 								memcpy(&ab, p, sizeof(armorBlock));
-									
+								/*
 								sType->armor = ab.armor;
 								sType->weight = ab.weight;
 								sType->slot_position = (slots_t)ab.slot_position;
+								*/
 
 								break;
 							}
@@ -822,7 +809,7 @@ int ItemsTypes::loadOtb(const char *filename)
 								if(datalen != sizeof(unsigned short))
 									return ERROR_INVALID_FORMAT;
 								
-								memcpy(&sType->runeMagLevel, p, sizeof(unsigned short));
+								//memcpy(&sType->runeMagLevel, p, sizeof(unsigned short));
 								
 								break;
 							}
@@ -842,7 +829,7 @@ int ItemsTypes::loadOtb(const char *filename)
 								struct writeableBlock wb;
 								memcpy(&wb, p, sizeof(writeableBlock));
 
-								sType->readOnlyId = wb.readOnlyId;
+								//sType->readOnlyId = wb.readOnlyId;
 
 								break;
 							}
@@ -851,7 +838,7 @@ int ItemsTypes::loadOtb(const char *filename)
 								if(datalen != sizeof(unsigned short))
 									return ERROR_INVALID_FORMAT;
 
-								memcpy(&sType->rotateTo, p, sizeof(unsigned short));
+								//memcpy(&sType->rotateTo, p, sizeof(unsigned short));
 
 								break;
 							}
@@ -862,8 +849,10 @@ int ItemsTypes::loadOtb(const char *filename)
 
 								decayBlock db;
 								memcpy(&db, p, sizeof(decayBlock));
+								/*
 								sType->decayTime = db.decayTime;
 								sType->decayTo = db.decayTo;
+								*/
 								break;
 							}
 
@@ -925,8 +914,10 @@ int ItemsTypes::loadOtb(const char *filename)
 
 								decayBlock2 db2;
 								memcpy(&db2, p, sizeof(decayBlock2));
+								/*
 								sType->decayTime = db2.decayTime;
 								sType->decayTo = db2.decayTo;
+								*/
 								break;
 							}
 
@@ -937,11 +928,13 @@ int ItemsTypes::loadOtb(const char *filename)
 
 								weaponBlock2 wb2;
 								memcpy(&wb2, p, sizeof(weaponBlock2));
+								/*
 								sType->weaponType = (WeaponType)wb2.weaponType;
 								sType->shootType = (subfight_t)wb2.shootType;
 								sType->amuType = (amu_t)wb2.amuType;
 								sType->attack = wb2.attack;
 								sType->defence = wb2.defence;
+								*/
 								break;
 							}
 
@@ -952,9 +945,11 @@ int ItemsTypes::loadOtb(const char *filename)
 
 								amuBlock2 ab2;
 								memcpy(&ab2, p, sizeof(amuBlock2));
+								/*
 								sType->shootType = (subfight_t)ab2.shootType;
 								sType->amuType = (amu_t)ab2.amuType;
 								sType->attack = ab2.attack;
+								*/
 								break;
 							}
 
@@ -964,10 +959,12 @@ int ItemsTypes::loadOtb(const char *filename)
 									return ERROR_INVALID_FORMAT;
 
 								armorBlock2 ab2;
-								memcpy(&ab2, p, sizeof(armorBlock2));									
+								memcpy(&ab2, p, sizeof(armorBlock2));
+								/*
 								sType->armor = ab2.armor;
 								sType->weight = ab2.weight;
 								sType->slot_position = (slots_t)ab2.slot_position;
+								*/
 
 								break;
 							}
@@ -979,8 +976,7 @@ int ItemsTypes::loadOtb(const char *filename)
 
 								struct writeableBlock2 wb2;
 								memcpy(&wb2, p, sizeof(writeableBlock2));
-								sType->readOnlyId = wb2.readOnlyId;
-
+								//sType->readOnlyId = wb2.readOnlyId;
 								break;
 							}
 
@@ -991,8 +987,8 @@ int ItemsTypes::loadOtb(const char *filename)
 
 								struct writeableBlock3 wb3;
 								memcpy(&wb3, p, sizeof(writeableBlock3));
-								sType->readOnlyId = wb3.readOnlyId;
-								sType->maxTextLen = wb3.maxTextLen;
+								//sType->readOnlyId = wb3.readOnlyId;
+								//sType->maxTextLen = wb3.maxTextLen;
 
 								break;
 							}
