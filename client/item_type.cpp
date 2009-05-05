@@ -41,6 +41,7 @@ long ItemType::dwBuildNumber = 0;
 
 ItemType::ItemType()
 {
+	name = "";
 	group     = ITEM_GROUP_NONE;
 	id		  = 100;
 	clientid  = 100;
@@ -72,6 +73,8 @@ ItemType::ItemType()
 	miniMapColor = 0;
 	subParam07 = 0;
 	subParam08 = 0;
+
+	memset(sprHash, 0, sizeof(sprHash));
 
 	//weight = 0.00;
 	//decayTo = 0;
@@ -355,9 +358,8 @@ bool ItemsTypes::exportToXml(const char *filename)
 
 	fprintf(f, "<?xml version=\"1.0\"?>\n<items>\n");
 
-	ItemMap::iterator it = getTypes();
-	for(;it != getEnd(); it++){
-		fprintf(f, "<item id=\"%d\" name=\"%s\">\n", it->second->id, it->second->name);
+	for(ItemMap::iterator it = item.begin(); it != item.end(); it++){
+		fprintf(f, "<item id=\"%d\" name=\"%s\">\n", it->second->id, it->second->name.c_str());
 
 		if(it->second->group == ITEM_GROUP_KEY){
 			saveAttribute(f, "type", "key");
