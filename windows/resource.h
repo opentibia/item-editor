@@ -20,6 +20,7 @@
 #define IDC_OPT_USEABLE                 1020
 #define IDC_OPT_NO_MOVE                 1021
 #define IDC_OPT_PICKUP                  1022
+#define IDC_OPT_LOOKTHROUGH             1023
 #define IDC_OPT_ROTABLE                 1024
 #define IDC_COMBO_FLOOR                 1026
 #define IDC_OPT_BLOCKPROJECTILE         1029
@@ -57,12 +58,13 @@
 #define IDC_DIFF_STACKABLE              1080
 #define IDC_DIFF_LIGHT_LEVEL            1081
 #define IDC_DIFF_LIGHT_COLOR            1082
+#define IDC_DIFF_STACKABLE2             1083
+#define IDC_DIFF_LOOKTHROUGH            1083
 #define IDC_DIFF_MINIMAP_COLOR          1084
 #define IDC_DIFF_SPEED                  1086
 #define IDC_DIFF_TOPORDER               1087
 #define IDC_DIFF_PARAM7                 1088
 #define IDC_DIFF_PARAM8                 1089
-#define IDC_DIFF_PARAM9                 1090
 #define IDC_DIFF_SPRITE                 1090
 #define ID_FILE_IMPORTXML               40001
 #define ID_FILE_SAVEAS                  40003

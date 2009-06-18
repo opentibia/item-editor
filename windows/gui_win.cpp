@@ -626,14 +626,14 @@ LRESULT GUIWin::onAutoFindImages(HWND h)
 	/*
 	int spriteCount = std::distance(g_itemsTypes->getTypes(), g_itemsTypes->getEnd());
 	int itemCount = std::distance(g_itemsTypes->getTypes(), g_itemsTypes->getEnd());
-	int depricatedCount = 0;
+	int deprecatedCount = 0;
 
 	for(ItemMap::iterator it = g_itemsTypes->getTypes(); it != g_itemsTypes->getEnd(); it++){
 		if(it->second->group == ITEM_GROUP_DEPRECATED){
-			++depricatedCount;
+			++deprecatedCount;
 		}
 	}
-	sprintf(str , "itemCount: %d  spriteCount: %d, depricatedCount: %d", itemCount, spriteCount, depricatedCount);
+	sprintf(str , "itemCount: %d  spriteCount: %d, depricatedCount: %d", itemCount, spriteCount, deprecatedCount);
 	MessageBoxA(h, str, NULL, MB_OK | MB_ICONINFORMATION);
 	*/
 
@@ -999,6 +999,17 @@ bool GUIWin::saveCurrentItem(HWND h)
 	if(!getEditTextInt(h, IDC_EDITCID, iType->clientid)){
 		return false;
 	}
+	
+	SpriteType *sType;
+	sType = g_itemsSprites->getSprite(iType->clientid);
+
+	/*
+	int retHash = IDOK;
+	if(sType && memcmp(iType->sprHash, sType->sprHash, 16) != 0){
+		 retHash = MessageBoxA(h, "Update hash information?", NULL, MB_YESNO | MB_ICONQUESTION);
+	}
+	*/
+
 	//update spr hash
 	if(iType->clientid >= SpriteType::minClientId && iType->clientid <= SpriteType::maxClientId){
 		getImageHash(iType->clientid, iType->sprHash);
@@ -1006,11 +1017,10 @@ bool GUIWin::saveCurrentItem(HWND h)
 	else{
 		memset(iType->sprHash, 0, 16);
 	}
+
 	//update spr params
-	SpriteType *sType;
-	sType = g_itemsSprites->getSprite(iType->clientid);
 	if(sType){
-		iType->speed = sType->speed;
+		iType->groundSpeed = sType->groundSpeed;
 		iType->miniMapColor = sType->miniMapColor;
 		iType->subParam07 = sType->subParam07;
 		iType->subParam08 = sType->subParam08;
@@ -1024,7 +1034,7 @@ bool GUIWin::saveCurrentItem(HWND h)
 	}
 
 
-	if(!getEditTextInt(h, IDC_EDIT_SPEED, iType->speed)){
+	if(!getEditTextInt(h, IDC_EDIT_SPEED, iType->groundSpeed)){
 		return false;
 	}
 
@@ -1048,6 +1058,7 @@ bool GUIWin::saveCurrentItem(HWND h)
 	iType->allowDistRead = getCheckButton(h, IDC_OPT_DISTREAD);
 	iType->isHangable = getCheckButton(h, IDC_OPT_HANGABLE);
 	iType->clientCharges = getCheckButton(h, IDC_OPT_CHARGES);
+	iType->lookThrough = getCheckButton(h, IDC_OPT_LOOKTHROUGH);
 
 	//change name in tree
 	TVITEM itemInfo;
@@ -1081,84 +1092,34 @@ void GUIWin::loadItem(HWND h)
 		SpriteType *sType;
 		sType = g_itemsSprites->getSprite(iType->clientid);
 		if(sType){
-			if(memcmp(iType->sprHash, sType->sprHash, 16) != 0){
-				SetDlgItemText(h, IDC_DIFF_SPRITE, "[x]");
-			}
-
-			if(iType->blockSolid != sType->blockSolid){
-				SetDlgItemText(h, IDC_DIFF_BLOCKING, "[x]");
-			}
-			if(iType->blockProjectile != sType->blockProjectile){
-				SetDlgItemText(h, IDC_DIFF_BLOCKPROJECTILE, "[x]");
-			}
-			if(iType->blockPathFind != sType->blockPathFind){
-				SetDlgItemText(h, IDC_DIFF_BLOCKPATHFIND, "[x]");
-			}
-			if(iType->moveable != sType->moveable){
-				SetDlgItemText(h, IDC_DIFF_NO_MOVE, "[x]");
-			}
-			if(iType->alwaysOnTop != sType->alwaysOnTop){
-				SetDlgItemText(h, IDC_DIFF_ATOP, "[x]");
-			}
-			if(iType->hasHeight != sType->hasHeight){
-				SetDlgItemText(h, IDC_DIFF_HASHEIGHT, "[x]");
-			}
-			if(iType->pickupable != sType->pickupable){
-				SetDlgItemText(h, IDC_DIFF_PICKUP, "[x]");
-			}
-			if(iType->isHangable != sType->isHangable){
-				SetDlgItemText(h, IDC_DIFF_HANGABLE, "[x]");
-			}
-			if(iType->useable != sType->useable){
-				SetDlgItemText(h, IDC_DIFF_USEABLE, "[x]");
-			}
-			if(iType->rotable != sType->rotable){
-				SetDlgItemText(h, IDC_DIFF_ROTABLE, "[x]");
-			}
-			if(iType->readable != sType->readable){
-				SetDlgItemText(h, IDC_DIFF_READABLE, "[x]");
-			}
-			/*
-			if(iType->allowDistRead != sType->allowDistRead){
-				SetDlgItemText(h, IDC_DIFF_DISTREAD, "[x]");
-			}
-			*/
-			if(iType->isVertical != sType->isVertical){
-				SetDlgItemText(h, IDC_DIFF_VERTICAL, "[x]");
-			}
-			if(iType->isHorizontal != sType->isHorizontal){
-				SetDlgItemText(h, IDC_DIFF_HORIZONTAL, "[x]");
-			}
-			if(iType->clientCharges != sType->clientCharges){
-				SetDlgItemText(h, IDC_DIFF_CHARGES, "[x]");
-			}
-			if(iType->stackable != sType->stackable){
-				SetDlgItemText(h, IDC_DIFF_STACKABLE, "[x]");
-			}
-			if(iType->speed != sType->speed){
-				SetDlgItemText(h, IDC_DIFF_SPEED, "[x]");
-			}
-			if(iType->alwaysOnTopOrder != sType->alwaysOnTopOrder){
-				SetDlgItemText(h, IDC_DIFF_TOPORDER, "[x]");
-			}
-			if(iType->subParam07 != sType->subParam07){
-				SetDlgItemText(h, IDC_DIFF_PARAM7, "[x]");
-			}
-			if(iType->subParam08 != sType->subParam08){
-				SetDlgItemText(h, IDC_DIFF_PARAM8, "[x]");
-			}
-			if(iType->lightLevel != sType->lightLevel){
-				SetDlgItemText(h, IDC_DIFF_LIGHT_LEVEL, "[x]");
-			}
-			if(iType->lightColor != sType->lightColor){
-				SetDlgItemText(h, IDC_DIFF_LIGHT_COLOR, "[x]");
-			}
-			if(iType->miniMapColor != sType->miniMapColor){
-				SetDlgItemText(h, IDC_DIFF_MINIMAP_COLOR, "[x]");
-			}
+			SetDlgItemText(h, IDC_DIFF_SPRITE, memcmp(iType->sprHash, sType->sprHash, 16) != 0 ? "[x]" : "");
+			SetDlgItemText(h, IDC_DIFF_BLOCKING, iType->blockSolid != sType->blockSolid ? "[x]" : "");
+			SetDlgItemText(h, IDC_DIFF_BLOCKPROJECTILE, iType->blockProjectile != sType->blockProjectile ? "[x]" : "");
+			SetDlgItemText(h, IDC_DIFF_BLOCKPATHFIND, iType->blockPathFind != sType->blockPathFind ? "[x]" : "");
+			SetDlgItemText(h, IDC_DIFF_NO_MOVE, iType->moveable != sType->moveable ? "[x]" : "");
+			SetDlgItemText(h, IDC_DIFF_ATOP, iType->alwaysOnTop != sType->alwaysOnTop ? "[x]" : "");
+			SetDlgItemText(h, IDC_DIFF_HASHEIGHT, iType->hasHeight != sType->hasHeight ? "[x]" : "");
+			SetDlgItemText(h, IDC_DIFF_PICKUP, iType->pickupable != sType->pickupable ? "[x]" : "");
+			SetDlgItemText(h, IDC_DIFF_HANGABLE, iType->isHangable != sType->isHangable ? "[x]" : "");
+			SetDlgItemText(h, IDC_DIFF_USEABLE, iType->useable != sType->useable ? "[x]" : "");
+			SetDlgItemText(h, IDC_DIFF_ROTABLE, iType->rotable != sType->rotable ? "[x]" : "");
+			SetDlgItemText(h, IDC_DIFF_READABLE, iType->readable != sType->readable ? "[x]" : "");
+			//SetDlgItemText(h, IDC_DIFF_DISTREAD, iType->allowDistRead != sType->allowDistRead ? "[x]" : "");
+			SetDlgItemText(h, IDC_DIFF_VERTICAL, iType->isVertical != sType->isVertical ? "[x]" : "");
+			SetDlgItemText(h, IDC_DIFF_HORIZONTAL, iType->isHorizontal != sType->isHorizontal ? "[x]" : "");
+			SetDlgItemText(h, IDC_DIFF_CHARGES, iType->clientCharges != sType->clientCharges ? "[x]" : "");
+			SetDlgItemText(h, IDC_DIFF_LOOKTHROUGH, iType->lookThrough != sType->lookThrough ? "[x]" : "");
+			SetDlgItemText(h, IDC_DIFF_STACKABLE, iType->stackable != sType->stackable ? "[x]" : "");
+			SetDlgItemText(h, IDC_DIFF_SPEED, iType->groundSpeed != sType->groundSpeed ? "[x]" : "");
+			SetDlgItemText(h, IDC_DIFF_TOPORDER, iType->alwaysOnTopOrder != sType->alwaysOnTopOrder ? "[x]" : "");
+			SetDlgItemText(h, IDC_DIFF_PARAM7, iType->subParam07 != sType->subParam07 ? "[x]" : "");
+			SetDlgItemText(h, IDC_DIFF_PARAM8, iType->subParam08 != sType->subParam08 ? "[x]" : "");
+			SetDlgItemText(h, IDC_DIFF_LIGHT_LEVEL, iType->lightLevel != sType->lightLevel ? "[x]" : "");
+			SetDlgItemText(h, IDC_DIFF_LIGHT_COLOR, iType->lightColor != sType->lightColor ? "[x]" : "");
+			SetDlgItemText(h, IDC_DIFF_MINIMAP_COLOR, iType->miniMapColor != sType->miniMapColor ? "[x]" : "");
 		}
 		//
-		setEditTextInt(h, IDC_EDIT_SPEED, iType->speed);
+		setEditTextInt(h, IDC_EDIT_SPEED, iType->groundSpeed);
 		setEditTextInt(h, IDC_EDIT_TOPORDER, iType->alwaysOnTopOrder);
 		setEditTextInt(h, IDC_EDIT_LIGHT_LEVEL, iType->lightLevel);
 		setEditTextInt(h, IDC_EDIT_LIGHT_COLOR, iType->lightColor);
@@ -1181,6 +1142,7 @@ void GUIWin::loadItem(HWND h)
 		setCheckButton(h, IDC_OPT_VERTICAL, iType->isVertical);
 		setCheckButton(h, IDC_OPT_HORIZONTAL, iType->isHorizontal);
 		setCheckButton(h, IDC_OPT_CHARGES, iType->clientCharges);
+		setCheckButton(h, IDC_OPT_LOOKTHROUGH, iType->lookThrough);
 		setCheckButton(h, IDC_OPT_HANGABLE, iType->isHangable);
 	}
 	else{
@@ -1210,6 +1172,7 @@ void GUIWin::loadItem(HWND h)
 		setCheckButton(h, IDC_OPT_VERTICAL, false);
 		setCheckButton(h, IDC_OPT_HORIZONTAL, false);
 		setCheckButton(h, IDC_OPT_CHARGES, false);
+		setCheckButton(h, IDC_OPT_LOOKTHROUGH, false);
 		setCheckButton(h, IDC_OPT_STACKABLE, false);
 
 		setComboValue(h, IDC_COMBO_FLOOR, FLOOR_NO_CHANGE);
@@ -1337,6 +1300,7 @@ void GUIWin::setControlState(HWND h, unsigned long flagsEdit, unsigned long flag
 	EnableWindow(GetDlgItem(h, IDC_OPT_READABLE),getFlagState(flagsOpt, IDC_OPT_READABLE_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_OPT_BLOCKPATHFIND),getFlagState(flagsOpt, IDC_OPT_BLOCKPATHFIND_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_OPT_HASHEIGHT),getFlagState(flagsOpt, IDC_OPT_HASHEIGHT_FLAG));
+	EnableWindow(GetDlgItem(h, IDC_OPT_LOOKTHROUGH),getFlagState(flagsOpt, IDC_OPT_LOOKTHROUGH_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_OPT_DISTREAD),getFlagState(flagsOpt, IDC_OPT_DISTREAD_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_OPT_HANGABLE),getFlagState(flagsOpt, IDC_OPT_HANGABLE_FLAG));
 	EnableWindow(GetDlgItem(h, IDC_OPT_VERTICAL),getFlagState(flagsOpt, IDC_OPT_VERTICAL_FLAG));

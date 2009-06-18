@@ -51,7 +51,6 @@ ItemType::ItemType()
 	blockProjectile = false;
 	hasHeight = false;
 	blockPathFind = false;
-
 	alwaysOnTop	= false;
 	alwaysOnTopOrder = 0;
 	stackable	= false;
@@ -62,50 +61,18 @@ ItemType::ItemType()
 	readable = false;
 	allowDistRead = false;
 	clientCharges = false;
-	
-	//rotateTo = 0;
-
+	lookThrough = false;
 	isVertical = false;
 	isHorizontal = false;
-
 	isHangable = false;
-
 	miniMapColor = 0;
 	subParam07 = 0;
 	subParam08 = 0;
-
-	memset(sprHash, 0, sizeof(sprHash));
-
-	//weight = 0.00;
-	//decayTo = 0;
-	//decayTime = 0;
-	//slot_position = SLOT_HAND;
-
 	lightLevel = 0;
 	lightColor = 0;
+	groundSpeed = 0;
 
-	//ground
-	speed = 0;
-
-	//container
-	//maxItems = 8;
-	
-	//weapon
-	//amuType = AMU_NONE;
-	//weaponType = WEAPON_NONE;
-	//shootType = DIST_NONE;
-	//attack = 0;
-	//defence = 0;
-	
-	//armor
-	//armor = 0;
-	
-	//rune
-	//runeMagLevel = -1;
-	
-	//writeable
-	//readOnlyId = 0;
-	//maxTextLen = 0;
+	memset(sprHash, 0, sizeof(sprHash));
 }
 
 ItemType::ItemType(unsigned short _id, const SpriteType *stype)
@@ -119,7 +86,6 @@ ItemType::ItemType(unsigned short _id, const SpriteType *stype)
 	hasHeight = stype->hasHeight;
 	blockProjectile = stype->blockProjectile;
 	blockPathFind = stype->blockPathFind;
-
 	alwaysOnTop = stype->alwaysOnTop;
 	alwaysOnTopOrder = stype->alwaysOnTopOrder;
 	stackable = stype->stackable ;
@@ -129,64 +95,19 @@ ItemType::ItemType(unsigned short _id, const SpriteType *stype)
 	rotable = stype->rotable;
 	readable = stype->readable;
 	clientCharges = stype->clientCharges;
-	speed = stype->speed;
-
-	allowDistRead = false;
-
+	lookThrough = stype->lookThrough;
+	groundSpeed = stype->groundSpeed;
 	miniMapColor = stype->miniMapColor;
 	subParam07 = stype->subParam07;
 	subParam08 = stype->subParam08;
-
 	lightLevel = stype->lightLevel;
 	lightColor = stype->lightColor;
-
 	isVertical = stype->isVertical;
 	isHorizontal = stype->isHorizontal;
-
 	isHangable = stype->isHangable;
+	allowDistRead = false;
 
-	//#ifdef __SPRITE_SEARCH__
 	memcpy(sprHash, stype->sprHash, 16);
-	/*
-	#else
-	getImageHash(stype->id, sprHash);
-	#endif
-	*/
-
-	/*
-	rotateTo = 0;
-	weight = 0.00;
-	decayTo = 0;
-	decayTime = 0;
-	slot_position = SLOT_HAND;
-
-	floorChangeDown = false;
-	floorChangeNorth = false;
-	floorChangeSouth = false;
-	floorChangeEast = false;
-	floorChangeWest = false;
-
-	//container
-	maxItems = 8;
-	
-	//weapon
-	amuType = AMU_NONE;
-	weaponType = WEAPON_NONE;
-	shootType = DIST_NONE;
-	attack = 0;
-	defence = 0;
-	
-	//armor
-	armor = 0;
-	
-	//rune
-	runeMagLevel = -1;
-	
-	
-	//writeable
-	readOnlyId = 0;
-	maxTextLen = 0;
-	*/
 }
 
 bool ItemType::compareOptions(const SpriteType *stype)
@@ -199,7 +120,6 @@ bool ItemType::compareOptions(const SpriteType *stype)
 	case ITEM_GROUP_CONTAINER:
 	case ITEM_GROUP_SPLASH:
 	case ITEM_GROUP_FLUID:
-	//case ITEM_GROUP_WRITEABLE:
 	case ITEM_GROUP_CHARGES:
 		if(group != stype->group)
 			return false;
@@ -233,18 +153,9 @@ bool ItemType::compareOptions(const SpriteType *stype)
 	if(rotable != stype->rotable)
 		return false;
 
-	if(speed != stype->speed)
-		return false;
-/*
-	if(miniMapColor != stype->miniMapColor)
-		return false;
-	
-	if(subParam07 != stype->subParam07)
+	if(groundSpeed != stype->groundSpeed)
 		return false;
 
-	if(subParam08 != stype->subParam08)
-		return false;
-*/
 	if(lightLevel != stype->lightLevel)
 		return false;
 
@@ -266,6 +177,9 @@ bool ItemType::compareOptions(const SpriteType *stype)
 	if(clientCharges != stype->clientCharges)
 		return false;
 
+	if(lookThrough != stype->lookThrough)
+		return false;
+
 	return true;
 }
 
@@ -282,7 +196,6 @@ void ItemType::reloadOptions(const SpriteType *stype)
 	hasHeight = stype->hasHeight;
 	blockProjectile = stype->blockProjectile;
 	blockPathFind = stype->blockPathFind;
-
 	alwaysOnTop = stype->alwaysOnTop;
 	alwaysOnTopOrder = stype->alwaysOnTopOrder;
 	stackable = stype->stackable ;
@@ -292,29 +205,19 @@ void ItemType::reloadOptions(const SpriteType *stype)
 	rotable = stype->rotable;
 	readable = stype->readable;
 	clientCharges = stype->clientCharges;
-	speed = stype->speed;
-
-	allowDistRead = false;
-
+	lookThrough = stype->lookThrough;
+	groundSpeed = stype->groundSpeed;
 	miniMapColor = stype->miniMapColor;
 	subParam07 = stype->subParam07;
 	subParam08 = stype->subParam08;
-
 	lightLevel = stype->lightLevel;
 	lightColor = stype->lightColor;
-
 	isVertical = stype->isVertical;
 	isHorizontal = stype->isHorizontal;
-
 	isHangable = stype->isHangable;
+	allowDistRead = false;
 
-	//#ifdef __SPRITE_SEARCH__
 	memcpy(sprHash, stype->sprHash, 16);
-	/*
-	#else
-	getImageHash(stype->id, sprHash);
-	#endif
-	*/
 }
 
 
@@ -368,137 +271,6 @@ bool ItemsTypes::exportToXml(const char *filename)
 			saveAttribute(f, "type", "magicfield");
 		}
 
-		/*
-		if(it->second->descr.size() > 0){
-			saveAttribute(f, "description", it->second->descr);
-		}
-
-		if(it->second->pickupable){
-			saveAttribute(f, "weight", int(it->second->weight * 100));
-		}
-
-		if(it->second->armor != 0){
-			saveAttribute(f, "armor", it->second->armor);
-		}
-
-		if(it->second->defence != 0){
-			saveAttribute(f, "defense", it->second->defence);
-		}
-
-		if(it->second->attack != 0){
-			saveAttribute(f, "attack", it->second->attack);
-		}
-
-		if(it->second->rotateTo != 0){
-			saveAttribute(f, "rotateTo", it->second->rotateTo);
-		}
-
-		if(it->second->group == ITEM_GROUP_CONTAINER){
-			saveAttribute(f, "containerSize", it->second->maxItems);
-		}
-
-		if(it->second->group == ITEM_GROUP_WRITEABLE){
-			saveAttribute(f, "maxTextLen", it->second->maxTextLen);
-
-			if(it->second->readOnlyId != 0){
-				saveAttribute(f, "writeOnceItemId", it->second->readOnlyId);
-			}
-		}
-
-		if(it->second->group == ITEM_GROUP_AMMUNITION){
-			saveAttribute(f, "weaponType", "ammunition");
-		}
-		if(it->second->weaponType != WEAPON_NONE){
-			switch(it->second->weaponType){
-				case WEAPON_AXE: saveAttribute(f, "weaponType", "axe"); break;
-				case WEAPON_CLUB: saveAttribute(f, "weaponType", "club"); break;
-				case WEAPON_SWORD: saveAttribute(f, "weaponType", "sword"); break;
-				case WEAPON_DIST: saveAttribute(f, "weaponType", "distance"); break;
-				case WEAPON_WAND: saveAttribute(f, "weaponType", "wand"); break;
-				case WEAPON_SHIELD: saveAttribute(f, "weaponType", "shield"); break;
-			}
-		}
-
-		if(it->second->slot_position != SLOT_HAND){
-			switch(it->second->slot_position){
-				case SLOT_HEAD: saveAttribute(f, "slotType", "head"); break;
-				case SLOT_BODY: saveAttribute(f, "slotType", "body"); break;
-				case SLOT_LEGS: saveAttribute(f, "slotType", "legs"); break;
-				case SLOT_FEET: saveAttribute(f, "slotType", "feet"); break;
-				case SLOT_BACKPACK: saveAttribute(f, "slotType", "backpack"); break;
-				case SLOT_2HAND: saveAttribute(f, "slotType", "two-handed"); break;
-				case SLOT_AMULET: saveAttribute(f, "slotType", "necklace"); break;
-				case SLOT_RING: saveAttribute(f, "slotType", "ring"); break;
-			}
-		}
-
-		if(it->second->amuType != AMU_NONE){
-			if(it->second->weaponType == WEAPON_NONE){
-				saveAttribute(f, "weaponType", "ammunition");
-			}
-
-			switch(it->second->amuType){
-				case AMU_ARROW: saveAttribute(f, "ammoType", "arrow"); break;
-				case AMU_BOLT: saveAttribute(f, "ammoType", "bolt"); break;
-			}
-		}
-
-		if(it->second->shootType != DIST_NONE){
-			switch(it->second->shootType){
-				case DIST_SPEAR: saveAttribute(f, "shootType", "spear"); break;
-				case DIST_BOLT: saveAttribute(f, "shootType", "bolt"); break;
-				case DIST_ARROW: saveAttribute(f, "shootType", "arrow"); break;
-				case DIST_FIRE: saveAttribute(f, "shootType", "fire"); break;
-				case DIST_ENERGY: saveAttribute(f, "shootType", "energy"); break;
-				case DIST_POISONARROW: saveAttribute(f, "shootType", "poisonarrow"); break;
-				case DIST_BURSTARROW: saveAttribute(f, "shootType", "burstarrow"); break;
-				case DIST_THROWINGSTAR: saveAttribute(f, "shootType", "throwingstar"); break;
-				case DIST_THROWINGKNIFE: saveAttribute(f, "shootType", "throwingknife"); break;
-				case DIST_SMALLSTONE: saveAttribute(f, "shootType", "smallstone"); break;
-				case DIST_SUDDENDEATH: saveAttribute(f, "shootType", "suddendeath"); break;
-				case DIST_LARGEROCK: saveAttribute(f, "shootType", "largerock"); break;
-				case DIST_SNOWBALL: saveAttribute(f, "shootType", "snowball"); break;
-				case DIST_POWERBOLT: saveAttribute(f, "shootType", "powerbolt"); break;
-				case DIST_POISONFIELD: saveAttribute(f, "shootType", "poison"); break;
-				case DIST_INFERNALBOLT: saveAttribute(f, "shootType", "infernalbolt"); break;
-			}
-		}			
-		if(it->second->decayTime > 0){
-			saveAttribute(f, "decayTo", it->second->decayTo);
-			saveAttribute(f, "duration", it->second->decayTime);
-		}
-		*/
-
-		//stopduration
-		//transformEquipTo
-		//transformDeEquipTo
-		//showduration
-		//charges
-		//showcharges
-		//invisible
-		//speed
-		//healthGain
-		//healthTicks
-		//manaGain
-		//manaTicks
-		//manaShield
-		//skillSword
-		//skillAxe
-		//skillClub
-		//skillDist
-		//skillFish
-		//skillShield
-		//skillFist
-		//absorbPercentAll
-		//absorbPercentEnergy
-		//absorbPercentFire
-		//absorbPercentPoison
-		//absorbPercentLifeDrain
-		//absorbPercentManaDrain
-		//absorbPercentPhysical
-		//suppressDrunk
-		//field
-
 		fprintf(f, "</item>\n");
 	}
 
@@ -531,7 +303,7 @@ itemgroup_t ItemsTypes::getGroup(int id)
 
 bool ItemsTypes::addType(int id, ItemType* type)
 {
-	if(!getType(id)) {
+	if(!getType(id)){
 		item[id] = type;
 
 		if(id < 20000){
@@ -658,13 +430,6 @@ int ItemsTypes::loadOtb(const char *filename)
 							sType->pickupable = ((flags & FLAG_PICKUPABLE) == FLAG_PICKUPABLE);
 							sType->moveable = ((flags & FLAG_MOVEABLE) == FLAG_MOVEABLE);
 							sType->stackable = ((flags & FLAG_STACKABLE) == FLAG_STACKABLE);
-							/*
-							sType->floorChangeDown = ((flags & FLAG_FLOORCHANGEDOWN) == FLAG_FLOORCHANGEDOWN);
-							sType->floorChangeNorth = ((flags & FLAG_FLOORCHANGENORTH) == FLAG_FLOORCHANGENORTH);
-							sType->floorChangeEast = ((flags & FLAG_FLOORCHANGEEAST) == FLAG_FLOORCHANGEEAST);
-							sType->floorChangeSouth = ((flags & FLAG_FLOORCHANGESOUTH) == FLAG_FLOORCHANGESOUTH);
-							sType->floorChangeWest = ((flags & FLAG_FLOORCHANGEWEST) == FLAG_FLOORCHANGEWEST);
-							*/
 							sType->alwaysOnTop = ((flags & FLAG_ALWAYSONTOP) == FLAG_ALWAYSONTOP);
 							sType->readable = ((flags & FLAG_READABLE) == FLAG_READABLE);
 							sType->rotable = ((flags & FLAG_ROTABLE) == FLAG_ROTABLE);
@@ -673,6 +438,7 @@ int ItemsTypes::loadOtb(const char *filename)
 							sType->isHorizontal = ((flags & FLAG_HORIZONTAL) == FLAG_HORIZONTAL);
 							sType->allowDistRead = ((flags & FLAG_ALLOWDISTREAD) == FLAG_ALLOWDISTREAD);
 							sType->clientCharges = ((flags & FLAG_CLIENTCHARGES) == FLAG_CLIENTCHARGES);
+							sType->lookThrough = ((flags & FLAG_LOOKTHROUGH) == FLAG_LOOKTHROUGH);
 
 							if(p >= data + len) //no attributes
 								break;
@@ -721,12 +487,6 @@ int ItemsTypes::loadOtb(const char *filename)
 							}
 							case ITEM_ATTR_DESCR:
 							{
-								/*
-								if(datalen >= sizeof(sType->descr))
-									return ERROR_INVALID_FORMAT;
-
-								sType->desc = std::string((char*)p, datalen);
-								*/
 								break;
 							}
 							case ITEM_ATTR_SPEED:
@@ -734,127 +494,7 @@ int ItemsTypes::loadOtb(const char *filename)
 								if(datalen != sizeof(unsigned short))
 									return ERROR_INVALID_FORMAT;
 
-								memcpy(&sType->speed, p, sizeof(unsigned short));
-								break;
-							}
-							case ITEM_ATTR_SLOT:
-							{
-								if(datalen != sizeof(unsigned short))
-									return ERROR_INVALID_FORMAT;
-
-								//memcpy(&sType->slot_position, p, sizeof(unsigned short));
-								break;
-							}
-							case ITEM_ATTR_MAXITEMS:
-							{
-								if(datalen != sizeof(unsigned short))
-									return ERROR_INVALID_FORMAT;
-
-								//memcpy(&sType->maxItems, p, sizeof(unsigned short));
-								break;
-							}
-							case ITEM_ATTR_WEIGHT:
-							{
-								if(datalen != sizeof(double))
-									return ERROR_INVALID_FORMAT;
-
-								//memcpy(&sType->weight, p, sizeof(double));
-								break;
-							}
-							case ITEM_ATTR_WEAPON:
-							{
-								if(datalen != sizeof(weaponBlock))
-									return ERROR_INVALID_FORMAT;
-
-								weaponBlock wb;
-								memcpy(&wb, p, sizeof(weaponBlock));
-								/*
-								sType->weaponType = (WeaponType)wb.weaponType;
-								sType->shootType = (subfight_t)wb.shootType;
-								sType->amuType = (amu_t)wb.amuType;
-								sType->attack = wb.attack;
-								sType->defence = wb.defence;
-								*/
-								break;
-							}
-							case ITEM_ATTR_AMU:
-							{
-								if(datalen != sizeof(amuBlock))
-									return ERROR_INVALID_FORMAT;
-
-								amuBlock ab;
-								memcpy(&ab, p, sizeof(amuBlock));
-								/*
-								sType->shootType = (subfight_t)ab.shootType;
-								sType->amuType = (amu_t)ab.amuType;
-								sType->attack = ab.attack;
-								*/
-								break;
-							}
-							case ITEM_ATTR_ARMOR:
-							{
-								if(datalen != sizeof(armorBlock))
-									return ERROR_INVALID_FORMAT;
-
-								armorBlock ab;
-								memcpy(&ab, p, sizeof(armorBlock));
-								/*
-								sType->armor = ab.armor;
-								sType->weight = ab.weight;
-								sType->slot_position = (slots_t)ab.slot_position;
-								*/
-
-								break;
-							}
-							case ITEM_ATTR_MAGLEVEL:
-							{
-								if(datalen != sizeof(unsigned short))
-									return ERROR_INVALID_FORMAT;
-								
-								//memcpy(&sType->runeMagLevel, p, sizeof(unsigned short));
-								
-								break;
-							}
-							case ITEM_ATTR_MAGFIELDTYPE:
-							{
-								if(datalen != sizeof(unsigned char))
-									return ERROR_INVALID_FORMAT;
-								
-								break;
-							}
-
-							case ITEM_ATTR_WRITEABLE:
-							{
-								if(datalen != sizeof(writeableBlock))
-									return ERROR_INVALID_FORMAT;
-
-								struct writeableBlock wb;
-								memcpy(&wb, p, sizeof(writeableBlock));
-
-								//sType->readOnlyId = wb.readOnlyId;
-
-								break;
-							}
-							case ITEM_ATTR_ROTATETO:
-							{
-								if(datalen != sizeof(unsigned short))
-									return ERROR_INVALID_FORMAT;
-
-								//memcpy(&sType->rotateTo, p, sizeof(unsigned short));
-
-								break;
-							}
-							case ITEM_ATTR_DECAY:
-							{
-								if(datalen != sizeof(decayBlock))
-									return ERROR_INVALID_FORMAT;
-
-								decayBlock db;
-								memcpy(&db, p, sizeof(decayBlock));
-								/*
-								sType->decayTime = db.decayTime;
-								sType->decayTo = db.decayTo;
-								*/
+								memcpy(&sType->groundSpeed, p, sizeof(unsigned short));
 								break;
 							}
 
@@ -906,92 +546,6 @@ int ItemsTypes::loadOtb(const char *filename)
 								memcpy(&lb, p, sizeof(lightBlock));
 								sType->lightLevel = lb.lightLevel;
 								sType->lightColor = lb.lightColor;
-								break;
-							}
-
-							case ITEM_ATTR_DECAY2:
-							{
-								if(datalen != sizeof(decayBlock2))
-									return ERROR_INVALID_FORMAT;
-
-								decayBlock2 db2;
-								memcpy(&db2, p, sizeof(decayBlock2));
-								/*
-								sType->decayTime = db2.decayTime;
-								sType->decayTo = db2.decayTo;
-								*/
-								break;
-							}
-
-							case ITEM_ATTR_WEAPON2:
-							{
-								if(datalen != sizeof(weaponBlock2))
-									return ERROR_INVALID_FORMAT;
-
-								weaponBlock2 wb2;
-								memcpy(&wb2, p, sizeof(weaponBlock2));
-								/*
-								sType->weaponType = (WeaponType)wb2.weaponType;
-								sType->shootType = (subfight_t)wb2.shootType;
-								sType->amuType = (amu_t)wb2.amuType;
-								sType->attack = wb2.attack;
-								sType->defence = wb2.defence;
-								*/
-								break;
-							}
-
-							case ITEM_ATTR_AMU2:
-							{
-								if(datalen != sizeof(amuBlock2))
-									return ERROR_INVALID_FORMAT;
-
-								amuBlock2 ab2;
-								memcpy(&ab2, p, sizeof(amuBlock2));
-								/*
-								sType->shootType = (subfight_t)ab2.shootType;
-								sType->amuType = (amu_t)ab2.amuType;
-								sType->attack = ab2.attack;
-								*/
-								break;
-							}
-
-							case ITEM_ATTR_ARMOR2:
-							{
-								if(datalen != sizeof(armorBlock2))
-									return ERROR_INVALID_FORMAT;
-
-								armorBlock2 ab2;
-								memcpy(&ab2, p, sizeof(armorBlock2));
-								/*
-								sType->armor = ab2.armor;
-								sType->weight = ab2.weight;
-								sType->slot_position = (slots_t)ab2.slot_position;
-								*/
-
-								break;
-							}
-
-							case ITEM_ATTR_WRITEABLE2:
-							{
-								if(datalen != sizeof(writeableBlock2))
-									return ERROR_INVALID_FORMAT;
-
-								struct writeableBlock2 wb2;
-								memcpy(&wb2, p, sizeof(writeableBlock2));
-								//sType->readOnlyId = wb2.readOnlyId;
-								break;
-							}
-
-							case ITEM_ATTR_WRITEABLE3:
-							{
-								if(datalen != sizeof(writeableBlock3))
-									return ERROR_INVALID_FORMAT;
-
-								struct writeableBlock3 wb3;
-								memcpy(&wb3, p, sizeof(writeableBlock3));
-								//sType->readOnlyId = wb3.readOnlyId;
-								//sType->maxTextLen = wb3.maxTextLen;
-
 								break;
 							}
 
@@ -1053,7 +607,6 @@ int ItemsTypes::saveOtb(const char *filename)
 	VERSIONINFO vi;
 	memset(&vi, '\0', sizeof(VERSIONINFO));
 
-	//vi.dwMajorVersion = 2; //version
 	vi.dwMajorVersion = 3; //version
 	char clientString[32];
 	const graphicsVersion* spritesVersion;
@@ -1078,31 +631,12 @@ int ItemsTypes::saveOtb(const char *filename)
 		if(it->second->id >= 20000)
 			continue;
 
-		/*
-		if(it->second->alwaysOnTopOrder > 0){
-			SpriteType* sType = g_itemsSprites->getSprite(it->second->clientid);
-			if(it->second->alwaysOnTopOrder != sType->alwaysOnTopOrder){
-				it->second->alwaysOnTop = sType->alwaysOnTop;
-				it->second->alwaysOnTopOrder = sType->alwaysOnTopOrder;
-				it->second->blockProjectile = sType->blockProjectile;
-			}
-		}
-
-		if(it->second->group != ITEM_GROUP_DEPRECATED){
-			SpriteType* sType = g_itemsSprites->getSprite(it->second->clientid);
-			if(!it->second->compareOptions(sType)){
-				it->second->compareOptions(sType);
-			}
-		}
-		*/
-
 		flags_t flags = 0;
 		std::list<itemattrib_t> saveAttr;
 		
 		saveAttr.push_back(ITEM_ATTR_SERVERID);
 		saveAttr.push_back(ITEM_ATTR_CLIENTID);
 		
-//#ifdef __SPRITE_SEARCH__
 		if(it->second->id < 20000){
 			saveAttr.push_back(ITEM_ATTR_SPRITEHASH);
 			getImageHash(it->second->clientid, it->second->sprHash);
@@ -1157,7 +691,6 @@ int ItemsTypes::saveOtb(const char *filename)
 			}
 		}
 
-//#endif
 		if(it->second->lightLevel != 0 || it->second->lightColor != 0) {
 			saveAttr.push_back(ITEM_ATTR_LIGHT2);
 		}
@@ -1165,14 +698,9 @@ int ItemsTypes::saveOtb(const char *filename)
 		switch(it->second->group){
 		case ITEM_GROUP_GROUND:
 		case ITEM_GROUP_CONTAINER:
-		//case ITEM_GROUP_CHARGES:
-		//case ITEM_GROUP_TELEPORT:
-		//case ITEM_GROUP_MAGICFIELD:
-		//case ITEM_GROUP_DOOR:
 		case ITEM_GROUP_SPLASH:
 		case ITEM_GROUP_FLUID:
 		case ITEM_GROUP_DEPRECATED:
-		//case ITEM_GROUP_NONE:
 			f->startNode(it->second->group);
 			break;
 		default:
@@ -1212,23 +740,6 @@ int ItemsTypes::saveOtb(const char *filename)
 		if(it->second->stackable)
 			flags |= FLAG_STACKABLE;
 		
-		/*
-		if(it->second->floorChangeDown)
-			flags |= FLAG_FLOORCHANGEDOWN;
-		
-		if(it->second->floorChangeNorth)
-			flags |= FLAG_FLOORCHANGENORTH;
-		
-		if(it->second->floorChangeEast)
-			flags |= FLAG_FLOORCHANGEEAST;
-		
-		if(it->second->floorChangeSouth)
-			flags |= FLAG_FLOORCHANGESOUTH;
-		
-		if(it->second->floorChangeWest)
-			flags |= FLAG_FLOORCHANGEWEST;
-		*/
-
 		if(it->second->alwaysOnTop){
 			flags |= FLAG_ALWAYSONTOP;
 
@@ -1256,6 +767,8 @@ int ItemsTypes::saveOtb(const char *filename)
 		if(it->second->clientCharges)
 			flags |= FLAG_CLIENTCHARGES;
 
+		if(it->second->lookThrough)
+			flags |= FLAG_LOOKTHROUGH;
 
 		if(it->second->group == ITEM_GROUP_DEPRECATED){
 			flags = 0;
@@ -1280,7 +793,7 @@ int ItemsTypes::saveOtb(const char *filename)
 				}
 				case ITEM_ATTR_SPEED:
 				{
-					f->setProps(ITEM_ATTR_SPEED, &it->second->speed, sizeof(unsigned short));
+					f->setProps(ITEM_ATTR_SPEED, &it->second->groundSpeed, sizeof(unsigned short));
 					break;
 				}
 				case ITEM_ATTR_SPRITEHASH:

@@ -38,7 +38,6 @@ Sprite::Sprite()
 	internal = NULL;
 }
 
-
 long SpriteType::minClientId = 0;
 long SpriteType::maxClientId = 0;
 
@@ -60,19 +59,14 @@ SpriteType::SpriteType()
 	rotable = false;
 	readable = false;
 	clientCharges = false;
-	
-	speed = 0;
-
+	lookThrough = false;
+	groundSpeed = 0;
 	lightLevel = 0;
 	lightColor = 0;
-
 	isVertical = false;
 	isHorizontal = false;
-
 	isHangable = false;
-
 	miniMapColor = 0;
-	
 	subParam07 = 0;
 	subParam08 = 0;
 
@@ -124,7 +118,7 @@ bool SpriteType::compareOptions(const SpriteType *stype)
 	if(rotable != stype->rotable)
 		return false;
 
-	if(speed != stype->speed)
+	if(groundSpeed != stype->groundSpeed)
 		return false;
 
 	if(miniMapColor != stype->miniMapColor)
@@ -157,12 +151,9 @@ bool SpriteType::compareOptions(const SpriteType *stype)
 	if(clientCharges != stype->clientCharges)
 		return false;
 
-	//if(alwaysOnTop != stype->alwaysOnTop)
-	//	return false;
+	if(lookThrough != stype->lookThrough)
+		return false;
 
-	//if(alwaysOnTopOrder != stype->alwaysOnTopOrder)
-	//	return false;
-	
 	return true;
 }
 
@@ -348,7 +339,7 @@ bool ItemsSprites::loadFromDat(const char *filename)
 	fp = fopen(filename, "rb");
 	if(!fp)
 		return false;
-	
+
 	fseek(fp,0,SEEK_END);
 	size = ftell(fp);
 	
@@ -381,7 +372,7 @@ bool ItemsSprites::loadFromDat(const char *filename)
 			case 0x00: //is groundtile
 				fread(&read_short, 2, 1, fp);
 				speed = read_short;
-				sType->speed = speed;
+				sType->groundSpeed = speed;
 				sType->group = ITEM_GROUP_GROUND;
 				break;
 			case 0x01: //all OnTop
@@ -408,7 +399,6 @@ bool ItemsSprites::loadFromDat(const char *filename)
 				sType->useable = true;
 				break;
 			case 0x08: //charges
-				//sType->group = ITEM_GROUP_CHARGES;
 				sType->clientCharges = true;
 				break;
 			case 0x09: //writtable objects
@@ -496,7 +486,13 @@ bool ItemsSprites::loadFromDat(const char *filename)
 				fgetc(fp); // always 4
 				break;
 			case 0x1F:
+				//std::cout << "0x1F - " <<  id << std::endl;
 				break;
+			case 0x20:
+				sType->lookThrough = true;
+				//std::cout << "0x20 - " <<  id << std::endl;
+				break;
+
 			default:
 				optbyte = optbyte;
 				//std::cout << "unknown byte: " << (unsigned short)optbyte << std::endl;

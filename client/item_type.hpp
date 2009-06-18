@@ -73,20 +73,20 @@ enum itemattrib_t{
 	ITEM_ATTR_FIRST = 0x10,
 	ITEM_ATTR_SERVERID = ITEM_ATTR_FIRST,
 	ITEM_ATTR_CLIENTID,
-	ITEM_ATTR_NAME,
-	ITEM_ATTR_DESCR,
+	ITEM_ATTR_NAME,				/*deprecated*/
+	ITEM_ATTR_DESCR,			/*deprecated*/
 	ITEM_ATTR_SPEED,
-	ITEM_ATTR_SLOT,
-	ITEM_ATTR_MAXITEMS,
-	ITEM_ATTR_WEIGHT,
-	ITEM_ATTR_WEAPON,
-	ITEM_ATTR_AMU,
-	ITEM_ATTR_ARMOR,
-	ITEM_ATTR_MAGLEVEL,
-	ITEM_ATTR_MAGFIELDTYPE,
-	ITEM_ATTR_WRITEABLE,
-	ITEM_ATTR_ROTATETO,
-	ITEM_ATTR_DECAY,
+	ITEM_ATTR_SLOT,				/*deprecated*/
+	ITEM_ATTR_MAXITEMS,			/*deprecated*/
+	ITEM_ATTR_WEIGHT,			/*deprecated*/
+	ITEM_ATTR_WEAPON,			/*deprecated*/
+	ITEM_ATTR_AMU,				/*deprecated*/
+	ITEM_ATTR_ARMOR,			/*deprecated*/
+	ITEM_ATTR_MAGLEVEL,			/*deprecated*/
+	ITEM_ATTR_MAGFIELDTYPE,		/*deprecated*/
+	ITEM_ATTR_WRITEABLE,		/*deprecated*/
+	ITEM_ATTR_ROTATETO,			/*deprecated*/
+	ITEM_ATTR_DECAY,			/*deprecated*/
 	ITEM_ATTR_SPRITEHASH,
 	ITEM_ATTR_MINIMAPCOLOR,
 	ITEM_ATTR_07,
@@ -94,16 +94,14 @@ enum itemattrib_t{
 	ITEM_ATTR_LIGHT,
 
 	//1-byte aligned
-	ITEM_ATTR_DECAY2,
-	ITEM_ATTR_WEAPON2,
-	ITEM_ATTR_AMU2,
-	ITEM_ATTR_ARMOR2,
-	ITEM_ATTR_WRITEABLE2,
+	ITEM_ATTR_DECAY2,			/*deprecated*/
+	ITEM_ATTR_WEAPON2,			/*deprecated*/
+	ITEM_ATTR_AMU2,				/*deprecated*/
+	ITEM_ATTR_ARMOR2,			/*deprecated*/
+	ITEM_ATTR_WRITEABLE2,		/*deprecated*/
 	ITEM_ATTR_LIGHT2,
-
 	ITEM_ATTR_TOPORDER,
-
-	ITEM_ATTR_WRITEABLE3,
+	ITEM_ATTR_WRITEABLE3,		/*deprecated*/
 
 	ITEM_ATTR_LAST
 };
@@ -130,8 +128,9 @@ enum itemflags_t {
  FLAG_HORIZONTAL = 262144,
  FLAG_CANNOTDECAY = 524288,
  FLAG_ALLOWDISTREAD = 1048576,
- FLAG_CORPSE = 2097152, //depricated
- FLAG_CLIENTCHARGES = 4194304
+ FLAG_CORPSE = 2097152,			/*deprecated*/
+ FLAG_CLIENTCHARGES = 4194304,
+ FLAG_LOOKTHROUGH = 8388608
 };
 
 struct decayBlock{
@@ -310,7 +309,6 @@ public:
 	bool hasHeight;
 	bool blockProjectile;
 	bool blockPathFind;
-
 	bool alwaysOnTop;
 	unsigned char alwaysOnTopOrder;
 	bool stackable;
@@ -319,16 +317,12 @@ public:
 	bool pickupable;
 	bool rotable;
 	bool readable;
-
 	bool allowDistRead;
 	bool clientCharges;
-
-	
+	bool lookThrough;
+	int groundSpeed;
 	std::string name;
 	char sprHash[16];
-
-	//ground
-	int speed;
 
 	unsigned short miniMapColor;
 	unsigned short subParam07;
@@ -343,43 +337,6 @@ public:
 	bool isHangable;
 	bool compareOptions(const SpriteType *stype);
 	void reloadOptions(const SpriteType *stype);
-
-	/*
-	std::string descr;
-	int rotateTo;
-	double weight;
-	int decayTo;
-	int decayTime;
-
-	slots_t slot_position;
-	bool floorChangeDown;
-	bool floorChangeNorth;
-	bool floorChangeSouth;
-	bool floorChangeEast;
-	bool floorChangeWest;
-
-	//container
-	int maxItems;
-	
-	//weapon
-	amu_t amuType;
-	WeaponType weaponType;
-	subfight_t shootType;
-	int attack;
-	int	defence;
-	
-	//armor
-	int armor;
-	
-	//rune
-	int runeMagLevel;
-	
-	//teleport
-	
-	//writeable
-	int readOnlyId;
-	int maxTextLen;
-	*/
 };
 
 typedef std::map<unsigned short, ItemType*> ItemMap;

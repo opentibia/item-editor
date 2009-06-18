@@ -58,7 +58,6 @@ public:
 	bool hasHeight;
 	bool blockProjectile;
 	bool blockPathFind;
-
 	bool alwaysOnTop;
 	unsigned char alwaysOnTopOrder;
 	bool stackable;
@@ -68,19 +67,14 @@ public:
 	bool rotable;
 	bool readable;
 	bool clientCharges;
-
-	int speed;
-
+	bool lookThrough;
+	int groundSpeed;
 	int lightLevel;
 	int lightColor;
-
 	bool isVertical;
 	bool isHorizontal;
-
 	bool isHangable;
-
-	unsigned short miniMapColor;
-	
+	unsigned short miniMapColor;	
 	unsigned short subParam07;
 	unsigned short subParam08;
 
