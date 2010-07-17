@@ -21,7 +21,6 @@
 #define __FILE_REVISION "0.0.1 CVS"
 #include "definitions.hpp"
 
-
 #include "item_sprite.hpp"
 #include "gui.hpp"
 #include <iostream>
@@ -334,7 +333,6 @@ bool ItemsSprites::loadFromDat(const char *filename)
 	long size;
 	int speed;
 	short read_short;
-	unsigned short us;
 
 	fp = fopen(filename, "rb");
 	if(!fp)
@@ -368,137 +366,228 @@ bool ItemsSprites::loadFromDat(const char *filename)
 		int optbyte;
 
 		while(((optbyte = fgetc(fp)) >= 0) && (optbyte != 0xFF)){
-			switch(optbyte){
-			case 0x00: //is groundtile
-				fread(&read_short, 2, 1, fp);
-				speed = read_short;
-				sType->groundSpeed = speed;
-				sType->group = ITEM_GROUP_GROUND;
-				break;
-			case 0x01: //all OnTop
-				sType->alwaysOnTop = true;
-				sType->alwaysOnTopOrder = 1;
-				break;
-			case 0x02: //can walk trough (open doors, arces, bug pen fence ??)
-				sType->alwaysOnTop = true;
-				sType->alwaysOnTopOrder = 2;
-				break;
-			case 0x03: //can walk trough (arces)
-				sType->alwaysOnTop = true;
-				sType->alwaysOnTopOrder = 3;
-				break;
-			case 0x04: //is a container
-				sType->group = ITEM_GROUP_CONTAINER;
-				break;
-			case 0x05: //is stackable
-				sType->stackable = true;
-				break;
-			case 0x06: //ladders
-				break;
-			case 0x07: //is useable
-				sType->useable = true;
-				break;
-			case 0x08: //charges
-				sType->clientCharges = true;
-				break;
-			case 0x09: //writtable objects
-				sType->group = ITEM_GROUP_WRITEABLE;
-				sType->readable = true;
-				fread(&us, sizeof(us), 1, fp); //unknown, values like 80, 200, 512, 1024, 2000
-				sType->subParam07 = us;
-				break;
-			case 0x0A: //writtable objects that can't be edited 
-				sType->readable = true;
-				fread(&us, sizeof(us), 1, fp); //unknown, all have the value 1024
-				sType->subParam08 = us;
-				break;
-			case 0x0B: //can contain fluids
-				sType->group = ITEM_GROUP_FLUID;
-				break;
-			case 0x0C: //liquid with states 
-				sType->group = ITEM_GROUP_SPLASH;
-				break;
-			case 0x0D: //is blocking
-				sType->blockSolid = true;
-				break;
-			case 0x0E: //is no moveable
-				sType->moveable = false;
-				break;
-			case 0x0F: //blocks missiles (walls, magic wall etc)
-				sType->blockProjectile = true;
-				break;
-			case 0x10: //blocks monster movement (flowers, parcels etc)
-				sType->blockPathFind = true;
-				break;
-			case 0x11: //can be equipped
-				sType->pickupable = true;
-				break;
-			case 0x12: //wall items
-				sType->isHangable = true;
-				break;
-			case 0x13:
-				sType->isHorizontal = true;
-				break;
-			case 0x14:
-				sType->isVertical = true;
-				break;
-			case 0x15: //rotable items
-				sType->rotable = true;
-				break;
-			case 0x16: //light info .. //sprite-drawing related
-				unsigned short lightlevel;
-				fread(&lightlevel, sizeof(lightlevel), 1, fp);
-				sType->lightLevel = lightlevel;
-				unsigned short lightcolor;
-				fread(&lightcolor, sizeof(lightcolor), 1, fp);
-				sType->lightColor = lightcolor;
-				break;
-			case 0x17:  //floor change 
-				break;
-			case 0x18:
-				optbyte = optbyte;
-				break;
-			case 0x19: //???
-				fgetc(fp);
-				fgetc(fp);
-				fgetc(fp);
-				fgetc(fp);
-				break;
-			case 0x1A:
-				sType->hasHeight = true;
-				fgetc(fp); //always 8
-				fgetc(fp); //always 0
-				break;
-			case 0x1B://draw with height offset for all parts (2x2) of the sprite
-				break;
-			case 0x1C://some monsters
-				break;
-			case 0x1D:
-				unsigned short color;
-				fread(&color, sizeof(color), 1, fp);
-				sType->miniMapColor = color;
-				break;
-			case 0x1E:  //line spot
-				int tmp;
-				tmp = fgetc(fp); // 86 -> openable holes, 77-> can be used to go down, 76 can be used to go up, 82 -> stairs up, 79 switch,    
-				if(tmp == 0x58)
-					sType->readable = true;
-				fgetc(fp); // always 4
-				break;
-			case 0x1F:
-				//std::cout << "0x1F - " <<  id << std::endl;
-				break;
-			case 0x20:
-				sType->lookThrough = true;
-				//std::cout << "0x20 - " <<  id << std::endl;
-				break;
 
-			default:
-				optbyte = optbyte;
-				//std::cout << "unknown byte: " << (unsigned short)optbyte << std::endl;
-				return false;
-				break;
-			}
+			switch(optbyte){
+				case 0x00: //groundtile
+				{
+					fread(&read_short, 2, 1, fp);
+					speed = read_short;
+					sType->groundSpeed = speed;
+					sType->group = ITEM_GROUP_GROUND;
+					break;
+				}
+
+				case 0x01: //all OnTop
+				{
+					sType->alwaysOnTop = true;
+					sType->alwaysOnTopOrder = 1;
+					break;
+				}
+
+				case 0x02: //can walk trough (open doors, arces, bug pen fence)
+				{
+					sType->alwaysOnTop = true;
+					sType->alwaysOnTopOrder = 2;
+					break;
+				}
+
+				case 0x03: //can walk trough (arces)
+				{
+					sType->alwaysOnTop = true;
+					sType->alwaysOnTopOrder = 3;
+					break;
+				}
+
+				case 0x04: //container
+				{
+					sType->group = ITEM_GROUP_CONTAINER;
+					break;
+				}
+
+				case 0x05: //stackable
+				{
+					sType->stackable = true;
+					break;
+				}
+
+				case 0x06:
+				{
+					break;
+				}
+
+				case 0x07: //useable
+				{
+					sType->useable = true;
+					break;
+				}
+
+				case 0x08: //writtable
+				{
+					unsigned short maxChars;
+					fread(&maxChars, sizeof(maxChars), 1, fp); //max number of characters, 80, 200, 512, 1024, 2000
+
+					sType->group = ITEM_GROUP_WRITEABLE;
+					sType->readable = true;
+					sType->subParam07 = maxChars;
+					break;
+				}
+
+				case 0x09: //writtable once
+				{
+					//writtable objects that can't be edited by players
+					unsigned short maxChars;
+					fread(&maxChars, sizeof(maxChars), 1, fp); //max number of characters, 80, 200, 512, 1024, 2000
+
+					sType->readable = true;
+					sType->subParam08 = maxChars;
+					break;
+				}
+
+				case 0x0A: //fluid containers
+				{
+					unsigned char unknown;
+					unknown = fgetc(fp);
+
+					sType->group = ITEM_GROUP_FLUID;
+					break;
+				}
+
+				case 0x0B: //splashes
+				{
+					sType->group = ITEM_GROUP_SPLASH;
+					break;
+				}
+
+				case 0x0C: //blocks solid objects (creatures, walls etc)
+				{
+					sType->blockSolid = true;
+					break;
+				}
+
+				case 0x0D: //not moveable
+				{
+					sType->moveable = false;
+					break;
+				}
+
+				case 0x0E: //blocks missiles (walls, magic wall etc)
+				{
+					sType->blockProjectile = true;
+					break;
+				}
+
+				case 0x0F: //blocks pathfind algorithms (monsters)
+				{
+					sType->blockPathFind = true;
+					break;
+				}
+
+				case 0x10: //blocks monster movement (flowers, parcels etc)
+				{
+					sType->pickupable = true;
+					break;
+				}
+
+				case 0x11: //hangable objects (wallpaper etc)
+				{
+					sType->isHangable = true;
+					break;
+				}
+
+				case 0x12: //horizontal wall
+				{
+					sType->isHorizontal = true;
+					break;
+				}
+
+				case 0x13: //vertical wall
+				{
+					sType->isVertical = true;
+					break;
+				}
+
+				case 0x14: //rotatable
+				{
+					sType->rotable = true;
+					break;
+				}
+
+				case 0x15: //light info
+				{
+					unsigned short lightLevel;
+					unsigned short lightColor;
+					fread(&lightLevel, sizeof(lightLevel), 1, fp);
+					fread(&lightColor, sizeof(lightColor), 1, fp);
+
+					sType->lightLevel = lightLevel;
+					sType->lightColor = lightColor;
+					break;
+				}
+
+				case 0x16:
+					break;
+
+				case 0x17:  //changes floor
+					break;
+
+				case 0x18:
+					fgetc(fp);
+					fgetc(fp);
+					fgetc(fp);
+					fgetc(fp);
+					break;
+
+				case 0x19:
+				{
+					sType->hasHeight = true;
+					unsigned short height;
+					fread(&height, sizeof(height), 1, fp);
+					break;
+				}
+
+				case 0x1A:
+					break;
+
+				case 0x1B:
+					break;
+
+				case 0x1C:
+				{					
+					unsigned short miniMapColor;
+					fread(&miniMapColor, sizeof(miniMapColor), 1, fp);
+					sType->miniMapColor = miniMapColor;
+					break;
+				}
+
+				case 0x1D:
+				{
+					unsigned short type;
+					fread(&type, sizeof(type), 1, fp);
+					if(type == 1112){
+						sType->readable = true;
+					}
+
+					break;
+				}
+
+				case 0x1E:
+					break;
+
+				case 0x1F:
+				{
+					sType->lookThrough = true;
+					break;
+				}
+
+				case 0x20:
+					break;
+
+				default:
+					optbyte = optbyte;
+					//std::cout << "unknown byte: " << (unsigned short)optbyte << std::endl;
+					return false;
+					break;
+				}
 		}
 
 		// Size and sprite data
