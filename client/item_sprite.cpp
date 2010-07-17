@@ -153,6 +153,12 @@ bool SpriteType::compareOptions(const SpriteType *stype)
 	if(lookThrough != stype->lookThrough)
 		return false;
 
+	if(hasHeight != stype->hasHeight)
+		return false;
+
+	if(blockProjectile != stype->blockProjectile)
+		return false;
+
 	return true;
 }
 
