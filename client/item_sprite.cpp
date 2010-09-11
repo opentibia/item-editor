@@ -451,9 +451,6 @@ bool ItemsSprites::loadFromDat(const char *filename)
 
 				case 0x0A: //fluid containers
 				{
-					unsigned char unknown;
-					unknown = fgetc(fp);
-
 					sType->group = ITEM_GROUP_FLUID;
 					break;
 				}
