@@ -133,15 +133,15 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Plugin850\plugin850.csproj">
+    <ProjectReference Include="Plugin850\plugin850.csproj">
       <Project>{4624E915-FB86-4DDB-ACA6-A2313F70BA9C}</Project>
       <Name>plugin850</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Plugin860\plugin860.csproj">
+    <ProjectReference Include="Plugin860\plugin860.csproj">
       <Project>{3624E915-FB86-4DDB-ACA6-A2313F70BA9C}</Project>
       <Name>plugin860</Name>
     </ProjectReference>
-    <ProjectReference Include="..\PluginInterface\PluginInterface.csproj">
+    <ProjectReference Include="PluginInterface\PluginInterface.csproj">
       <Project>{CEF21172-258C-4D0D-B024-ED7EF99612A2}</Project>
       <Name>PluginInterface</Name>
     </ProjectReference>

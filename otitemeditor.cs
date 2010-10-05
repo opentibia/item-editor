@@ -32,7 +32,7 @@ namespace otitemeditor
 		string currentOtbFullPath = "";
 
 		//The original plugin that was used to open the currently loaded OTB
-		public Host.Types.Plugin originalPlugin;
+		public Host.Types.Plugin previousPlugin;
 
 		public otitemeditor()
 		{
@@ -316,10 +316,10 @@ namespace otitemeditor
 				box.Image = null;
 			}
 
-			if (originalPlugin != null)
+			if (previousPlugin != null)
 			{
 				SpriteItem prevSpriteItem;
-				if (originalPlugin.Instance.Items.TryGetValue(item.prevSpriteId, out prevSpriteItem))
+				if (previousPlugin.Instance.Items.TryGetValue(item.prevSpriteId, out prevSpriteItem))
 				{
 					DrawSprite(prevPictureBox, prevSpriteItem);
 
@@ -397,6 +397,33 @@ namespace otitemeditor
 				}
 				++index;
 			}
+		}
+
+		public bool LoadClient(Host.Types.Plugin plugin, UInt32 otbVersion)
+		{
+			SupportedClient client = plugin.Instance.SupportedClients.Find(
+				delegate(SupportedClient sc)
+				{
+					return sc.otbVersion == otbVersion;
+				});
+
+			if (client == null)
+			{
+				MessageBox.Show("The selected plugin does not support this version.");
+				return false;
+			}
+
+			string baseFolder = System.IO.Directory.GetCurrentDirectory();
+			string datPath = System.IO.Path.Combine("data", String.Format("tibia{0}.dat", client.version));
+			string sprPath = System.IO.Path.Combine("data", String.Format("tibia{0}.spr", client.version));
+
+			bool result = currentPlugin.Instance.LoadClient(client, System.IO.Path.Combine(baseFolder, datPath), System.IO.Path.Combine(baseFolder, sprPath));
+			if (!result)
+			{
+				MessageBox.Show(String.Format("The plugin could not load tibia{0}.dat or tibia{1}.spr", client.version, client.version));
+			}
+
+			return result;
 		}
 
 		private void otitemeditor_Load(object sender, EventArgs e)
@@ -505,11 +532,10 @@ namespace otitemeditor
 					return;
 				}
 
-				if (!currentPlugin.Instance.LoadClient(currentOtbVersion))
+				if (!LoadClient(currentPlugin, currentOtbVersion))
 				{
 					currentPlugin = null;
 					items.Clear();
-					MessageBox.Show(String.Format("The plugin could not load the tibia.dat and tibia.spr"));
 					return;
 				}
 
@@ -604,10 +630,8 @@ namespace otitemeditor
 					return;
 				}
 
-				updatePlugin.Instance.LoadClient(updateClientVersion);
-				if (updatePlugin == null)
+				if (!LoadClient(updatePlugin, updateClientVersion))
 				{
-					MessageBox.Show(String.Format("The plugin could not load the tibia.dat and tibia.spr"));
 					return;
 				}
 
@@ -642,6 +666,7 @@ namespace otitemeditor
 						{
 							Application.DoEvents();
 						}
+
 						progress.progressLbl.Text = String.Format(
 							"Calculating image signature for item {0}", spriteItem.id);
 						++progress.bar.Value;
@@ -670,7 +695,7 @@ namespace otitemeditor
 				List<UInt16> assignedSpriteIdList = new List<UInt16>();
 
 				//store the previous plugin (so we can display previous sprite, and do other comparisions)
-				originalPlugin = currentPlugin;
+				previousPlugin = currentPlugin;
 
 				//update the current plugin the one we are updating to
 				currentPlugin = updatePlugin;
@@ -690,18 +715,11 @@ namespace otitemeditor
 					{
 						continue;
 					}
-					
-					//Store the previous client id, so that we can use it to show the previous sprite,
-					//and for image searching with signatures.
-					//item.previousSpriteId = item.dat.id;
 
 					SpriteItem updateSpriteItem;
 					if (updateItems.TryGetValue(item.spriteId, out updateSpriteItem))
 					{
 						bool compareResult = updateSpriteItem.isEqual(item);
-
-						//Update the dat information with the plugin we are updating to
-						//item.dat = updateItem.Clone();
 
 						if (Utils.ByteArrayCompare(updateSpriteItem.spriteHash, item.spriteHash))
 						{
@@ -878,7 +896,6 @@ namespace otitemeditor
 						}
 					}
 
-					//currentItem.dat = newItem.dat.Clone();
 					currentItem.prevSpriteId = currentItem.spriteId;
 					currentItem.spriteId = spriteItem.id;
 					showItem(currentItem);
@@ -893,7 +910,6 @@ namespace otitemeditor
 				SpriteItem newSpriteItem;
 				if (currentPlugin.Instance.Items.TryGetValue((UInt16)clientIdUpDown.Value, out newSpriteItem))
 				{
-					//currentItem.dat = newItem.Clone();
 					currentItem.prevSpriteId = currentItem.spriteId;
 					currentItem.spriteId = newSpriteItem.id;
 					showItem(currentItem);
