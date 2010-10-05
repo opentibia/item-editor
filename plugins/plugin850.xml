@@ -1,0 +1,11 @@
+<settings>
+  <clients>
+    <client version="850" description="Tibia 8.50.rev1" otbversion="15" datsignature="4A49C5EB" sprsignature="4A44FD4E"/>
+    <client version="850" description="Tibia 8.50.rev2" otbversion="15" datsignature="4A4CC0DC" sprsignature="4A44FD4E"/>
+    <client version="850" description="Tibia 8.50.rev3" otbversion="15" datsignature="4AE97492" sprsignature="4ACB5230"/>
+    <client version="854" description="Tibia 8.54.rev1" otbversion="16" datsignature="4B1E2CAA" sprsignature="4B1E2C87"/>
+    <client version="854" description="Tibia 8.54.rev2" otbversion="16" datsignature="4B0D46A9" sprsignature="4B0D3AFF"/>
+    <client version="854" description="Tibia 8.54.rev3" otbversion="17" datsignature="4B28B89E" sprsignature="4B1E2C87"/>
+    <client version="855" description="Tibia 8.55" otbversion="18" datsignature="4B98FF53" sprsignature="4B913871"/>
+  </clients>
+</settings>
