@@ -180,14 +180,16 @@ namespace otitemeditor
 						resultTextBox.AppendText(string.Format("id: {0} minimapColor [{1}]/[{2}]" + Environment.NewLine, item1.id, item1.minimapColor, item2.minimapColor));
 					}
 				}
+
+				if (resultTextBox.Text.Length == 0)
+				{
+					MessageBox.Show("No differences found!");
+				}
+
+				return true;
 			}
 
-			if (resultTextBox.Text.Length == 0)
-			{
-				MessageBox.Show("No differences found!");
-			}
-
-			return true;
+			return false;
 		}
 
 		private void btnCompare_Click(object sender, EventArgs e)
