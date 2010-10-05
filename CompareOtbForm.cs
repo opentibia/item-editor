@@ -59,8 +59,8 @@ namespace otitemeditor
 						resultTextBox.AppendText(string.Format("id: {0} Sprite changed [{1}]/[{2}]" + Environment.NewLine, item1.id, item1.spriteId, item2.spriteId));
 						continue;
 					}
-					
-					if (!Utils.ByteArrayCompare(item1.spriteHash, item2.spriteHash))
+
+					if (item1.spriteHash != null && item2.spriteHash != null && !Utils.ByteArrayCompare(item1.spriteHash, item2.spriteHash))
 					{
 						resultTextBox.AppendText(string.Format("id: {0} Sprite updated" + Environment.NewLine, item1.id));
 					}
