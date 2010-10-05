@@ -417,7 +417,7 @@ namespace otitemeditor
 			string datPath = System.IO.Path.Combine("data", String.Format("tibia{0}.dat", client.version));
 			string sprPath = System.IO.Path.Combine("data", String.Format("tibia{0}.spr", client.version));
 
-			bool result = currentPlugin.Instance.LoadClient(client, System.IO.Path.Combine(baseFolder, datPath), System.IO.Path.Combine(baseFolder, sprPath));
+			bool result = plugin.Instance.LoadClient(client, System.IO.Path.Combine(baseFolder, datPath), System.IO.Path.Combine(baseFolder, sprPath));
 			if (!result)
 			{
 				MessageBox.Show(String.Format("The plugin could not load tibia{0}.dat or tibia{1}.spr", client.version, client.version));
