@@ -4,6 +4,11 @@ using otitemeditor;
 
 namespace PluginInterface
 {
+	public class SpriteItems : Dictionary<UInt16, SpriteItem>
+	{
+		public bool signatureCalculated = false;
+	}
+
 	public class SupportedClient
 	{
 		public SupportedClient(
@@ -31,7 +36,7 @@ namespace PluginInterface
 	{
 		IPluginHost Host { get; set; }
 
-		Dictionary<UInt16, SpriteItem> Items { get; }
+		SpriteItems Items { get; }
 		List<SupportedClient> SupportedClients { get; }
 		bool LoadClient(SupportedClient client, string datFullPath, string sprFullPath);
 

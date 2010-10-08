@@ -276,16 +276,22 @@ namespace otitemeditor
 		}
 
 		//contains sprite signatures using Euclidean distance (4x4 blocks) on a ff2d generated image of the sprite
-		private double[] _spriteSignature = null;
-		public double[] spriteSignature
+		private double[,] _spriteSignature = null;
+		public double[,] spriteSignature
 		{
 			get {return _spriteSignature;}
 			set { _spriteSignature = value; }
 		}
+
 		//Used to calculate fourier transformation
 		public byte[] getRGBData()
 		{
 			return spriteList[0].getRGBData();
+		}
+
+		public byte[] getRGBData(int frameIndex)
+		{
+			return spriteList[frameIndex].getRGBData();
 		}
 
 		//used for drawing and calculating MD5

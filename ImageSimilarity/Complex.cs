@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace otitemeditor
+namespace ImageSimilarity
 {
 	public class Complex
 	{

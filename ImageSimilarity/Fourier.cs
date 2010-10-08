@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Drawing;
+using System.Drawing.Imaging;
 
-namespace otitemeditor
+namespace ImageSimilarity
 {
 	public class Fourier
 	{
@@ -151,18 +152,22 @@ namespace otitemeditor
 		{
 			int width = input.Width;
 			int height = input.Height;
-			byte[] data = Utils.greyScale(input);
+			byte[] data = ImageUtils.greyScale(input);
 			Complex[,] cmplx = new Complex[height, width];
 			double scale = 1.0 / (double)Math.Sqrt(width * height);
+			
 			for (int i = 0; i < data.Length; i++)
 			{
 				cmplx[i / width, i % width] = new Complex(data[i] / 256.0);
 			}
+			
 			cmplx = fft2d(cmplx);
+
 			for (int i = 0; i < data.Length; i++)
 			{
 				data[i] = (byte)Math.Min(255, (int)(cmplx[i / width, i % width].GetModulus() * 256.0) * scale);
 			}
+
 			// Swapping data -> lowest frequencies at center
 			if (reorder)
 			{
@@ -179,7 +184,8 @@ namespace otitemeditor
 					}
 				}
 			}
-			Bitmap output = Utils.getBitmap(data, width, height, 1);
+
+			Bitmap output = ImageUtils.getBitmap(data, PixelFormat.Format8bppIndexed, width, height);
 			return output;
 		}
 
@@ -187,7 +193,8 @@ namespace otitemeditor
 		{
 			int width = (int)Math.Pow(2, Math.Ceiling(Math.Log(input.Width, 2)));
 			int height = (int)Math.Pow(2, Math.Ceiling(Math.Log(input.Width, 2)));
-			byte[] data = Utils.greyScale(input);
+			byte[] data = ImageUtils.greyScale(input);
+
 			if (width != input.Width || height != input.Height)
 			{
 				// Pad data
@@ -203,14 +210,18 @@ namespace otitemeditor
 				}
 				data = newdata;
 			}
+
 			Complex[,] cmplx = new Complex[height, width];
 			double scale = 1.0 / (double)Math.Sqrt(width * height);
 			scale = 1;
+			
 			for (int i = 0; i < data.Length; i++)
 			{
 				cmplx[i / width, i % width] = new Complex(data[i] / 256.0);
 			}
+			
 			cmplx = ifft2d(cmplx);
+			
 			for (int i = 0; i < height; i++)
 			{
 				for (int k = 0; k < width; k++)
@@ -221,11 +232,139 @@ namespace otitemeditor
 					}
 				}
 			}
+
 			for (int i = 0; i < data.Length; i++)
 			{
 				data[i] = (byte)Math.Min(255, (int)(cmplx[i / width, i % width].GetModulus() * 256.0 * scale));
 			}
-			Bitmap output = Utils.getBitmap(data, width, height, 1);
+
+			Bitmap output = ImageUtils.getBitmap(data, PixelFormat.Format8bppIndexed, width, height);
+			return output;
+		}
+
+		public static Bitmap fft2dRGB(Bitmap input, bool reorder)
+		{
+			int width = input.Width;
+			int height = input.Height;
+			ImageUtils.RGB[] data = ImageUtils.SplitColorChannels(input);
+			Complex[,] cmplxR = new Complex[height, width];
+			Complex[,] cmplxG = new Complex[height, width];
+			Complex[,] cmplxB = new Complex[height, width];
+			double scale = 1.0 / (double)Math.Sqrt(width * height);
+			for (int i = 0; i < data.Length; i++)
+			{
+				cmplxR[i / width, i % width] = new Complex(data[i].r / 256.0);
+				cmplxG[i / width, i % width] = new Complex(data[i].g / 256.0);
+				cmplxB[i / width, i % width] = new Complex(data[i].b / 256.0);
+			}
+
+			cmplxR = fft2d(cmplxR);
+			cmplxG = fft2d(cmplxG);
+			cmplxB = fft2d(cmplxB);
+
+			for (int i = 0; i < data.Length; i++)
+			{
+				data[i].r = (byte)Math.Min(255, (int)(cmplxR[i / width, i % width].GetModulus() * 256.0) * scale);
+				data[i].g = (byte)Math.Min(255, (int)(cmplxG[i / width, i % width].GetModulus() * 256.0) * scale);
+				data[i].b = (byte)Math.Min(255, (int)(cmplxB[i / width, i % width].GetModulus() * 256.0) * scale);
+			}
+			// Swapping data -> lowest frequencies at center
+			if (reorder)
+			{
+				for (int i = 0; i < height / 2; i++)
+				{
+					for (int k = 0; k < width / 2; k++)
+					{
+						//r
+						byte val1 = data[i * width + k].r;
+						byte val2 = data[i * width + k + width / 2].r;
+						data[i * width + k].r = data[(i + width / 2) * width + k + width / 2].r;
+						data[(i + width / 2) * width + k + width / 2].r = val1;
+						data[i * width + k + width / 2].r = data[(i + width / 2) * width + k].r;
+						data[(i + width / 2) * width + k].r = val2;
+
+						//g
+						val1 = data[i * width + k].g;
+						val2 = data[i * width + k + width / 2].g;
+						data[i * width + k].g = data[(i + width / 2) * width + k + width / 2].g;
+						data[(i + width / 2) * width + k + width / 2].g = val1;
+						data[i * width + k + width / 2].g = data[(i + width / 2) * width + k].g;
+						data[(i + width / 2) * width + k].g = val2;
+
+						//b
+						val1 = data[i * width + k].b;
+						val2 = data[i * width + k + width / 2].b;
+						data[i * width + k].b = data[(i + width / 2) * width + k + width / 2].b;
+						data[(i + width / 2) * width + k + width / 2].b = val1;
+						data[i * width + k + width / 2].b = data[(i + width / 2) * width + k].b;
+						data[(i + width / 2) * width + k].b = val2;
+					}
+				}
+			}
+			Bitmap output = ImageUtils.getBitmap(ImageUtils.CombineColorChannels(data), input.PixelFormat, width, height);
+			return output;
+		}
+
+		public static Bitmap ifft2dRGB(Bitmap input)
+		{
+			int width = (int)Math.Pow(2, Math.Ceiling(Math.Log(input.Width, 2)));
+			int height = (int)Math.Pow(2, Math.Ceiling(Math.Log(input.Width, 2)));
+			ImageUtils.RGB[] data = ImageUtils.SplitColorChannels(input);
+			if (width != input.Width || height != input.Height)
+			{
+				// Pad data
+				ImageUtils.RGB[] newdata = new ImageUtils.RGB[width * height];
+				int xoff = width - input.Width;
+				int yoff = height - input.Height;
+				for (int i = 0; i < input.Height; i++)
+				{
+					for (int k = 0; k < input.Width; k++)
+					{
+						newdata[(i + yoff) * width + k + xoff] = data[i * input.Width + k];
+					}
+				}
+				data = newdata;
+			}
+
+			Complex[,] cmplxR = new Complex[height, width];
+			Complex[,] cmplxG = new Complex[height, width];
+			Complex[,] cmplxB = new Complex[height, width];
+
+			double scale = 1.0 / (double)Math.Sqrt(width * height);
+			scale = 1;
+
+			for (int i = 0; i < data.Length; i++)
+			{
+				cmplxR[i / width, i % width] = new Complex(data[i].r / 256.0);
+				cmplxG[i / width, i % width] = new Complex(data[i].g / 256.0);
+				cmplxB[i / width, i % width] = new Complex(data[i].b / 256.0);
+			}
+
+			cmplxR = ifft2d(cmplxR);
+			cmplxG = ifft2d(cmplxG);
+			cmplxB = ifft2d(cmplxB);
+
+			for (int i = 0; i < height; i++)
+			{
+				for (int k = 0; k < width; k++)
+				{
+					if (((k + i) & 0x1) != 0)
+					{
+						cmplxR[i, k] *= -1;
+						cmplxG[i, k] *= -1;
+						cmplxB[i, k] *= -1;
+					}
+				}
+			}
+
+			for (int i = 0; i < data.Length; i++)
+			{
+				data[i].r = (byte)Math.Min(255, (int)(cmplxR[i / width, i % width].GetModulus() * 256.0 * scale));
+				data[i].g = (byte)Math.Min(255, (int)(cmplxG[i / width, i % width].GetModulus() * 256.0 * scale));
+				data[i].b = (byte)Math.Min(255, (int)(cmplxB[i / width, i % width].GetModulus() * 256.0 * scale));
+			}
+
+			Bitmap output = ImageUtils.getBitmap(ImageUtils.CombineColorChannels(data), input.PixelFormat, width, height);
 			return output;
 		}
 	}

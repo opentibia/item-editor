@@ -7,12 +7,12 @@ using System.Text;
 using System.Windows.Forms;
 using System.Reflection;
 using System.IO;
-using PluginInterface;
 using System.Diagnostics;
-
 using System.Runtime.InteropServices;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
+using PluginInterface;
+using ImageSimilarity;
 
 namespace otitemeditor
 {
@@ -39,15 +39,9 @@ namespace otitemeditor
 			InitializeComponent();
 		}
 
-		private void DrawSprite(PictureBox picturBox, SpriteItem spriteItem)
+		private void DrawSprite(ref Bitmap canvas, SpriteItem spriteItem)
 		{
-			Bitmap newImage = new Bitmap(64, 64, PixelFormat.Format32bppRgb);
-			newImage.MakeTransparent(Color.FromArgb(0x11, 0x11, 0x11));
-			Graphics g = Graphics.FromImage(newImage);
-			g.FillRectangle(new SolidBrush(Color.White), new Rectangle(0, 0, newImage.Width, newImage.Height));
-			g.Save();
-
-			int spriteSize = spriteItem.width * spriteItem.height * spriteItem.frames;
+			Graphics g = Graphics.FromImage(canvas);
 
 			//draw sprite
 			for (int frame = 0; frame < spriteItem.frames; frame++)
@@ -57,28 +51,42 @@ namespace otitemeditor
 					for (int cx = 0; cx < spriteItem.width; ++cx)
 					{
 						int frameIndex = cx + cy * spriteItem.width + frame * spriteItem.width * spriteItem.height;
-						byte[] rgbData = spriteItem.getRGBAData(frameIndex);
+						Bitmap bmp = ImageUtils.getBitmap(spriteItem.getRGBData(frameIndex), PixelFormat.Format24bppRgb, 32, 32);
 
-						//Bitmap bmp = Utils.getBitmap(item.getRGBData(), 32, 32, 3);
-						Bitmap bmp = new Bitmap(32, 32, PixelFormat.Format32bppRgb);
-
-						BitmapData bmpData = bmp.LockBits(
-												new Rectangle(0, 0, bmp.Width, bmp.Height),
-												ImageLockMode.WriteOnly, bmp.PixelFormat);
-
-						bmpData.Stride = -bmpData.Stride;
-						//Copy the data from the byte array into Scan0
-						Marshal.Copy(rgbData, 0, bmpData.Scan0, 32 * 32 * 4);
-
-						bmp.UnlockBits(bmpData);
-						bmp.MakeTransparent(Color.FromArgb(0x11, 0x11, 0x11));
-						bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
-						g.DrawImage(bmp, new Rectangle(Math.Max(34 - cx * 32, 0), Math.Max(34 - cy * 32,0), bmp.Width, bmp.Height));
-						g.Save();
+						if (canvas.Width == 32)
+						{
+							g.DrawImage(bmp, new Rectangle(0, 0, bmp.Width, bmp.Height));
+						}
+						else
+						{
+							g.DrawImage(bmp, new Rectangle(Math.Max(32 - cx * 32, 0), Math.Max(32 - cy * 32, 0), bmp.Width, bmp.Height));
+						}
 					}
 				}
 			}
 
+			g.Save();
+		}
+
+		private void DrawSprite(PictureBox picturBox, SpriteItem spriteItem)
+		{
+			Bitmap canvas = new Bitmap(64, 64, PixelFormat.Format24bppRgb);
+			using (Graphics g = Graphics.FromImage(canvas))
+			{
+				g.FillRectangle(new SolidBrush(Color.FromArgb(0x11, 0x11, 0x11)), 0, 0, canvas.Width, canvas.Height);
+				g.Save();
+			}
+
+			DrawSprite(ref canvas, spriteItem);
+
+			Bitmap newImage = new Bitmap(64, 64, PixelFormat.Format24bppRgb);
+			using (Graphics g = Graphics.FromImage(newImage))
+			{
+				g.DrawImage(canvas, new Point((canvas.Width > 32 ? 0 : 32), (canvas.Height > 32 ? 0 : 32)));
+				g.Save();
+			}
+
+			newImage.MakeTransparent(Color.FromArgb(0x11, 0x11, 0x11));
 			picturBox.Image = newImage;
 		}
 		
@@ -323,17 +331,10 @@ namespace otitemeditor
 				{
 					DrawSprite(prevPictureBox, prevSpriteItem);
 
-					if (!compareItem(item))
+					if (prevSpriteItem.spriteSignature != null)
 					{
-						if (!Utils.ByteArrayCompare(item.spriteHash, spriteItem.spriteHash))
-						{
-							if (prevSpriteItem.spriteSignature != null)
-							{
-								//Sprite does not match, use the sprite signature (ff2d) to find possible candidates
-								tableLayoutPanelCandidates.Visible = true;
-								showSpriteCandidates(prevSpriteItem);
-							}
-						}
+						//Sprite does not match, use the sprite signature to find possible candidates
+						showSpriteCandidates(prevSpriteItem);
 					}
 				}
 				else
@@ -348,6 +349,8 @@ namespace otitemeditor
 
 		private void showSpriteCandidates(SpriteItem spriteItem)
 		{
+			tableLayoutPanelCandidates.Visible = true;
+
 			//list with the top 5 results
 			List<KeyValuePair<double, OtbItem>> signatureList = new List<KeyValuePair<double, OtbItem>>();
 
@@ -364,8 +367,8 @@ namespace otitemeditor
 					continue;
 				}
 
-				double similarity = Utils.compareFF2Signature(spriteItem.spriteSignature, cmpSpriteItem.spriteSignature);
-				
+				double similarity = ImageUtils.CompareSignature(spriteItem.spriteSignature, cmpSpriteItem.spriteSignature);
+
 				foreach (KeyValuePair<double, OtbItem> kvp in signatureList)
 				{
 					if (similarity < kvp.Key)
@@ -382,6 +385,12 @@ namespace otitemeditor
 					signatureList.Add(kvp);
 				}
 			}
+
+			signatureList.Sort(
+				delegate(KeyValuePair<double, OtbItem> item1, KeyValuePair<double, OtbItem> item2)
+				{
+					return item1.Key.CompareTo(item2.Key);
+				});
 
 			//those with lowest value are the closest match
 			int index = 0;
@@ -424,6 +433,41 @@ namespace otitemeditor
 			}
 
 			return result;
+		}
+
+		private bool generateSpriteSignatures(ref SpriteItems items)
+		{
+			if (items.signatureCalculated)
+			{
+				return true;
+			}
+
+			ProgressForm progress = new ProgressForm();
+			progress.StartPosition = FormStartPosition.Manual;
+			progress.Location = new Point(Location.X + ((Width - progress.Width) / 2),
+				Location.Y + ((Height - progress.Height) / 2));
+			progress.bar.Minimum = 0;
+			progress.bar.Maximum = currentPlugin.Instance.Items.Count + items.Count;
+			progress.Show(this);
+
+			foreach (SpriteItem spriteItem in items.Values)
+			{
+				Bitmap spriteBmp = ImageUtils.getBitmap(spriteItem.getRGBData(), PixelFormat.Format24bppRgb, 32, 32);
+				Bitmap ff2dBmp = Fourier.fft2dRGB(spriteBmp, false);
+				spriteItem.spriteSignature = ImageUtils.CalculateEuclideanDistance(ff2dBmp, 1);
+
+				if (progress.bar.Value % 20 == 0)
+				{
+					Application.DoEvents();
+				}
+				progress.progressLbl.Text = String.Format(
+					"Calculating image signature for item {0}", spriteItem.id);
+				++progress.bar.Value;
+			}
+
+			items.signatureCalculated = true;
+			progress.Close();
+			return true;
 		}
 
 		private void otitemeditor_Load(object sender, EventArgs e)
@@ -514,7 +558,13 @@ namespace otitemeditor
 				return;
 			}
 
+			currentItem = null;
+			currentPlugin = null;
+			previousPlugin = null;
+			currentOtbVersion = 0;
+
 			items.Clear();
+
 			if (otb_loader.loadOtb(dialog.FileName, ref items, showOtbOutput))
 			{
 				currentOtbFullPath = dialog.FileName;
@@ -645,53 +695,17 @@ namespace otitemeditor
 				if (updateSettingsForm.generateSignatureCheck.Checked)
 				{
 					//Calculate an image signature using fourier transformation and calculate a signature we can
-					//use to compare it to other images (kinda similiar usage as the sprite hash) except this
+					//use to compare it to other images (kinda similar to md5 hash) except this
 					//can also be used to find images with some variation.
+					SpriteItems currentSpriteItems = currentPlugin.Instance.Items;
+					generateSpriteSignatures(ref currentSpriteItems);
 
-					ProgressForm progress = new ProgressForm();
-					progress.StartPosition = FormStartPosition.Manual;
-					progress.Location = new Point(Location.X + ((Width - progress.Width) / 2),
-						Location.Y + ((Height - progress.Height) / 2));
-					progress.bar.Minimum = 0;
-					progress.bar.Maximum = currentPlugin.Instance.Items.Count + updatePlugin.Instance.Items.Count;
-					progress.Show(this);
-
-					foreach (SpriteItem spriteItem in currentPlugin.Instance.Items.Values)
-					{
-						Bitmap ff2dBmp = Fourier.fft2d(Utils.getBitmap(spriteItem.getRGBData(), 32, 32, 3), false);
-						//Bitmap ff2dBmp = Utils.getBitmap(item.getRGBData(), 32, 32, 3);
-						spriteItem.spriteSignature = Utils.getEuclideanDistance(ff2dBmp);
-
-						if (progress.bar.Value % 20 == 0)
-						{
-							Application.DoEvents();
-						}
-
-						progress.progressLbl.Text = String.Format(
-							"Calculating image signature for item {0}", spriteItem.id);
-						++progress.bar.Value;
-					}
-
-					foreach (SpriteItem spriteItem in updatePlugin.Instance.Items.Values)
-					{
-						Bitmap ff2dBmp = Fourier.fft2d(Utils.getBitmap(spriteItem.getRGBData(), 32, 32, 3), false);
-						//Bitmap ff2dBmp = Utils.getBitmap(item.getRGBData(), 32, 32, 3);
-						spriteItem.spriteSignature = Utils.getEuclideanDistance(ff2dBmp);
-
-						if (progress.bar.Value % 20 == 0)
-						{
-							Application.DoEvents();
-						}
-						progress.progressLbl.Text = String.Format(
-							"Calculating image signature for item {0}", spriteItem.id);
-						++progress.bar.Value;
-					}
-
-					progress.Close();
+					SpriteItems updateSpriteItems = updatePlugin.Instance.Items;
+					generateSpriteSignatures(ref updateSpriteItems);
 				}
 
-				Dictionary<UInt16, SpriteItem> currentItems = currentPlugin.Instance.Items;
-				Dictionary<UInt16, SpriteItem> updateItems = updatePlugin.Instance.Items;
+				SpriteItems currentItems = currentPlugin.Instance.Items;
+				SpriteItems updateItems = updatePlugin.Instance.Items;
 				List<UInt16> assignedSpriteIdList = new List<UInt16>();
 
 				//store the previous plugin (so we can display previous sprite, and do other comparisions)

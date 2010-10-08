@@ -12,7 +12,7 @@ namespace Tibia860
 	public class Plugin : IPlugin
 	{
 		Dictionary<UInt16, Sprite> sprites = new Dictionary<UInt16, Sprite>();
-		Dictionary<UInt16, SpriteItem> items = new Dictionary<UInt16, SpriteItem>();
+		SpriteItems items = new SpriteItems();
 		List<SupportedClient> supportedClients = new List<SupportedClient>();
 
 		IPluginHost myHost = null;
@@ -21,7 +21,7 @@ namespace Tibia860
 		public IPluginHost Host { get { return myHost; } set { myHost = value; } }
 
 		public List<SupportedClient> SupportedClients { get { return supportedClients; } }
-		public Dictionary<UInt16, SpriteItem> Items { get { return items; } set { items = value; } }
+		public SpriteItems Items { get { return items; } set { items = value; } }
 
 		public bool LoadClient(SupportedClient client, string datFullPath, string sprFullPath)
 		{
