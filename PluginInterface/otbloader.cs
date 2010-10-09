@@ -280,6 +280,8 @@ namespace otitemeditor
 		public UInt32 dwMajorVersion;
 		public UInt32 dwMinorVersion;
 		public UInt32 dwBuildNumber;
+
+		public UInt32 clientVersion;
 	}
 
 	public class otb
@@ -697,7 +699,7 @@ namespace otitemeditor
 					vi.dwMajorVersion = items.dwMajorVersion;
 					vi.dwMinorVersion = items.dwMinorVersion;
 					vi.dwBuildNumber = items.dwBuildNumber;
-					vi.CSDVersion = String.Format("OTB {0}.{1}.{2}-{3}.{4}", vi.dwMajorVersion, vi.dwMinorVersion, vi.dwBuildNumber, 861 / 100, 861 % 100);
+					vi.CSDVersion = String.Format("OTB {0}.{1}.{2}-{3}.{4}", vi.dwMajorVersion, vi.dwMinorVersion, vi.dwBuildNumber, items.clientVersion / 100, items.clientVersion % 100);
 
 					MemoryStream ms = new MemoryStream();
 					BinaryWriter property = new BinaryWriter(ms);

@@ -18,6 +18,8 @@ namespace otitemeditor
 {
 	public partial class otitemeditor : Form
 	{
+		const string versionString = "otitemeditor 0.5";
+
 		bool showOnlyMissMatchedItems = false;
 		private TextBoxTraceListener textBoxListener;
 		private bool showUpdateOutput = true;
@@ -456,6 +458,7 @@ namespace otitemeditor
 				MessageBox.Show(String.Format("The plugin could not load tibia{0}.dat or tibia{1}.spr", client.version, client.version));
 			}
 
+			items.clientVersion = client.version;
 			return result;
 		}
 
@@ -496,6 +499,7 @@ namespace otitemeditor
 
 		private void otitemeditor_Load(object sender, EventArgs e)
 		{
+			this.Text = versionString;
 			typeCombo.Items.Add("Ground");
 			typeCombo.Items.Add("Container");
 			typeCombo.Items.Add("Fluid");
@@ -690,14 +694,14 @@ namespace otitemeditor
 			{
 				//Update OTB
 				Host.Types.Plugin updatePlugin = form.selectedPlugin;
-				UInt32 updateClientVersion = form.updateOtbVersion;
+				SupportedClient updateClient = form.updateClient;
 
 				if (updatePlugin == null)
 				{
 					return;
 				}
 
-				if (!LoadClient(updatePlugin, updateClientVersion))
+				if (!LoadClient(updatePlugin, updateClient.otbVersion))
 				{
 					return;
 				}
@@ -732,7 +736,8 @@ namespace otitemeditor
 				currentPlugin = updatePlugin;
 
 				//update version information
-				items.dwMinorVersion = updateClientVersion;
+				items.clientVersion = updateClient.version;
+				items.dwMinorVersion = updateClient.otbVersion;
 				items.dwBuildNumber = items.dwBuildNumber + 1;
 				currentOtbVersion = items.dwMinorVersion;
 
@@ -946,6 +951,16 @@ namespace otitemeditor
 					showItem(currentItem);
 				}
 			}
+		}
+
+		private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			MessageBox.Show("Information how to use this program check http://www.otfans.net.",
+				"About " + versionString, 
+				MessageBoxButtons.OK,
+				MessageBoxIcon.None,
+				MessageBoxDefaultButton.Button1,
+				0);
 		}
 	}
 }

@@ -93,8 +93,8 @@
 			this.findSpriteIdToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.reloadItemAttributesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripSeparator();
-			this.updateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.compareOtbToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.updateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
 			this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -120,8 +120,8 @@
 			// 
 			traceToolStripMenuItem.CheckOnClick = true;
 			traceToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-			this.otbTraceToolStripMenuItem,
-			this.updateTraceToolStripMenuItem});
+            this.otbTraceToolStripMenuItem,
+            this.updateTraceToolStripMenuItem});
 			traceToolStripMenuItem.Name = "traceToolStripMenuItem";
 			traceToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
 			traceToolStripMenuItem.Text = "Show trace";
@@ -130,7 +130,7 @@
 			// 
 			this.otbTraceToolStripMenuItem.CheckOnClick = true;
 			this.otbTraceToolStripMenuItem.Name = "otbTraceToolStripMenuItem";
-			this.otbTraceToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.otbTraceToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
 			this.otbTraceToolStripMenuItem.Text = "OTB";
 			this.otbTraceToolStripMenuItem.Click += new System.EventHandler(this.otbTraceToolStripMenuItem_Click);
 			// 
@@ -138,7 +138,7 @@
 			// 
 			this.updateTraceToolStripMenuItem.CheckOnClick = true;
 			this.updateTraceToolStripMenuItem.Name = "updateTraceToolStripMenuItem";
-			this.updateTraceToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.updateTraceToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
 			this.updateTraceToolStripMenuItem.Text = "Update";
 			this.updateTraceToolStripMenuItem.Click += new System.EventHandler(this.updateTraceToolStripMenuItem_Click);
 			// 
@@ -659,10 +659,10 @@
 			// menuBar
 			// 
 			this.menuBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-			this.fileToolStripMenuItem,
-			this.viewToolStripMenuItem,
-			this.toolsToolStripMenuItem,
-			this.helpToolStripMenuItem});
+            this.fileToolStripMenuItem,
+            this.viewToolStripMenuItem,
+            this.toolsToolStripMenuItem,
+            this.helpToolStripMenuItem});
 			this.menuBar.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
 			this.menuBar.Location = new System.Drawing.Point(0, 0);
 			this.menuBar.Name = "menuBar";
@@ -673,12 +673,12 @@
 			// fileToolStripMenuItem
 			// 
 			this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-			this.newToolStripMenuItem,
-			this.openToolStripMenuItem,
-			this.saveToolStripMenuItem,
-			this.saveAsToolStripMenuItem,
-			this.toolStripMenuItem1,
-			this.closeToolStripMenuItem});
+            this.newToolStripMenuItem,
+            this.openToolStripMenuItem,
+            this.saveToolStripMenuItem,
+            this.saveAsToolStripMenuItem,
+            this.toolStripMenuItem1,
+            this.closeToolStripMenuItem});
 			this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
 			this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
 			this.fileToolStripMenuItem.Text = "&File";
@@ -727,7 +727,7 @@
 			// viewToolStripMenuItem
 			// 
 			this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-			this.showOnlyUnmatchedToolStripMenuItem});
+            this.showOnlyUnmatchedToolStripMenuItem});
 			this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
 			this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
 			this.viewToolStripMenuItem.Text = "&View";
@@ -743,14 +743,14 @@
 			// toolsToolStripMenuItem
 			// 
 			this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-			this.findItemIdToolStripMenuItem,
-			this.findSpriteIdToolStripMenuItem,
-			this.reloadItemAttributesToolStripMenuItem,
-			this.toolStripMenuItem4,
-			this.compareOtbToolStripMenuItem,
-			this.updateToolStripMenuItem,
-			this.toolStripMenuItem2,
-			traceToolStripMenuItem});
+            this.findItemIdToolStripMenuItem,
+            this.findSpriteIdToolStripMenuItem,
+            this.reloadItemAttributesToolStripMenuItem,
+            this.toolStripMenuItem4,
+            this.compareOtbToolStripMenuItem,
+            this.updateToolStripMenuItem,
+            this.toolStripMenuItem2,
+            traceToolStripMenuItem});
 			this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
 			this.toolsToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
 			this.toolsToolStripMenuItem.Text = "&Tools";
@@ -781,6 +781,13 @@
 			this.toolStripMenuItem4.Name = "toolStripMenuItem4";
 			this.toolStripMenuItem4.Size = new System.Drawing.Size(187, 6);
 			// 
+			// compareOtbToolStripMenuItem
+			// 
+			this.compareOtbToolStripMenuItem.Name = "compareOtbToolStripMenuItem";
+			this.compareOtbToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+			this.compareOtbToolStripMenuItem.Text = "Compare otb...";
+			this.compareOtbToolStripMenuItem.Click += new System.EventHandler(this.compareOtbToolStripMenuItem_Click);
+			// 
 			// updateToolStripMenuItem
 			// 
 			this.updateToolStripMenuItem.Enabled = false;
@@ -788,13 +795,6 @@
 			this.updateToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
 			this.updateToolStripMenuItem.Text = "Update otb...";
 			this.updateToolStripMenuItem.Click += new System.EventHandler(this.updateToolStripMenuItem_Click);
-			// 
-			// compareOtbToolStripMenuItem
-			// 
-			this.compareOtbToolStripMenuItem.Name = "compareOtbToolStripMenuItem";
-			this.compareOtbToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
-			this.compareOtbToolStripMenuItem.Text = "Compare otb...";
-			this.compareOtbToolStripMenuItem.Click += new System.EventHandler(this.compareOtbToolStripMenuItem_Click);
 			// 
 			// toolStripMenuItem2
 			// 
@@ -804,7 +804,7 @@
 			// helpToolStripMenuItem
 			// 
 			this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-			this.aboutToolStripMenuItem});
+            this.aboutToolStripMenuItem});
 			this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
 			this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
 			this.helpToolStripMenuItem.Text = "&Help";
@@ -812,8 +812,9 @@
 			// aboutToolStripMenuItem
 			// 
 			this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-			this.aboutToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
+			this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
 			this.aboutToolStripMenuItem.Text = "&About...";
+			this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
 			// 
 			// outputTextBox
 			// 

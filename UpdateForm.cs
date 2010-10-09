@@ -13,10 +13,10 @@ namespace otitemeditor
 	{
 		public otitemeditor mainForm = null;
 		public Host.Types.Plugin selectedPlugin = null;
-		public UInt32 updateOtbVersion = 0;
+		public SupportedClient updateClient = null;
 
 		private UInt32 currentClientIndex = 0;
-		private List<UInt32> clientVersionList = new List<UInt32>();
+		private List<SupportedClient> clientList = new List<SupportedClient>();
 
 		public UpdateForm()
 		{
@@ -30,7 +30,7 @@ namespace otitemeditor
 				foreach (SupportedClient client in plugin.Instance.SupportedClients)
 				{
 					UInt32 index = (UInt32)pluginsListBox.Items.Add(client.description);
-					clientVersionList.Add(client.otbVersion);
+					clientList.Add(client);
 
 					if (client.otbVersion == mainForm.currentOtbVersion)
 					{
@@ -49,7 +49,7 @@ namespace otitemeditor
 		{
 			if(pluginsListBox.SelectedItem != null){
 				selectedPlugin = Program.plugins.AvailablePlugins.Find(pluginsListBox.SelectedItem.ToString());
-				updateOtbVersion = clientVersionList[(Int32)pluginsListBox.SelectedIndex];
+				updateClient = clientList[(Int32)pluginsListBox.SelectedIndex];
 
 				this.DialogResult = DialogResult.OK;
 				Close();
