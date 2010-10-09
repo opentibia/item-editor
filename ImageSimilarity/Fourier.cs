@@ -275,29 +275,12 @@ namespace ImageSimilarity
 				{
 					for (int k = 0; k < width / 2; k++)
 					{
-						//r
-						byte val1 = data[i * width + k].r;
-						byte val2 = data[i * width + k + width / 2].r;
-						data[i * width + k].r = data[(i + width / 2) * width + k + width / 2].r;
-						data[(i + width / 2) * width + k + width / 2].r = val1;
-						data[i * width + k + width / 2].r = data[(i + width / 2) * width + k].r;
-						data[(i + width / 2) * width + k].r = val2;
-
-						//g
-						val1 = data[i * width + k].g;
-						val2 = data[i * width + k + width / 2].g;
-						data[i * width + k].g = data[(i + width / 2) * width + k + width / 2].g;
-						data[(i + width / 2) * width + k + width / 2].g = val1;
-						data[i * width + k + width / 2].g = data[(i + width / 2) * width + k].g;
-						data[(i + width / 2) * width + k].g = val2;
-
-						//b
-						val1 = data[i * width + k].b;
-						val2 = data[i * width + k + width / 2].b;
-						data[i * width + k].b = data[(i + width / 2) * width + k + width / 2].b;
-						data[(i + width / 2) * width + k + width / 2].b = val1;
-						data[i * width + k + width / 2].b = data[(i + width / 2) * width + k].b;
-						data[(i + width / 2) * width + k].b = val2;
+						ImageUtils.RGB val1 = data[i * width + k];
+						ImageUtils.RGB val2 = data[i * width + k + width / 2];
+						data[i * width + k] = data[(i + width / 2) * width + k + width / 2];
+						data[(i + width / 2) * width + k + width / 2] = val1;
+						data[i * width + k + width / 2] = data[(i + width / 2) * width + k];
+						data[(i + width / 2) * width + k] = val2;
 					}
 				}
 			}

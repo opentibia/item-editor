@@ -206,7 +206,7 @@ namespace otitemeditor
 			writeBytes(bytes, unescape);
 		}
 
-		public void writeProp(otb_loader.itemattrib_t attr, BinaryWriter writer)
+		public void writeProp(otb.itemattrib_t attr, BinaryWriter writer)
 		{
 			writer.BaseStream.Position = 0;
 			byte[] bytes = new byte[writer.BaseStream.Length];
@@ -217,7 +217,7 @@ namespace otitemeditor
 			writeProp((byte)attr, bytes);
 		}
 
-		public void writeProp(otb_loader.rootattrib_t attr, BinaryWriter writer)
+		public void writeProp(otb.rootattrib_t attr, BinaryWriter writer)
 		{
 			writer.BaseStream.Position = 0;
 			byte[] bytes = new byte[writer.BaseStream.Length];
@@ -282,7 +282,7 @@ namespace otitemeditor
 		public UInt32 dwBuildNumber;
 	}
 
-	public class otb_loader
+	public class otb
 	{
 		public enum clientversion_t
 		{
@@ -355,7 +355,7 @@ namespace otitemeditor
 			ITEM_ATTR_MINIMAPCOLOR,
 			ITEM_ATTR_07,
 			ITEM_ATTR_08,
-			ITEM_ATTR_LIGHT,
+			ITEM_ATTR_LIGHT,			/*deprecated*/
 
 			//1-byte aligned
 			ITEM_ATTR_DECAY2,			/*deprecated*/
@@ -411,7 +411,7 @@ namespace otitemeditor
 			FLAG_LOOKTHROUGH = 8388608
 		};
 
-		public static bool loadOtb(string filename, ref OtbList items, bool outputDebug)
+		public static bool open(string filename, ref OtbList items, bool outputDebug)
 		{
 			FileStream fileStream = new FileStream(filename, FileMode.Open);
 			try
@@ -496,6 +496,7 @@ namespace otitemeditor
 						item.hasUseWith = ((flags & itemflags_t.FLAG_USEABLE) == itemflags_t.FLAG_USEABLE);
 						item.hasHeight = ((flags & itemflags_t.FLAG_HAS_HEIGHT) == itemflags_t.FLAG_HAS_HEIGHT);
 						item.lookThrough = ((flags & itemflags_t.FLAG_LOOKTHROUGH) == itemflags_t.FLAG_LOOKTHROUGH);
+						item.allowDistRead = ((flags & itemflags_t.FLAG_ALLOWDISTREAD) == itemflags_t.FLAG_ALLOWDISTREAD);
 
 						while (nodeReader.PeekChar() != -1)
 						{
@@ -524,8 +525,9 @@ namespace otitemeditor
 									item.id = nodeReader.ReadUInt16();
 									if (outputDebug)
 									{
-										Trace.WriteLine(String.Format("Node:attribute:data {0}", item.id));
+										System.Diagnostics.Debug.WriteLine(String.Format("Node:attribute:data {0}", item.id));
 									}
+
 								} break;
 
 								case itemattrib_t.ITEM_ATTR_CLIENTID:
@@ -561,43 +563,6 @@ namespace otitemeditor
 									if (outputDebug)
 									{
 										Trace.WriteLine(String.Format("Node:attribute:data {0}", item.groundSpeed));
-									}
-								} break;
-
-								case itemattrib_t.ITEM_ATTR_LIGHT2:
-								{
-									if (datalen != sizeof(UInt16) * 2)
-									{
-										if (outputDebug)
-										{
-											Trace.WriteLine(String.Format("Unexpected data length of item light (2) block"));
-										}
-										return false;
-									}
-
-									item.lightLevel = nodeReader.ReadUInt16();
-									item.lightColor = nodeReader.ReadUInt16();
-									if (outputDebug)
-									{
-										Trace.WriteLine(String.Format("Node:attribute:data {0}, {1}", item.lightLevel, item.lightColor));
-									}
-								} break;
-
-								case itemattrib_t.ITEM_ATTR_TOPORDER:
-								{
-									if (datalen != sizeof(byte))
-									{
-										if (outputDebug)
-										{
-											Trace.WriteLine(String.Format("Unexpected data length of item toporder block (Should be 1 byte)"));
-										}
-										return false;
-									}
-
-									item.alwaysOnTopOrder = nodeReader.ReadByte();
-									if (outputDebug)
-									{
-										Trace.WriteLine(String.Format("Node:attribute:data {0}", item.alwaysOnTopOrder));
 									}
 								} break;
 
@@ -652,14 +617,42 @@ namespace otitemeditor
 									item.maxReadChars = nodeReader.ReadUInt16();
 								} break;
 
-								case itemattrib_t.ITEM_ATTR_LIGHT:
-								{
-									if (datalen != sizeof(UInt16) * 2)
+								case itemattrib_t.ITEM_ATTR_LIGHT2:
 									{
-										return false;
-									}
+										if (datalen != sizeof(UInt16) * 2)
+										{
+											if (outputDebug)
+											{
+												Trace.WriteLine(String.Format("Unexpected data length of item light (2) block"));
+											}
+											return false;
+										}
 
-								} break;
+										item.lightLevel = nodeReader.ReadUInt16();
+										item.lightColor = nodeReader.ReadUInt16();
+										if (outputDebug)
+										{
+											Trace.WriteLine(String.Format("Node:attribute:data {0}, {1}", item.lightLevel, item.lightColor));
+										}
+									} break;
+
+								case itemattrib_t.ITEM_ATTR_TOPORDER:
+									{
+										if (datalen != sizeof(byte))
+										{
+											if (outputDebug)
+											{
+												Trace.WriteLine(String.Format("Unexpected data length of item toporder block (Should be 1 byte)"));
+											}
+											return false;
+										}
+
+										item.alwaysOnTopOrder = nodeReader.ReadByte();
+										if (outputDebug)
+										{
+											Trace.WriteLine(String.Format("Node:attribute:data {0}", item.alwaysOnTopOrder));
+										}
+									} break;
 
 								default:
 								{
@@ -687,7 +680,7 @@ namespace otitemeditor
 			return true;
 		}
 
-		public static bool saveOtb(string filename, ref OtbList items)
+		public static bool save(string filename, ref OtbList items)
 		{
 			FileStream fileStream = new FileStream(filename, FileMode.Create);
 			try
@@ -737,11 +730,6 @@ namespace otitemeditor
 								saveAttributeList.Add(itemattrib_t.ITEM_ATTR_MINIMAPCOLOR);
 							}
 
-							if (item.groundSpeed != 0)
-							{
-								saveAttributeList.Add(itemattrib_t.ITEM_ATTR_SPEED);
-							}
-
 							if (item.maxReadWriteChars != 0)
 							{
 								saveAttributeList.Add(itemattrib_t.ITEM_ATTR_07);
@@ -755,6 +743,11 @@ namespace otitemeditor
 							if (item.lightLevel != 0 || item.lightColor != 0)
 							{
 								saveAttributeList.Add(itemattrib_t.ITEM_ATTR_LIGHT2);
+							}
+
+							if (item.type == ItemType.Ground)
+							{
+								saveAttributeList.Add(itemattrib_t.ITEM_ATTR_SPEED);
 							}
 
 							if (item.alwaysOnTop)
@@ -818,6 +811,9 @@ namespace otitemeditor
 
 						if (item.lookThrough)
 							flags |= (UInt32)itemflags_t.FLAG_LOOKTHROUGH;
+
+						if (item.allowDistRead)
+							flags |= (UInt32)itemflags_t.FLAG_ALLOWDISTREAD;
 
 						writer.writeUInt32(flags, true);
 

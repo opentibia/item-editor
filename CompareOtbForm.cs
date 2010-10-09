@@ -24,14 +24,14 @@ namespace otitemeditor
 				OtbList items2 = new OtbList();
 
 				bool result;
-				result = otb_loader.loadOtb(file1Text.Text, ref items1, false);
+				result = otb.open(file1Text.Text, ref items1, false);
 				if (!result)
 				{
 					MessageBox.Show("Could not open {0}", file1Text.Text);
 					return false;
 				}
 
-				result = otb_loader.loadOtb(file2Text.Text, ref items2, false);
+				result = otb.open(file2Text.Text, ref items2, false);
 				if (!result)
 				{
 					MessageBox.Show("Could not open {0}", file2Text.Text);

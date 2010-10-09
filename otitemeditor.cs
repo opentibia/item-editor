@@ -39,6 +39,46 @@ namespace otitemeditor
 			InitializeComponent();
 		}
 
+		private Bitmap GetBitmap(SpriteItem spriteItem)
+		{
+			int Width = 32;
+			int Height = 32;
+
+			if (spriteItem.width > 1 || spriteItem.height > 1)
+			{
+				Width = 64;
+				Height = 64;
+			}
+
+			Bitmap canvas = new Bitmap(Width, Height, PixelFormat.Format24bppRgb);
+			Graphics g = Graphics.FromImage(canvas);
+
+			//draw sprite
+			for (int frame = 0; frame < spriteItem.frames; frame++)
+			{
+				for (int cy = 0; cy < spriteItem.height; ++cy)
+				{
+					for (int cx = 0; cx < spriteItem.width; ++cx)
+					{
+						int frameIndex = cx + cy * spriteItem.width + frame * spriteItem.width * spriteItem.height;
+						Bitmap bmp = ImageUtils.getBitmap(spriteItem.getRGBData(frameIndex), PixelFormat.Format24bppRgb, 32, 32);
+
+						if (canvas.Width == 32)
+						{
+							g.DrawImage(bmp, new Rectangle(0, 0, bmp.Width, bmp.Height));
+						}
+						else
+						{
+							g.DrawImage(bmp, new Rectangle(Math.Max(32 - cx * 32, 0), Math.Max(32 - cy * 32, 0), bmp.Width, bmp.Height));
+						}
+					}
+				}
+			}
+
+			g.Save();
+			return canvas;
+		}
+
 		private void DrawSprite(ref Bitmap canvas, SpriteItem spriteItem)
 		{
 			Graphics g = Graphics.FromImage(canvas);
@@ -102,7 +142,7 @@ namespace otitemeditor
 
 			foreach (OtbItem item in items)
 			{
-				if (showOnlyMissMatchedItems && compareItem(item))
+				if (showOnlyMissMatchedItems && compareItem(item, true))
 				{
 					continue;
 				}
@@ -153,11 +193,6 @@ namespace otitemeditor
 			itemTreeView.Nodes.Clear();
 		}
 
-		private bool compareItem(OtbItem item)
-		{
-			return compareItem(item, true);
-		}
-
 		private bool compareItem(OtbItem item, bool compareHash)
 		{
 			if (item.type == ItemType.Deprecated)
@@ -179,6 +214,17 @@ namespace otitemeditor
 			return false;
 		}
 
+		private void reloadItems()
+		{
+			foreach (OtbItem item in items)
+			{
+				if (!compareItem(item, true))
+				{
+					reloadItem(item);
+				}
+			}
+		}
+
 		private void reloadItem(OtbItem item)
 		{
 			//to avoid problems with events
@@ -193,30 +239,8 @@ namespace otitemeditor
 					Trace.WriteLine(String.Format("Reloading item id: {0}", item.id));
 				}
 
-				item.type = spriteItem.type;
-				item.blockObject = spriteItem.blockObject;
+				item.itemImpl = (ItemImpl)spriteItem.itemImpl.Clone();
 				Buffer.BlockCopy(spriteItem.spriteHash, 0, item.spriteHash, 0, spriteItem.spriteHash.Length);
-				item.blockProjectile = spriteItem.blockProjectile;
-				item.blockPathFind = spriteItem.blockPathFind;
-				item.isMoveable = spriteItem.isMoveable;
-				item.hasHeight = spriteItem.hasHeight;
-				item.isPickupable = spriteItem.isPickupable;
-				item.isHangable = spriteItem.isHangable;
-				item.hasUseWith = spriteItem.hasUseWith;
-				item.isRotatable = spriteItem.isRotatable;
-				item.isStackable = spriteItem.isStackable;
-				item.isVertical = spriteItem.isVertical;
-				item.isHorizontal = spriteItem.isHorizontal;
-				item.alwaysOnTop = spriteItem.alwaysOnTop;
-				item.isReadable = spriteItem.isReadable;
-				item.groundSpeed = spriteItem.groundSpeed;
-				item.alwaysOnTopOrder = spriteItem.alwaysOnTopOrder;
-				item.lightLevel = spriteItem.lightLevel;
-				item.lightColor = spriteItem.lightColor;
-				item.lookThrough = spriteItem.lookThrough;
-				item.minimapColor = spriteItem.minimapColor;
-				item.maxReadChars = spriteItem.maxReadChars;
-				item.maxReadWriteChars = spriteItem.maxReadWriteChars;
 
 				currentItem = tmpItem;
 			}
@@ -447,12 +471,12 @@ namespace otitemeditor
 			progress.Location = new Point(Location.X + ((Width - progress.Width) / 2),
 				Location.Y + ((Height - progress.Height) / 2));
 			progress.bar.Minimum = 0;
-			progress.bar.Maximum = currentPlugin.Instance.Items.Count + items.Count;
+			progress.bar.Maximum = items.Count;
 			progress.Show(this);
 
 			foreach (SpriteItem spriteItem in items.Values)
 			{
-				Bitmap spriteBmp = ImageUtils.getBitmap(spriteItem.getRGBData(), PixelFormat.Format24bppRgb, 32, 32);
+				Bitmap spriteBmp = GetBitmap(spriteItem);
 				Bitmap ff2dBmp = Fourier.fft2dRGB(spriteBmp, false);
 				spriteItem.spriteSignature = ImageUtils.CalculateEuclideanDistance(ff2dBmp, 1);
 
@@ -485,7 +509,7 @@ namespace otitemeditor
 
 			updateTraceToolStripMenuItem.Checked = showUpdateOutput;
 			otbTraceToolStripMenuItem.Checked = showOtbOutput;
-			
+
 			Program.plugins.FindPlugins();
 		}
 
@@ -565,7 +589,7 @@ namespace otitemeditor
 
 			items.Clear();
 
-			if (otb_loader.loadOtb(dialog.FileName, ref items, showOtbOutput))
+			if (otb.open(dialog.FileName, ref items, showOtbOutput))
 			{
 				currentOtbFullPath = dialog.FileName;
 				currentOtbVersion = items.dwMinorVersion;
@@ -598,7 +622,7 @@ namespace otitemeditor
 		{
 			try
 			{
-				otb_loader.saveOtb(currentOtbFullPath, ref items);
+				otb.save(currentOtbFullPath, ref items);
 			}
 			catch (UnauthorizedAccessException exception)
 			{
@@ -623,7 +647,7 @@ namespace otitemeditor
 
 				try
 				{
-					otb_loader.saveOtb(dialog.FileName, ref items);
+					otb.save(dialog.FileName, ref items);
 					currentOtbFullPath = dialog.FileName;
 				}
 				catch (UnauthorizedAccessException exception)
@@ -651,14 +675,7 @@ namespace otitemeditor
 
 		private void reloadItemAttributesToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			foreach (OtbItem item in items)
-			{
-				if (!compareItem(item))
-				{
-					reloadItem(item);
-				}
-			}
-
+			reloadItems();
 			showItem(currentItem);
 			buildTreeView();
 		}
@@ -828,7 +845,7 @@ namespace otitemeditor
 							assignedSpriteIdList.Add(item.spriteId);
 						}
 
-						if (!compareItem(item))
+						if (!compareItem(item, true))
 						{
 							//sync with dat info
 							reloadItem(item);

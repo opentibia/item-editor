@@ -129,7 +129,7 @@ namespace ImageSimilarity
 			byte[] data = new byte[rgb.Length * 3];
 
 			int counter = 0;
-			for (int i = 0; i < rgb.Length; i += 3)
+			for (int i = 0; i < data.Length; i += 3)
 			{
 				data[i] = rgb[counter].r;
 				data[i + 1] = rgb[counter].g;
