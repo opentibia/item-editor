@@ -262,7 +262,10 @@ namespace otitemeditor
 		public OtbItem(Item item)
 			: base()
 		{
-			this.itemImpl = (ItemImpl)item.itemImpl.Clone();
+			if (item != null)
+			{
+				this.itemImpl = (ItemImpl)item.itemImpl.Clone();
+			}
 		}
 
 		public UInt16 spriteId;
@@ -270,6 +273,9 @@ namespace otitemeditor
 
 		//Used during an update to indicate if this item has been updated
 		public bool spriteAssigned = false;
+
+		//An custom created item id
+		public bool isCustomCreated = false;
 	}
 
 	public class OtbList : List<OtbItem>

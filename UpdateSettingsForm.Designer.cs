@@ -77,8 +77,6 @@
 			// generateSignatureCheck
 			// 
 			this.generateSignatureCheck.AutoSize = true;
-			this.generateSignatureCheck.Checked = true;
-			this.generateSignatureCheck.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.generateSignatureCheck.Location = new System.Drawing.Point(6, 88);
 			this.generateSignatureCheck.Name = "generateSignatureCheck";
 			this.generateSignatureCheck.Size = new System.Drawing.Size(182, 17);

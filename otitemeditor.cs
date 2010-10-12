@@ -18,7 +18,7 @@ namespace otitemeditor
 {
 	public partial class otitemeditor : Form
 	{
-		const string versionString = "otitemeditor 0.5";
+		const string versionString = "otitemeditor 0.5.1";
 
 		bool showOnlyMissMatchedItems = false;
 		private TextBoxTraceListener textBoxListener;
@@ -41,7 +41,23 @@ namespace otitemeditor
 			InitializeComponent();
 		}
 
-		private Bitmap GetBitmap(SpriteItem spriteItem)
+		private void otitemeditor_Load(object sender, EventArgs e)
+		{
+			this.Text = versionString;
+			typeCombo.DataSource = Enum.GetNames(typeof(ItemType)); 
+
+			Trace.Listeners.Clear();
+			textBoxListener = new TextBoxTraceListener(outputTextBox);
+			Trace.Listeners.Add(textBoxListener);
+
+			updateTraceToolStripMenuItem.Checked = showUpdateOutput;
+			otbTraceToolStripMenuItem.Checked = showOtbOutput;
+			onSelectItem(null);
+
+			Program.plugins.FindPlugins();
+		}
+
+		private Bitmap getBitmap(SpriteItem spriteItem)
 		{
 			int Width = 32;
 			int Height = 32;
@@ -81,7 +97,7 @@ namespace otitemeditor
 			return canvas;
 		}
 
-		private void DrawSprite(ref Bitmap canvas, SpriteItem spriteItem)
+		private void drawSprite(ref Bitmap canvas, SpriteItem spriteItem)
 		{
 			Graphics g = Graphics.FromImage(canvas);
 
@@ -110,7 +126,7 @@ namespace otitemeditor
 			g.Save();
 		}
 
-		private void DrawSprite(PictureBox picturBox, SpriteItem spriteItem)
+		private void drawSprite(PictureBox picturBox, SpriteItem spriteItem)
 		{
 			Bitmap canvas = new Bitmap(64, 64, PixelFormat.Format24bppRgb);
 			using (Graphics g = Graphics.FromImage(canvas))
@@ -119,7 +135,7 @@ namespace otitemeditor
 				g.Save();
 			}
 
-			DrawSprite(ref canvas, spriteItem);
+			drawSprite(ref canvas, spriteItem);
 
 			Bitmap newImage = new Bitmap(64, 64, PixelFormat.Format24bppRgb);
 			using (Graphics g = Graphics.FromImage(newImage))
@@ -241,17 +257,19 @@ namespace otitemeditor
 					Trace.WriteLine(String.Format("Reloading item id: {0}", item.id));
 				}
 
+				UInt16 tmpId = item.id;
 				item.itemImpl = (ItemImpl)spriteItem.itemImpl.Clone();
+				item.id = tmpId;
 				Buffer.BlockCopy(spriteItem.spriteHash, 0, item.spriteHash, 0, spriteItem.spriteHash.Length);
 
 				currentItem = tmpItem;
 			}
 		}
-
+		
 		private bool showItem(OtbItem item)
 		{
 			currentItem = null;
-			ResetAllDatabindings(this);
+			resetAllDatabindings(this);
 
 			if (item == null)
 			{
@@ -264,10 +282,15 @@ namespace otitemeditor
 				return false;
 			}
 
-			DrawSprite(pictureBox, spriteItem);
-			pictureBox.BackColor = ((Utils.ByteArrayCompare(item.spriteHash, spriteItem.spriteHash) ? Color.White : Color.Red));
+			duplicateItemToolStripMenuItem.Enabled = true;
 
-			typeCombo.DataBindings.Add("Text", spriteItem, "type");
+			drawSprite(pictureBox, spriteItem);
+			if (!item.isCustomCreated)
+			{
+				pictureBox.BackColor = ((Utils.ByteArrayCompare(item.spriteHash, spriteItem.spriteHash) ? Color.White : Color.Red));
+			}
+
+			typeCombo.Text = item.type.ToString();
 			typeCombo.ForeColor = (item.type == spriteItem.type ? Color.Black : Color.Red);
 
 			//
@@ -355,7 +378,7 @@ namespace otitemeditor
 				SpriteItem prevSpriteItem;
 				if (previousPlugin.Instance.Items.TryGetValue(item.prevSpriteId, out prevSpriteItem))
 				{
-					DrawSprite(prevPictureBox, prevSpriteItem);
+					drawSprite(prevPictureBox, prevSpriteItem);
 
 					if (prevSpriteItem.spriteSignature != null)
 					{
@@ -371,6 +394,30 @@ namespace otitemeditor
 
 			currentItem = item;
 			return true;
+		}
+
+		private UInt16 createItem(Item item)
+		{
+			UInt16 newId = (UInt16)(items.maxId + 1);
+
+			//create a new otb item
+			OtbItem newItem = new OtbItem(item);
+			newItem.id = newId;
+			newItem.spriteHash = new byte[16];
+
+			if (item != null)
+			{
+				newItem.spriteId = item.id;
+				Buffer.BlockCopy(item.spriteHash, 0, newItem.spriteHash, 0, newItem.spriteHash.Length);
+			}
+			else
+			{
+				newItem.spriteId = items.minId;
+				newItem.isCustomCreated = true;
+			}
+
+			items.Add(newItem);
+			return newId;
 		}
 
 		private void showSpriteCandidates(SpriteItem spriteItem)
@@ -428,13 +475,13 @@ namespace otitemeditor
 				SpriteItem spriteCandidateItem;
 				if (currentPlugin.Instance.Items.TryGetValue(kvp.Value.spriteId, out spriteCandidateItem))
 				{
-					DrawSprite(box, spriteCandidateItem);
+					drawSprite(box, spriteCandidateItem);
 				}
 				++index;
 			}
 		}
 
-		public bool LoadClient(Host.Types.Plugin plugin, UInt32 otbVersion)
+		public bool loadClient(Host.Types.Plugin plugin, UInt32 otbVersion)
 		{
 			SupportedClient client = plugin.Instance.SupportedClients.Find(
 				delegate(SupportedClient sc)
@@ -479,7 +526,7 @@ namespace otitemeditor
 
 			foreach (SpriteItem spriteItem in items.Values)
 			{
-				Bitmap spriteBmp = GetBitmap(spriteItem);
+				Bitmap spriteBmp = getBitmap(spriteItem);
 				Bitmap ff2dBmp = Fourier.fft2dRGB(spriteBmp, false);
 				spriteItem.spriteSignature = ImageUtils.CalculateEuclideanDistance(ff2dBmp, 1);
 
@@ -497,42 +544,21 @@ namespace otitemeditor
 			return true;
 		}
 
-		private void otitemeditor_Load(object sender, EventArgs e)
-		{
-			this.Text = versionString;
-			typeCombo.Items.Add("Ground");
-			typeCombo.Items.Add("Container");
-			typeCombo.Items.Add("Fluid");
-			typeCombo.Items.Add("Splash");
-			typeCombo.Items.Add("Other");
-			typeCombo.Items.Add("Deprecated");
-
-			Trace.Listeners.Clear();
-			textBoxListener = new TextBoxTraceListener(outputTextBox);
-			Trace.Listeners.Add(textBoxListener);
-
-			updateTraceToolStripMenuItem.Checked = showUpdateOutput;
-			otbTraceToolStripMenuItem.Checked = showOtbOutput;
-
-			Program.plugins.FindPlugins();
-		}
-
-		private void ResetAllDatabindings(Control control)
+		private void resetAllDatabindings(Control control)
 		{
 			control.DataBindings.Clear();
 			if (control.HasChildren)
 			{
 				foreach (Control childControl in control.Controls)
 				{
-					ResetAllDatabindings(childControl);
+					resetAllDatabindings(childControl);
 				}
 			}
 		}
 
-		private void itemTreeView_AfterSelect(object sender, TreeViewEventArgs e)
+		private void onSelectItem(TreeNode node)
 		{
-			TreeNode node = itemTreeView.SelectedNode;
-			if (node.Tag != null)
+			if (node != null && node.Tag != null)
 			{
 				OtbItem item = (OtbItem)node.Tag;
 				showItem(item);
@@ -550,6 +576,7 @@ namespace otitemeditor
 				serverIdLbl.Text = "0";
 				typeCombo.Text = "";
 				typeCombo.ForeColor = Color.Black;
+				duplicateItemToolStripMenuItem.Enabled = false;
 
 				foreach (Control control in optionGroupBox.Controls)
 				{
@@ -565,6 +592,26 @@ namespace otitemeditor
 					}
 				}
 			}
+		}
+
+		private void itemTreeView_BeforeSelect(object sender, TreeViewCancelEventArgs e)
+		{
+			if (currentItem != null && currentItem.isCustomCreated)
+			{
+				//Making sure the hash is updated
+				SpriteItem spriteItem;
+				if (currentPlugin.Instance.Items.TryGetValue(currentItem.spriteId, out spriteItem))
+				{
+					Buffer.BlockCopy(spriteItem.spriteHash, 0, currentItem.spriteHash, 0, spriteItem.spriteHash.Length);
+				}
+			}
+			
+			currentItem = null;
+		}
+
+		private void itemTreeView_AfterSelect(object sender, TreeViewEventArgs e)
+		{
+			onSelectItem(itemTreeView.SelectedNode);
 		}
 
 		private void compareOtbToolStripMenuItem_Click(object sender, EventArgs e)
@@ -610,13 +657,14 @@ namespace otitemeditor
 					return;
 				}
 
-				if (!LoadClient(currentPlugin, currentOtbVersion))
+				if (!loadClient(currentPlugin, currentOtbVersion))
 				{
 					currentPlugin = null;
 					items.Clear();
 					return;
 				}
 
+				createItemToolStripMenuItem.Enabled = true;
 				updateToolStripMenuItem.Enabled = true;
 				buildTreeView();
 			}
@@ -701,7 +749,7 @@ namespace otitemeditor
 					return;
 				}
 
-				if (!LoadClient(updatePlugin, updateClient.otbVersion))
+				if (!loadClient(updatePlugin, updateClient.otbVersion))
 				{
 					return;
 				}
@@ -873,17 +921,8 @@ namespace otitemeditor
 						{
 							++newItemCounter;
 
-							//create new item ids
-							UInt16 newId = (UInt16)(items.maxId + 1);
+							UInt16 newId = createItem(updateItem);
 
-							//create a new otb item
-							OtbItem newItem = new OtbItem(updateItem);
-							newItem.id = newId;
-							newItem.spriteId = updateItem.id;
-							newItem.spriteHash = new byte[updateItem.spriteHash.Length];
-							Buffer.BlockCopy(updateItem.spriteHash, 0, newItem.spriteHash, 0, updateItem.spriteHash.Length);
-
-							items.Add(newItem);
 							if (showUpdateOutput)
 							{
 								Trace.WriteLine(String.Format("Creating item id {0}", newId));
@@ -961,6 +1000,34 @@ namespace otitemeditor
 				MessageBoxIcon.None,
 				MessageBoxDefaultButton.Button1,
 				0);
+		}
+
+		private void duplicateItemToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			if (currentItem != null)
+			{
+				UInt16 newId = createItem(currentItem);
+				Trace.WriteLine(String.Format("Creating item id {0}", newId));
+			}
+		}
+
+		private void createItemToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			UInt16 newId = createItem(null);
+			Trace.WriteLine(String.Format("Creating item id {0}", newId));
+		}
+
+		private void typeCombo_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			if (currentItem != null)
+			{
+				currentItem.type = (ItemType)Enum.Parse(typeof(ItemType), typeCombo.SelectedValue.ToString());
+			}
+		}
+
+		private void updateTreeviewToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			buildTreeView();
 		}
 	}
 }
