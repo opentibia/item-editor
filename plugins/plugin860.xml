@@ -4,5 +4,7 @@
     <client version="860" description="Tibia 8.60.rev2" otbversion="20" datsignature="4C2C7993" sprsignature="4C220594"/>
     <client version="861" description="Tibia 8.61" otbversion="21" datsignature="4C6A4CBC" sprsignature="4C63F145"/>
     <client version="862" description="Tibia 8.62" otbversion="22" datsignature="4C973450" sprsignature="4C63F145"/>
+	<client version="870" description="Tibia 8.70" otbversion="23" datsignature="4CFE22C5" sprsignature="4CFD078A"/>
+	<client version="871" description="Tibia 8.71" otbversion="24" datsignature="4D41979E" sprsignature="4D3D65D0"/>
   </clients>
 </settings>
