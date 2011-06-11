@@ -49,6 +49,7 @@ namespace otitemeditor
 		public bool blockProjectile;
 		public bool blockPathFind;
 		public bool allowDistRead;
+		public bool isAnimation;
 	}
 
 	public class Item
@@ -212,6 +213,7 @@ namespace otitemeditor
 		public bool blockProjectile { get { return itemImpl.blockProjectile; } set { itemImpl.blockProjectile = value; } }
 		public bool blockPathFind { get { return itemImpl.blockPathFind; } set { itemImpl.blockPathFind = value; } }
 		public bool allowDistRead { get { return itemImpl.allowDistRead; } set { itemImpl.allowDistRead = value; } }
+		public bool isAnimation { get { return itemImpl.isAnimation; } set { itemImpl.isAnimation = value; } }
 
 		//used to find sprites during updates
 		protected byte[] _spriteHash = null;
