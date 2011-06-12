@@ -239,7 +239,7 @@ namespace Tibia900
 
                                 case 0x1B: //animate
                                     {
-										item.isAnimation = true;
+										//item.animationAlways = true;
                                     } break;
 
                                 case 0x1C: //minimap color
@@ -298,6 +298,7 @@ namespace Tibia900
                         item.ydiv = reader.ReadByte();
                         item.zdiv = reader.ReadByte();
                         item.animationLength = reader.ReadByte();
+						item.isAnimation = item.animationLength > 1;
 
                         item.numSprites =
                             (UInt32)item.width * (UInt32)item.height *
