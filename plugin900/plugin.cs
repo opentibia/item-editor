@@ -10,7 +10,7 @@ using System.Drawing;
 using ImageSimilarity;
 using System.Drawing.Imaging;
 
-namespace Tibia872
+namespace Tibia900
 {
     public class Plugin : IPlugin
     {
@@ -33,7 +33,7 @@ namespace Tibia872
 
         public void Initialize()
         {
-            settings.Load("plugin872.xml");
+            settings.Load("plugin900.xml");
             supportedClients = settings.GetSupportedClientList();
         }
 
