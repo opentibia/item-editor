@@ -239,7 +239,7 @@ namespace Tibia900
 
                                 case 0x1B: //animate
                                     {
-										//item.animationAlways = true;
+										//item.animateWhenIdle = true;
                                     } break;
 
                                 case 0x1C: //minimap color
@@ -270,8 +270,8 @@ namespace Tibia900
                                 case 0x20: //cloth
                                     {
                                         //item.isCloth = true;
-										UInt16 opt = reader.ReadUInt16();
-                                        //item.clothSlot = opt;
+										UInt16 slot = reader.ReadUInt16();
+                                        //item.clothSlot = slot;
                                     } break;
 
                                 case 0xFF: //end of attributes
