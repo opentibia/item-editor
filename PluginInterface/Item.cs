@@ -75,6 +75,11 @@ namespace otitemeditor
 			}
 			*/
 
+			if (isAnimation != item.isAnimation)
+			{
+				return false;
+			}
+
 			if (alwaysOnTop != item.alwaysOnTop)
 			{
 				return false;

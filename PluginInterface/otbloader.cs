@@ -416,7 +416,8 @@ namespace otitemeditor
 			FLAG_ALLOWDISTREAD = 1048576,	/*deprecated*/
 			FLAG_CORPSE = 2097152,			/*deprecated*/
 			FLAG_CLIENTCHARGES = 4194304,	/*deprecated*/
-			FLAG_LOOKTHROUGH = 8388608
+			FLAG_LOOKTHROUGH = 8388608,
+			FLAG_ANIMATION = 16777216
 		};
 
 		public static bool open(string filename, ref OtbList items, bool outputDebug)
@@ -505,6 +506,7 @@ namespace otitemeditor
 						item.hasHeight = ((flags & itemflags_t.FLAG_HAS_HEIGHT) == itemflags_t.FLAG_HAS_HEIGHT);
 						item.lookThrough = ((flags & itemflags_t.FLAG_LOOKTHROUGH) == itemflags_t.FLAG_LOOKTHROUGH);
 						item.allowDistRead = ((flags & itemflags_t.FLAG_ALLOWDISTREAD) == itemflags_t.FLAG_ALLOWDISTREAD);
+						item.isAnimation = ((flags & itemflags_t.FLAG_ANIMATION) == itemflags_t.FLAG_ANIMATION);
 
 						while (nodeReader.PeekChar() != -1)
 						{
