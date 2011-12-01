@@ -317,7 +317,15 @@ namespace otitemeditor
 			CLIENT_VERSION_860_OLD = 19,
 			CLIENT_VERSION_860 = 20,
 			CLIENT_VERSION_861 = 21,
-			CLIENT_VERSION_862 = 22
+			CLIENT_VERSION_862 = 22,
+			CLIENT_VERSION_870 = 23,
+			CLIENT_VERSION_871 = 24,
+			CLIENT_VERSION_872 = 25,
+			CLIENT_VERSION_873 = 26,
+			CLIENT_VERSION_900 = 27,
+			CLIENT_VERSION_910 = 28,
+			CLIENT_VERSION_920 = 29,
+			CLIENT_VERSION_940 = 30
 		};
 
 		public enum itemgroup_t
@@ -374,6 +382,7 @@ namespace otitemeditor
 			ITEM_ATTR_LIGHT2,
 			ITEM_ATTR_TOPORDER,
 			ITEM_ATTR_WRITEABLE3,		/*deprecated*/
+			ITEM_ATTR_WAREID,
 
 			ITEM_ATTR_LAST
 		};
@@ -555,6 +564,24 @@ namespace otitemeditor
 									if (outputDebug)
 									{
 										Trace.WriteLine(String.Format("Node:attribute:data {0}", item.spriteId));
+									}
+								} break;
+
+								case itemattrib_t.ITEM_ATTR_WAREID:
+								{
+									if (datalen != sizeof(UInt16))
+									{
+										if (outputDebug)
+										{
+											Trace.WriteLine(String.Format("Unexpected data length of ware id block (Should be 2 bytes)"));
+										}
+										return false;
+									}
+
+									item.wareId = nodeReader.ReadUInt16();
+									if (outputDebug)
+									{
+										Trace.WriteLine(String.Format("Node:attribute:data {0}", item.wareId));
 									}
 								} break;
 
@@ -764,6 +791,11 @@ namespace otitemeditor
 							{
 								saveAttributeList.Add(itemattrib_t.ITEM_ATTR_TOPORDER);
 							}
+
+							if (item.wareId != 0)
+							{
+								saveAttributeList.Add(itemattrib_t.ITEM_ATTR_WAREID);
+							}
 						}
 
 						switch(item.type)
@@ -835,6 +867,13 @@ namespace otitemeditor
 									{
 										property.Write((UInt16)item.id);
 										writer.writeProp(itemattrib_t.ITEM_ATTR_SERVERID, property);
+										break;
+									}
+
+								case itemattrib_t.ITEM_ATTR_WAREID:
+									{
+										property.Write((UInt16)item.wareId);
+										writer.writeProp(itemattrib_t.ITEM_ATTR_WAREID, property);
 										break;
 									}
 

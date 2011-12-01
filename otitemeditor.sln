@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "plugin872", "Plugin872\plug
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "plugin900", "Plugin900\plugin900.csproj", "{F1A9A849-66BA-4B7D-AE69-A896B5893419}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "plugin940", "Plugin940\plugin940.csproj", "{F1A9A849-66BA-4B7D-AE69-A896B5893419}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageSimilarity", "ImageSimilarity\ImageSimilarity.csproj", "{2FBAC16E-457D-472B-880D-8D393F8A7827}"
 EndProject
 Global

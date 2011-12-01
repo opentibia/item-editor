@@ -37,6 +37,7 @@ namespace otitemeditor
 		public bool lookThrough;
 		public UInt16 lightLevel;
 		public UInt16 lightColor;
+		public UInt16 wareId;
 		public bool isStackable;
 		public bool isReadable;
 		public bool isMoveable;
@@ -145,6 +146,11 @@ namespace otitemeditor
 				return false;
 			}
 
+			if (wareId != item.wareId)
+			{
+				return false;
+			}
+
 			if (isRotatable != item.isRotatable)
 			{
 				return false;
@@ -219,6 +225,7 @@ namespace otitemeditor
 		public bool blockPathFind { get { return itemImpl.blockPathFind; } set { itemImpl.blockPathFind = value; } }
 		public bool allowDistRead { get { return itemImpl.allowDistRead; } set { itemImpl.allowDistRead = value; } }
 		public bool isAnimation { get { return itemImpl.isAnimation; } set { itemImpl.isAnimation = value; } }
+		public UInt16 wareId { get { return itemImpl.wareId; } set { itemImpl.wareId = value; } }
 
 		//used to find sprites during updates
 		protected byte[] _spriteHash = null;
