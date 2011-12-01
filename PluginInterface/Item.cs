@@ -26,6 +26,7 @@ namespace otitemeditor
 
 		public UInt16 id;
 		public UInt16 groundSpeed;
+		public string name;
 		public ItemType type;
 		public bool alwaysOnTop;
 		public UInt16 alwaysOnTopOrder;
@@ -51,6 +52,7 @@ namespace otitemeditor
 		public bool blockPathFind;
 		public bool allowDistRead;
 		public bool isAnimation;
+		public bool walkStack;
 	}
 
 	public class Item
@@ -87,6 +89,16 @@ namespace otitemeditor
 			}
 
 			if (alwaysOnTopOrder != item.alwaysOnTopOrder)
+			{
+				return false;
+			}
+
+			if (name != item.name)
+			{
+				return false;
+			}
+
+			if (walkStack != item.walkStack)
 			{
 				return false;
 			}
@@ -226,6 +238,8 @@ namespace otitemeditor
 		public bool allowDistRead { get { return itemImpl.allowDistRead; } set { itemImpl.allowDistRead = value; } }
 		public bool isAnimation { get { return itemImpl.isAnimation; } set { itemImpl.isAnimation = value; } }
 		public UInt16 wareId { get { return itemImpl.wareId; } set { itemImpl.wareId = value; } }
+		public bool walkStack { get { return itemImpl.walkStack; } set { itemImpl.walkStack = value; } }
+		public string name { get { return itemImpl.name; } set { itemImpl.name = value; } }
 
 		//used to find sprites during updates
 		protected byte[] _spriteHash = null;

@@ -353,7 +353,7 @@ namespace otitemeditor
 			ITEM_ATTR_FIRST = 0x10,
 			ITEM_ATTR_SERVERID = ITEM_ATTR_FIRST,
 			ITEM_ATTR_CLIENTID,
-			ITEM_ATTR_NAME,				/*deprecated*/
+			ITEM_ATTR_NAME,
 			ITEM_ATTR_DESCR,			/*deprecated*/
 			ITEM_ATTR_SPEED,
 			ITEM_ATTR_SLOT,				/*deprecated*/
@@ -426,7 +426,8 @@ namespace otitemeditor
 			FLAG_CORPSE = 2097152,			/*deprecated*/
 			FLAG_CLIENTCHARGES = 4194304,	/*deprecated*/
 			FLAG_LOOKTHROUGH = 8388608,
-			FLAG_ANIMATION = 16777216
+			FLAG_ANIMATION = 16777216,
+			FLAG_WALKSTACK = 33554432
 		};
 
 		public static bool open(string filename, ref OtbList items, bool outputDebug)
@@ -516,6 +517,7 @@ namespace otitemeditor
 						item.lookThrough = ((flags & itemflags_t.FLAG_LOOKTHROUGH) == itemflags_t.FLAG_LOOKTHROUGH);
 						item.allowDistRead = ((flags & itemflags_t.FLAG_ALLOWDISTREAD) == itemflags_t.FLAG_ALLOWDISTREAD);
 						item.isAnimation = ((flags & itemflags_t.FLAG_ANIMATION) == itemflags_t.FLAG_ANIMATION);
+						item.walkStack = ((flags & itemflags_t.FLAG_WALKSTACK) == itemflags_t.FLAG_WALKSTACK);
 
 						while (nodeReader.PeekChar() != -1)
 						{
@@ -600,6 +602,25 @@ namespace otitemeditor
 									if (outputDebug)
 									{
 										Trace.WriteLine(String.Format("Node:attribute:data {0}", item.groundSpeed));
+									}
+								} break;
+
+								case itemattrib_t.ITEM_ATTR_NAME:
+								{
+									if (datalen != sizeof(UInt16))
+									{
+										if (outputDebug)
+										{
+											Trace.WriteLine(String.Format("Unexpected data length of name block (Should be 2 bytes)"));
+										}
+										return false;
+									}
+
+									UInt16 size = nodeReader.ReadUInt16();
+									item.name = new string(nodeReader.ReadChars(size));
+									if (outputDebug)
+									{
+										Trace.WriteLine(String.Format("Node:attribute:data {0}", item.name));
 									}
 								} break;
 
@@ -796,6 +817,11 @@ namespace otitemeditor
 							{
 								saveAttributeList.Add(itemattrib_t.ITEM_ATTR_WAREID);
 							}
+
+							if (item.name != "")
+							{
+								saveAttributeList.Add(itemattrib_t.ITEM_ATTR_NAME);
+							}
 						}
 
 						switch(item.type)
@@ -857,6 +883,9 @@ namespace otitemeditor
 						if (item.allowDistRead)
 							flags |= (UInt32)itemflags_t.FLAG_ALLOWDISTREAD;
 
+						if (item.walkStack)
+							flags |= (UInt32)itemflags_t.FLAG_WALKSTACK;
+
 						writer.writeUInt32(flags, true);
 
 						foreach (itemattrib_t attribute in saveAttributeList)
@@ -888,6 +917,14 @@ namespace otitemeditor
 									{
 										property.Write((UInt16)item.groundSpeed);
 										writer.writeProp(itemattrib_t.ITEM_ATTR_SPEED, property);
+										break;
+									}
+
+								case itemattrib_t.ITEM_ATTR_NAME:
+									{
+										property.Write((UInt16)item.name.Length);
+										property.Write(item.name);
+										writer.writeProp(itemattrib_t.ITEM_ATTR_NAME, property);
 										break;
 									}
 

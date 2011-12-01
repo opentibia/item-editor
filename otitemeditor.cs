@@ -18,7 +18,7 @@ namespace otitemeditor
 {
 	public partial class otitemeditor : Form
 	{
-		const string versionString = "otitemeditor 0.5.1";
+		const string versionString = "otitemeditor 0.5.2";
 
 		bool showOnlyMissMatchedItems = false;
 		private TextBoxTraceListener textBoxListener;
@@ -333,6 +333,9 @@ namespace otitemeditor
 			verticalCheck.DataBindings.Add("Checked", item, "isVertical");
 			verticalCheck.ForeColor = (item.isVertical == spriteItem.isVertical ? Color.Black : Color.Red);
 
+			verticalCheck.DataBindings.Add("Checked", item, "walkStack");
+			verticalCheck.ForeColor = (item.walkStack == spriteItem.walkStack ? Color.Black : Color.Red);
+
 			horizontalCheck.DataBindings.Add("Checked", item, "isHorizontal");
 			horizontalCheck.ForeColor = (item.isHorizontal == spriteItem.isHorizontal ? Color.Black : Color.Red);
 
@@ -365,6 +368,9 @@ namespace otitemeditor
 
 			minimapColorText.DataBindings.Add("Text", item, "minimapColor");
 			minimapColorText.ForeColor = (item.minimapColor == spriteItem.minimapColor ? Color.Black : Color.Red);
+
+			minimapColorText.DataBindings.Add("Text", item, "name");
+			minimapColorText.ForeColor = (item.name == spriteItem.name ? Color.Black : Color.Red);
 
 			tableLayoutPanelCandidates.Visible = false;
 			for (int i = 0; i < tableLayoutPanelCandidates.ColumnCount; ++i)

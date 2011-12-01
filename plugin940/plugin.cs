@@ -276,12 +276,16 @@ namespace Tibia940
 								case 0x21:
 									{
 										UInt16 marketCategory = reader.ReadUInt16();
-										UInt16 marketShowAs = reader.ReadUInt16();
 										UInt16 marketTradeAs = reader.ReadUInt16();
-										String marketName = reader.ReadString();
+										UInt16 marketShowAs = reader.ReadUInt16();
+
+										UInt16 size = reader.ReadUInt16();
+										char[] marketName = reader.ReadChars(size);
+
 										UInt16 marketProfession = reader.ReadUInt16();
 										UInt16 marketLevel = reader.readUInt16();
 
+										item.name = new string(marketName);
 										item.wareId = marketTradeAs;
 									} break;
 
@@ -308,9 +312,11 @@ namespace Tibia940
                         item.xdiv = reader.ReadByte();
                         item.ydiv = reader.ReadByte();
                         item.zdiv = reader.ReadByte();
-                        item.animationLength = reader.ReadByte();
-						item.isAnimation = item.animationLength > 1;
 
+                        item.animationLength = reader.ReadByte();
+						// in Flash read length of each animation, u32
+
+						item.isAnimation = item.animationLength > 1;
                         item.numSprites =
                             (UInt32)item.width * (UInt32)item.height *
                             (UInt32)item.frames *
@@ -320,7 +326,7 @@ namespace Tibia940
                         // Read the sprite ids
                         for (UInt32 i = 0; i < item.numSprites; ++i)
                         {
-                            UInt16 spriteId = reader.ReadUInt16();
+                            UInt16 spriteId = reader.ReadUInt16(); //u32 in Flash
                             Sprite sprite;
                             if (!sprites.TryGetValue(spriteId, out sprite))
                             {
