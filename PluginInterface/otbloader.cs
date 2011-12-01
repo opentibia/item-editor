@@ -353,7 +353,7 @@ namespace otitemeditor
 			ITEM_ATTR_FIRST = 0x10,
 			ITEM_ATTR_SERVERID = ITEM_ATTR_FIRST,
 			ITEM_ATTR_CLIENTID,
-			ITEM_ATTR_NAME,
+			ITEM_ATTR_NAME,				/*deprecated*/
 			ITEM_ATTR_DESCR,			/*deprecated*/
 			ITEM_ATTR_SPEED,
 			ITEM_ATTR_SLOT,				/*deprecated*/
@@ -383,11 +383,12 @@ namespace otitemeditor
 			ITEM_ATTR_TOPORDER,
 			ITEM_ATTR_WRITEABLE3,		/*deprecated*/
 			ITEM_ATTR_WAREID,
+			ITEM_ATTR_NAME2,
 
 			ITEM_ATTR_LAST
 		};
 
-		public  enum rootattrib_t
+		public enum rootattrib_t
 		{
 			ROOT_ATTR_VERSION = 0x01
 		};
@@ -605,7 +606,7 @@ namespace otitemeditor
 									}
 								} break;
 
-								case itemattrib_t.ITEM_ATTR_NAME:
+								case itemattrib_t.ITEM_ATTR_NAME2:
 								{
 									if (datalen != sizeof(UInt16))
 									{
@@ -818,9 +819,9 @@ namespace otitemeditor
 								saveAttributeList.Add(itemattrib_t.ITEM_ATTR_WAREID);
 							}
 
-							if (item.name != "")
+							if (item.name.Length != 0)
 							{
-								saveAttributeList.Add(itemattrib_t.ITEM_ATTR_NAME);
+								saveAttributeList.Add(itemattrib_t.ITEM_ATTR_NAME2);
 							}
 						}
 
@@ -920,11 +921,11 @@ namespace otitemeditor
 										break;
 									}
 
-								case itemattrib_t.ITEM_ATTR_NAME:
+								case itemattrib_t.ITEM_ATTR_NAME2:
 									{
 										property.Write((UInt16)item.name.Length);
 										property.Write(item.name);
-										writer.writeProp(itemattrib_t.ITEM_ATTR_NAME, property);
+										writer.writeProp(itemattrib_t.ITEM_ATTR_NAME2, property);
 										break;
 									}
 
