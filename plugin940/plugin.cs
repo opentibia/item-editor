@@ -259,7 +259,7 @@ namespace Tibia940
 
                                 case 0x1E: //full tile
                                     {
-										//item.walkStack = true;
+										item.walkStack = true;
                                     } break;
 
                                 case 0x1F: //look through (borders)
