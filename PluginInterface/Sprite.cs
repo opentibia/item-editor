@@ -99,12 +99,56 @@ namespace otitemeditor
 
 			while (bytes < size)
 			{
-				chunkSize = dump[bytes] | dump[bytes + 1] << 8;
-				bytes += 2;
+				try {
+					chunkSize = dump[bytes] | dump[bytes + 1] << 8;
+					bytes += 2;
 
-				for (int i = 0; i < chunkSize; ++i)
-				{
-					// Transparent pixel
+					for (int i = 0; i < chunkSize; ++i)
+					{
+						// Transparent pixel
+						rgb32x32x3[96 * y + x * 3 + 0] = transparentColor;
+						rgb32x32x3[96 * y + x * 3 + 1] = transparentColor;
+						rgb32x32x3[96 * y + x * 3 + 2] = transparentColor;
+						x++;
+						if (x >= 32)
+						{
+							x = 0;
+							++y;
+						}
+					}
+				} catch(Exception) {}
+
+				if (bytes >= size) break; // We're done
+				// Now comes a pixel chunk, read it!
+
+				try {
+					chunkSize = dump[bytes] | dump[bytes + 1] << 8;
+					bytes += 2;
+					for (int i = 0; i < chunkSize; ++i)
+					{
+						byte red = dump[bytes + 0];
+						byte green = dump[bytes + 1];
+						byte blue = dump[bytes + 2];
+						rgb32x32x3[96 * y + x * 3 + 0] = red;
+						rgb32x32x3[96 * y + x * 3 + 1] = green;
+						rgb32x32x3[96 * y + x * 3 + 2] = blue;
+
+						bytes += 3;
+
+						x++;
+						if (x >= 32)
+						{
+							x = 0;
+							++y;
+						}
+					}
+				} catch(Exception) {}
+			}
+
+			// Fill up any trailing pixels
+			while (y < 32 && x < 32)
+			{
+				try {
 					rgb32x32x3[96 * y + x * 3 + 0] = transparentColor;
 					rgb32x32x3[96 * y + x * 3 + 1] = transparentColor;
 					rgb32x32x3[96 * y + x * 3 + 2] = transparentColor;
@@ -114,44 +158,7 @@ namespace otitemeditor
 						x = 0;
 						++y;
 					}
-				}
-
-				if (bytes >= size) break; // We're done
-				// Now comes a pixel chunk, read it!
-				chunkSize = dump[bytes] | dump[bytes + 1] << 8;
-				bytes += 2;
-				for (int i = 0; i < chunkSize; ++i)
-				{
-					byte red = dump[bytes + 0];
-					byte green = dump[bytes + 1];
-					byte blue = dump[bytes + 2];
-					rgb32x32x3[96 * y + x * 3 + 0] = red;
-					rgb32x32x3[96 * y + x * 3 + 1] = green;
-					rgb32x32x3[96 * y + x * 3 + 2] = blue;
-
-					bytes += 3;
-
-					x++;
-					if (x >= 32)
-					{
-						x = 0;
-						++y;
-					}
-				}
-			}
-
-			// Fill up any trailing pixels
-			while (y < 32 && x < 32)
-			{
-				rgb32x32x3[96 * y + x * 3 + 0] = transparentColor;
-				rgb32x32x3[96 * y + x * 3 + 1] = transparentColor;
-				rgb32x32x3[96 * y + x * 3 + 2] = transparentColor;
-				x++;
-				if (x >= 32)
-				{
-					x = 0;
-					++y;
-				}
+				} catch(Exception) {}
 			}
 
 			return rgb32x32x3;
