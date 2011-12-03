@@ -422,8 +422,8 @@ namespace otitemeditor
 			FLAG_HANGABLE = 65536,
 			FLAG_VERTICAL = 131072,
 			FLAG_HORIZONTAL = 262144,
-			FLAG_CANNOTDECAY = 524288,
-			FLAG_ALLOWDISTREAD = 1048576,	/*deprecated*/
+			FLAG_CANNOTDECAY = 524288,		/*deprecated*/
+			FLAG_ALLOWDISTREAD = 1048576,
 			FLAG_CORPSE = 2097152,			/*deprecated*/
 			FLAG_CLIENTCHARGES = 4194304,	/*deprecated*/
 			FLAG_LOOKTHROUGH = 8388608,
@@ -883,6 +883,9 @@ namespace otitemeditor
 
 						if (item.allowDistRead)
 							flags |= (UInt32)itemflags_t.FLAG_ALLOWDISTREAD;
+
+						if (item.isAnimation)
+							flags |= (UInt32)itemflags_t.FLAG_ANIMATION;
 
 						if (item.walkStack)
 							flags |= (UInt32)itemflags_t.FLAG_WALKSTACK;
