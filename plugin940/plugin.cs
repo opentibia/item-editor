@@ -283,7 +283,7 @@ namespace Tibia940
 										char[] marketName = reader.ReadChars(size);
 
 										UInt16 marketProfession = reader.ReadUInt16();
-										UInt16 marketLevel = reader.readUInt16();
+										UInt16 marketLevel = reader.ReadUInt16();
 
 										item.name = new string(marketName);
 										item.wareId = marketTradeAs;
