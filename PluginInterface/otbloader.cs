@@ -922,7 +922,7 @@ namespace otitemeditor
 										break;
 									}
 
-								case itemattrib_t.ITEM_ATTR_NAME2:
+								case itemattrib_t.ITEM_ATTR_NAME:
 									{
 										property.Write((UInt16)item.name.Length);
 										for (UInt16 i = 0; i < item.name.Length; ++i)
@@ -930,7 +930,7 @@ namespace otitemeditor
 											property.Write((char)item.name[i]);
 										}
 
-										writer.writeProp(itemattrib_t.ITEM_ATTR_NAME2, property);
+										writer.writeProp(itemattrib_t.ITEM_ATTR_NAME, property);
 										break;
 									}
 
