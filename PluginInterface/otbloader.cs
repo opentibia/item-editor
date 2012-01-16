@@ -353,7 +353,7 @@ namespace otitemeditor
 			ITEM_ATTR_FIRST = 0x10,
 			ITEM_ATTR_SERVERID = ITEM_ATTR_FIRST,
 			ITEM_ATTR_CLIENTID,
-			ITEM_ATTR_NAME,				/*deprecated*/
+			ITEM_ATTR_NAME,
 			ITEM_ATTR_DESCR,			/*deprecated*/
 			ITEM_ATTR_SPEED,
 			ITEM_ATTR_SLOT,				/*deprecated*/
@@ -383,7 +383,6 @@ namespace otitemeditor
 			ITEM_ATTR_TOPORDER,
 			ITEM_ATTR_WRITEABLE3,		/*deprecated*/
 			ITEM_ATTR_WAREID,
-			ITEM_ATTR_NAME2,
 
 			ITEM_ATTR_LAST
 		};
@@ -606,15 +605,14 @@ namespace otitemeditor
 									}
 								} break;
 
-								case itemattrib_t.ITEM_ATTR_NAME2:
+								case itemattrib_t.ITEM_ATTR_NAME:
 								{
 									if (datalen != sizeof(UInt16))
 									{
 										if (outputDebug)
 										{
-											Trace.WriteLine(String.Format("Unexpected data length of name block (Should be 2 bytes)"));
+											Trace.WriteLine(String.Format("Unexpected data length of name block (Should be at least 2 bytes)"));
 										}
-										return false;
 									}
 
 									UInt16 size = nodeReader.ReadUInt16();
@@ -819,9 +817,9 @@ namespace otitemeditor
 								saveAttributeList.Add(itemattrib_t.ITEM_ATTR_WAREID);
 							}
 
-							if (item.name.Length != 0)
+							if (!string.IsNullOrEmpty(item.name))
 							{
-								saveAttributeList.Add(itemattrib_t.ITEM_ATTR_NAME2);
+								saveAttributeList.Add(itemattrib_t.ITEM_ATTR_NAME);
 							}
 						}
 

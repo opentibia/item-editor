@@ -94,7 +94,7 @@ namespace otitemeditor
 				return false;
 			}
 
-			if (name != item.name)
+			if (name.CompareTo(item.name) != 0)
 			{
 				return false;
 			}
