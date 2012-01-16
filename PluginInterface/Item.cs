@@ -62,6 +62,7 @@ namespace otitemeditor
 		public Item()
 		{
 			isMoveable = true;
+			name = "";
 		}
 
 		public virtual bool isEqual(Item item)
