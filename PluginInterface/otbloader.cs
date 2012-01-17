@@ -325,7 +325,9 @@ namespace otitemeditor
 			CLIENT_VERSION_900 = 27,
 			CLIENT_VERSION_910 = 28,
 			CLIENT_VERSION_920 = 29,
-			CLIENT_VERSION_944 = 30
+			CLIENT_VERSION_940 = 30
+			CLIENT_VERSION_944 = 31
+			CLIENT_VERSION_944_NEW = 32,
 		};
 
 		public enum itemgroup_t
@@ -392,7 +394,8 @@ namespace otitemeditor
 			ROOT_ATTR_VERSION = 0x01
 		};
 
-		public class VERSIONINFO{
+		public class VERSIONINFO
+		{
 			public UInt32 dwMajorVersion;
 			public UInt32 dwMinorVersion;
 			public UInt32 dwBuildNumber;
@@ -607,16 +610,7 @@ namespace otitemeditor
 
 								case itemattrib_t.ITEM_ATTR_NAME:
 								{
-									if (datalen != sizeof(UInt16))
-									{
-										if (outputDebug)
-										{
-											Trace.WriteLine(String.Format("Unexpected data length of name block (Should be at least 2 bytes)"));
-										}
-									}
-
-									UInt16 size = nodeReader.ReadUInt16();
-									item.name = new string(nodeReader.ReadChars(size));
+									item.name = new string(nodeReader.ReadChars(datalen));
 									if (outputDebug)
 									{
 										Trace.WriteLine(String.Format("Node:attribute:data {0}", item.name));
@@ -924,7 +918,6 @@ namespace otitemeditor
 
 								case itemattrib_t.ITEM_ATTR_NAME:
 									{
-										property.Write((UInt16)item.name.Length);
 										for (UInt16 i = 0; i < item.name.Length; ++i)
 										{
 											property.Write((char)item.name[i]);

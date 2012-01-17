@@ -1,5 +1,7 @@
 <settings>
   <clients>
-	<!-- No official client yet -->
+	<!-- missing 9.40 -->
+	<client version="944" description="Tibia 9.44 (old)" otbversion="31" datsignature="4F0EEFBB" sprsignature="4F0EEFEF"/>
+	<client version="9441" description="Tibia 9.44" otbversion="32" datsignature="4F105168" sprsignature="4F1051D7"/>
   </clients>
 </settings>
