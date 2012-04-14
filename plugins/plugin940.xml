@@ -6,5 +6,7 @@
 	<client version="9442" description="Tibia 9.44 v2" otbversion="33" datsignature="4F16C0D7" sprsignature="4F1051D7"/>
 	<client version="9443" description="Tibia 9.44 v3" otbversion="34" datsignature="4F3131CF" sprsignature="4F3131F6"/>
 	<client version="946" description="Tibia 9.46" otbversion="35" datsignature="4F6B341F" sprsignature="4F5DCEF7"/>
+	<client version="950" description="Tibia 9.50" otbversion="36" datsignature="4F75B7AB" sprsignature="4F75B7CD"/>
+	<client version="952" description="Tibia 9.52" otbversion="37" datsignature="4F857F6C" sprsignature="4F857F8E"/>
   </clients>
 </settings>
