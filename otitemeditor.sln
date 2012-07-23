@@ -1,26 +1,26 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C# Express 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "otitemeditor", "otitemeditor.csproj", "{9A90BE1A-4A8F-4BFE-92E7-2C0EF64D850C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "otitemeditor", "Source\otitemeditor.csproj", "{9A90BE1A-4A8F-4BFE-92E7-2C0EF64D850C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{3624E915-FB86-4DDB-ACA6-A2313F70BA9C} = {3624E915-FB86-4DDB-ACA6-A2313F70BA9C}
 		{4624E915-FB86-4DDB-ACA6-A2313F70BA9C} = {4624E915-FB86-4DDB-ACA6-A2313F70BA9C}
 		{2FBAC16E-457D-472B-880D-8D393F8A7827} = {2FBAC16E-457D-472B-880D-8D393F8A7827}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluginInterface", "PluginInterface\PluginInterface.csproj", "{CEF21172-258C-4D0D-B024-ED7EF99612A2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluginInterface", "Source\PluginInterface\PluginInterface.csproj", "{CEF21172-258C-4D0D-B024-ED7EF99612A2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "plugin850", "Plugin850\plugin850.csproj", "{4624E915-FB86-4DDB-ACA6-A2313F70BA9C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "plugin850", "Source\Plugin850\plugin850.csproj", "{4624E915-FB86-4DDB-ACA6-A2313F70BA9C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "plugin860", "Plugin860\plugin860.csproj", "{3624E915-FB86-4DDB-ACA6-A2313F70BA9C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "plugin860", "Source\Plugin860\plugin860.csproj", "{3624E915-FB86-4DDB-ACA6-A2313F70BA9C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "plugin872", "Plugin872\plugin872.csproj", "{F1A9A849-66BA-4B7D-AE69-A896B5893418}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "plugin872", "Source\Plugin872\plugin872.csproj", "{F1A9A849-66BA-4B7D-AE69-A896B5893418}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "plugin900", "Plugin900\plugin900.csproj", "{F1A9A849-66BA-4B7D-AE69-A896B5893419}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "plugin900", "Source\Plugin900\plugin900.csproj", "{F1A9A849-66BA-4B7D-AE69-A896B5893419}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "plugin940", "Plugin940\plugin940.csproj", "{06A3993C-A9DA-44BE-AE47-13F6503E7A01}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "plugin940", "Source\Plugin940\plugin940.csproj", "{06A3993C-A9DA-44BE-AE47-13F6503E7A01}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageSimilarity", "ImageSimilarity\ImageSimilarity.csproj", "{2FBAC16E-457D-472B-880D-8D393F8A7827}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageSimilarity", "Source\ImageSimilarity\ImageSimilarity.csproj", "{2FBAC16E-457D-472B-880D-8D393F8A7827}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
