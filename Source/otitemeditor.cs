@@ -333,9 +333,6 @@ namespace otitemeditor
 			verticalCheck.DataBindings.Add("Checked", item, "isVertical");
 			verticalCheck.ForeColor = (item.isVertical == spriteItem.isVertical ? Color.Black : Color.Red);
 
-			verticalCheck.DataBindings.Add("Checked", item, "walkStack");
-			verticalCheck.ForeColor = (item.walkStack == spriteItem.walkStack ? Color.Black : Color.Red);
-
 			horizontalCheck.DataBindings.Add("Checked", item, "isHorizontal");
 			horizontalCheck.ForeColor = (item.isHorizontal == spriteItem.isHorizontal ? Color.Black : Color.Red);
 
@@ -369,8 +366,11 @@ namespace otitemeditor
 			minimapColorText.DataBindings.Add("Text", item, "minimapColor");
 			minimapColorText.ForeColor = (item.minimapColor == spriteItem.minimapColor ? Color.Black : Color.Red);
 
-			minimapColorText.DataBindings.Add("Text", item, "name");
-			minimapColorText.ForeColor = (item.name == spriteItem.name ? Color.Black : Color.Red);
+            wareIdText.DataBindings.Add("Text", item, "wareId");
+            wareIdText.ForeColor = (item.wareId == spriteItem.wareId ? Color.Black : Color.Red);
+
+            nameText.DataBindings.Add("Text", item, "name");
+            nameText.ForeColor = (item.name.CompareTo(spriteItem.name) == 0 ? Color.Black : Color.Red);
 
 			tableLayoutPanelCandidates.Visible = false;
 			for (int i = 0; i < tableLayoutPanelCandidates.ColumnCount; ++i)
@@ -1034,6 +1034,6 @@ namespace otitemeditor
 		private void updateTreeviewToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			buildTreeView();
-		}
+        }
 	}
 }

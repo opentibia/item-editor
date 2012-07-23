@@ -26,7 +26,6 @@ namespace otitemeditor
 
 		public UInt16 id;
 		public UInt16 groundSpeed;
-		public string name;
 		public ItemType type;
 		public bool alwaysOnTop;
 		public UInt16 alwaysOnTopOrder;
@@ -38,9 +37,8 @@ namespace otitemeditor
 		public bool lookThrough;
 		public UInt16 lightLevel;
 		public UInt16 lightColor;
-		public UInt16 wareId;
 		public bool isStackable;
-		public bool isReadable;
+		public bool isReadable; 
 		public bool isMoveable;
 		public bool isPickupable;
 		public bool isHangable;
@@ -52,7 +50,9 @@ namespace otitemeditor
 		public bool blockPathFind;
 		public bool allowDistRead;
 		public bool isAnimation;
-		public bool walkStack;
+	    public bool walkStack;
+	    public UInt16 wareId;
+	    public string name;
 	}
 
 	public class Item
@@ -62,7 +62,7 @@ namespace otitemeditor
 		public Item()
 		{
 			isMoveable = true;
-			name = "";
+		    name = "";
 		}
 
 		public virtual bool isEqual(Item item)
@@ -79,6 +79,21 @@ namespace otitemeditor
 			}
 			*/
 
+            if (name.CompareTo(item.name) != 0)
+            {
+                return false;
+            }
+
+            if (wareId != item.wareId)
+            {
+                return false;
+            }
+
+            if (walkStack != item.walkStack)
+            {
+                return false;
+            }
+
 			if (isAnimation != item.isAnimation)
 			{
 				return false;
@@ -90,16 +105,6 @@ namespace otitemeditor
 			}
 
 			if (alwaysOnTopOrder != item.alwaysOnTopOrder)
-			{
-				return false;
-			}
-
-			if (name.CompareTo(item.name) != 0)
-			{
-				return false;
-			}
-
-			if (walkStack != item.walkStack)
 			{
 				return false;
 			}
@@ -155,11 +160,6 @@ namespace otitemeditor
 			}
 
 			if (isReadable != item.isReadable)
-			{
-				return false;
-			}
-
-			if (wareId != item.wareId)
 			{
 				return false;
 			}
@@ -238,9 +238,17 @@ namespace otitemeditor
 		public bool blockPathFind { get { return itemImpl.blockPathFind; } set { itemImpl.blockPathFind = value; } }
 		public bool allowDistRead { get { return itemImpl.allowDistRead; } set { itemImpl.allowDistRead = value; } }
 		public bool isAnimation { get { return itemImpl.isAnimation; } set { itemImpl.isAnimation = value; } }
-		public UInt16 wareId { get { return itemImpl.wareId; } set { itemImpl.wareId = value; } }
-		public bool walkStack { get { return itemImpl.walkStack; } set { itemImpl.walkStack = value; } }
-		public string name { get { return itemImpl.name; } set { itemImpl.name = value; } }
+        public bool walkStack { get { return itemImpl.walkStack; } set { itemImpl.walkStack = value; } }
+        public string name
+        {
+            get { return itemImpl.name; }
+            set { itemImpl.name = value; }
+        }
+        public UInt16 wareId
+        {
+            get { return itemImpl.wareId; }
+            set { itemImpl.wareId = value; }
+        }
 
 		//used to find sprites during updates
 		protected byte[] _spriteHash = null;

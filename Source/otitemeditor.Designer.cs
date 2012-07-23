@@ -47,7 +47,6 @@
             this.clientIdUpDown = new System.Windows.Forms.NumericUpDown();
             this.serverIdLbl = new System.Windows.Forms.Label();
             this.optionGroupBox = new System.Windows.Forms.GroupBox();
-            this.walkStackCheck = new System.Windows.Forms.CheckBox();
             this.maxReadWriteChars = new System.Windows.Forms.Label();
             this.maxReadWriteCharsText = new System.Windows.Forms.TextBox();
             this.maxReadCharsLabel = new System.Windows.Forms.Label();
@@ -104,6 +103,10 @@
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.outputTextBox = new System.Windows.Forms.TextBox();
+            this.nameLbl = new System.Windows.Forms.Label();
+            this.nameText = new System.Windows.Forms.TextBox();
+            this.wareIdLbl = new System.Windows.Forms.Label();
+            this.wareIdText = new System.Windows.Forms.TextBox();
             traceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanelCandidates.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCandidate5)).BeginInit();
@@ -111,6 +114,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCandidate4)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCandidate1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCandidate2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.vertSplitContainer)).BeginInit();
             this.vertSplitContainer.Panel1.SuspendLayout();
             this.vertSplitContainer.Panel2.SuspendLayout();
             this.vertSplitContainer.SuspendLayout();
@@ -172,7 +176,7 @@
             this.tableLayoutPanelCandidates.Name = "tableLayoutPanelCandidates";
             this.tableLayoutPanelCandidates.RowCount = 1;
             this.tableLayoutPanelCandidates.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 64F));
-            this.tableLayoutPanelCandidates.Size = new System.Drawing.Size(239, 85);
+            this.tableLayoutPanelCandidates.Size = new System.Drawing.Size(226, 85);
             this.tableLayoutPanelCandidates.TabIndex = 2;
             this.tableLayoutPanelCandidates.Visible = false;
             // 
@@ -292,7 +296,7 @@
             // typeLbl
             // 
             this.typeLbl.AutoSize = true;
-            this.typeLbl.Location = new System.Drawing.Point(11, 111);
+            this.typeLbl.Location = new System.Drawing.Point(11, 107);
             this.typeLbl.Name = "typeLbl";
             this.typeLbl.Size = new System.Drawing.Size(34, 13);
             this.typeLbl.TabIndex = 34;
@@ -346,7 +350,10 @@
             // 
             // optionGroupBox
             // 
-            this.optionGroupBox.Controls.Add(this.walkStackCheck);
+            this.optionGroupBox.Controls.Add(this.wareIdText);
+            this.optionGroupBox.Controls.Add(this.wareIdLbl);
+            this.optionGroupBox.Controls.Add(this.nameText);
+            this.optionGroupBox.Controls.Add(this.nameLbl);
             this.optionGroupBox.Controls.Add(this.maxReadWriteChars);
             this.optionGroupBox.Controls.Add(this.maxReadWriteCharsText);
             this.optionGroupBox.Controls.Add(this.maxReadCharsLabel);
@@ -382,16 +389,6 @@
             this.optionGroupBox.TabIndex = 1;
             this.optionGroupBox.TabStop = false;
             this.optionGroupBox.Text = "Options";
-            // 
-            // walkStackCheck
-            // 
-            this.walkStackCheck.AutoSize = true;
-            this.walkStackCheck.Location = new System.Drawing.Point(323, 19);
-            this.walkStackCheck.Name = "walkStackCheck";
-            this.walkStackCheck.Size = new System.Drawing.Size(94, 17);
-            this.walkStackCheck.TabIndex = 45;
-            this.walkStackCheck.Text = "Walk stacking";
-            this.walkStackCheck.UseVisualStyleBackColor = true;
             // 
             // maxReadWriteChars
             // 
@@ -444,7 +441,7 @@
             // lightColorLbl
             // 
             this.lightColorLbl.AutoSize = true;
-            this.lightColorLbl.Location = new System.Drawing.Point(157, 178);
+            this.lightColorLbl.Location = new System.Drawing.Point(157, 175);
             this.lightColorLbl.Name = "lightColorLbl";
             this.lightColorLbl.Size = new System.Drawing.Size(59, 13);
             this.lightColorLbl.TabIndex = 38;
@@ -460,7 +457,7 @@
             // lightLevelLbl
             // 
             this.lightLevelLbl.AutoSize = true;
-            this.lightLevelLbl.Location = new System.Drawing.Point(157, 152);
+            this.lightLevelLbl.Location = new System.Drawing.Point(157, 149);
             this.lightLevelLbl.Name = "lightLevelLbl";
             this.lightLevelLbl.Size = new System.Drawing.Size(58, 13);
             this.lightLevelLbl.TabIndex = 36;
@@ -476,7 +473,7 @@
             // topOrderLbl
             // 
             this.topOrderLbl.AutoSize = true;
-            this.topOrderLbl.Location = new System.Drawing.Point(3, 178);
+            this.topOrderLbl.Location = new System.Drawing.Point(3, 175);
             this.topOrderLbl.Name = "topOrderLbl";
             this.topOrderLbl.Size = new System.Drawing.Size(56, 13);
             this.topOrderLbl.TabIndex = 30;
@@ -492,7 +489,7 @@
             // SpeedLbl
             // 
             this.SpeedLbl.AutoSize = true;
-            this.SpeedLbl.Location = new System.Drawing.Point(3, 152);
+            this.SpeedLbl.Location = new System.Drawing.Point(3, 149);
             this.SpeedLbl.Name = "SpeedLbl";
             this.SpeedLbl.Size = new System.Drawing.Size(41, 13);
             this.SpeedLbl.TabIndex = 28;
@@ -882,6 +879,38 @@
             this.outputTextBox.Size = new System.Drawing.Size(641, 142);
             this.outputTextBox.TabIndex = 24;
             // 
+            // nameLbl
+            // 
+            this.nameLbl.AutoSize = true;
+            this.nameLbl.Location = new System.Drawing.Point(280, 204);
+            this.nameLbl.Name = "nameLbl";
+            this.nameLbl.Size = new System.Drawing.Size(38, 13);
+            this.nameLbl.TabIndex = 45;
+            this.nameLbl.Text = "Name:";
+            // 
+            // nameText
+            // 
+            this.nameText.Location = new System.Drawing.Point(323, 201);
+            this.nameText.Name = "nameText";
+            this.nameText.Size = new System.Drawing.Size(98, 20);
+            this.nameText.TabIndex = 46;
+            // 
+            // wareIdLbl
+            // 
+            this.wareIdLbl.AutoSize = true;
+            this.wareIdLbl.Location = new System.Drawing.Point(157, 204);
+            this.wareIdLbl.Name = "wareIdLbl";
+            this.wareIdLbl.Size = new System.Drawing.Size(50, 13);
+            this.wareIdLbl.TabIndex = 47;
+            this.wareIdLbl.Text = "Ware ID:";
+            // 
+            // wareIdText
+            // 
+            this.wareIdText.Location = new System.Drawing.Point(219, 201);
+            this.wareIdText.Name = "wareIdText";
+            this.wareIdText.Size = new System.Drawing.Size(55, 20);
+            this.wareIdText.TabIndex = 48;
+            // 
             // otitemeditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -907,6 +936,7 @@
             this.vertSplitContainer.Panel1.ResumeLayout(false);
             this.vertSplitContainer.Panel2.ResumeLayout(false);
             this.vertSplitContainer.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.vertSplitContainer)).EndInit();
             this.vertSplitContainer.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.prevPictureBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.clientIdUpDown)).EndInit();
@@ -995,8 +1025,11 @@
 		private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem duplicateItemToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem createItemToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem updateTreeviewToolStripMenuItem;
-        private System.Windows.Forms.CheckBox walkStackCheck;
+		private System.Windows.Forms.ToolStripMenuItem updateTreeviewToolStripMenuItem;
+        private System.Windows.Forms.TextBox wareIdText;
+        private System.Windows.Forms.Label wareIdLbl;
+        private System.Windows.Forms.TextBox nameText;
+        private System.Windows.Forms.Label nameLbl;
 	}
 }
 

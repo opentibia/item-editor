@@ -10,11 +10,11 @@ using System.Drawing;
 using ImageSimilarity;
 using System.Drawing.Imaging;
 
-namespace Tibia872
+namespace Tibia960
 {
     public class Plugin : IPlugin
     {
-        Dictionary<UInt16, Sprite> sprites = new Dictionary<UInt16, Sprite>();
+        Dictionary<UInt32, Sprite> sprites = new Dictionary<UInt32, Sprite>();
         SpriteItems items = new SpriteItems();
         List<SupportedClient> supportedClients = new List<SupportedClient>();
 
@@ -28,12 +28,23 @@ namespace Tibia872
 
         public bool LoadClient(SupportedClient client, string datFullPath, string sprFullPath)
         {
-            return loadDat(datFullPath, client.datSignature) && loadSprites(sprFullPath, client.sprSignature);
+            if (!loadDat(datFullPath, client.datSignature))
+            {
+                Trace.WriteLine("Failed to load dat");
+                return false;
+            }
+
+            if (!loadSprites(sprFullPath, client.sprSignature))
+            {
+                Trace.WriteLine("Failed to load spr");
+                return false;
+            }
+            return true;
         }
 
         public void Initialize()
         {
-            settings.Load("plugin872.xml");
+            settings.Load("plugin960.xml");
             supportedClients = settings.GetSupportedClientList();
         }
 
@@ -58,6 +69,7 @@ namespace Tibia872
                     UInt32 datSignature = reader.ReadUInt32();
                     if (signature != 0 && datSignature != signature)
                     {
+                        Trace.WriteLine(String.Format("Plugin: Bad signature, dat signature is {0} and signature is {0}", datSignature, signature));
                         return false;
                     }
 
@@ -247,8 +259,9 @@ namespace Tibia872
                                         }
                                     } break;
 
-                                case 0x1E: //unknown
+                                case 0x1E: //full tile
                                     {
+                                        item.walkStack = true;
                                     } break;
 
                                 case 0x1F: //look through (borders)
@@ -261,13 +274,26 @@ namespace Tibia872
                                         reader.ReadUInt16();
                                     } break;
 
+                                case 0x21: //market
+                                    {
+                                        reader.ReadUInt16(); // category
+                                        item.wareId = reader.ReadUInt16(); // trade as
+                                        reader.ReadUInt16(); // show as
+                                        var size = reader.ReadUInt16();
+                                        item.name = new string(reader.ReadChars(size));
+
+                                        reader.ReadUInt16(); // profession
+                                        reader.ReadUInt16(); // level
+                                    }
+                                    break;
+
                                 case 0xFF: //end of attributes
                                     {
                                     } break;
 
                                 default:
                                     {
-                                        Trace.WriteLine(String.Format("Plugin: Error while parsing, unknown optbyte 0x{0:X}", optbyte));
+                                        Trace.WriteLine(String.Format("Plugin: Error while parsing, unknown optbyte 0x{0:X} at id {1}", optbyte, id));
                                         return false;
                                     }
                             }
@@ -285,7 +311,7 @@ namespace Tibia872
                         item.ydiv = reader.ReadByte();
                         item.zdiv = reader.ReadByte();
                         item.animationLength = reader.ReadByte();
-						item.isAnimation = item.animationLength > 1;
+                        item.isAnimation = item.animationLength > 1;
 
                         item.numSprites =
                             (UInt32)item.width * (UInt32)item.height *
@@ -296,7 +322,7 @@ namespace Tibia872
                         // Read the sprite ids
                         for (UInt32 i = 0; i < item.numSprites; ++i)
                         {
-                            UInt16 spriteId = reader.ReadUInt16();
+                            var spriteId = reader.ReadUInt32();
                             Sprite sprite;
                             if (!sprites.TryGetValue(spriteId, out sprite))
                             {

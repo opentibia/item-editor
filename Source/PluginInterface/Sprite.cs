@@ -72,6 +72,71 @@ namespace otitemeditor
 			return true;
 		}
 
+        public static bool loadSprites(string filename, ref Dictionary<UInt32, Sprite> sprites, UInt32 signature)
+        {
+            FileStream fileStream = new FileStream(filename, FileMode.Open);
+            try
+            {
+                using (BinaryReader reader = new BinaryReader(fileStream))
+                {
+                    UInt32 sprSignature = reader.ReadUInt32();
+                    if (signature != 0 && signature != sprSignature)
+                    {
+                        return false;
+                    }
+
+                    UInt32 totalPics = reader.ReadUInt32();
+
+                    List<UInt32> spriteIndexes = new List<UInt32>();
+                    for (uint i = 0; i < totalPics; ++i)
+                    {
+                        UInt32 index = reader.ReadUInt32();
+                        spriteIndexes.Add(index);
+                    }
+
+                    UInt32 id = 1;
+                    foreach (UInt32 element in spriteIndexes)
+                    {
+                        UInt32 index = element + 3;
+                        reader.BaseStream.Seek(index, SeekOrigin.Begin);
+                        UInt16 size = reader.ReadUInt16();
+
+                        Sprite sprite;
+                        if (sprites.TryGetValue(id, out sprite))
+                        {
+                            if (sprite != null && size > 0)
+                            {
+                                if (sprite.size > 0)
+                                {
+                                    //generate warning
+                                }
+                                else
+                                {
+                                    sprite.id = id;
+                                    sprite.size = size;
+                                    sprite.dump = reader.ReadBytes(size);
+
+                                    sprites[id] = sprite;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            reader.BaseStream.Seek(size, SeekOrigin.Current);
+                        }
+
+                        ++id;
+                    }
+                }
+            }
+            finally
+            {
+                fileStream.Close();
+            }
+
+            return true;
+        }
+
 		public Sprite()
 		{
 			id = 0;
@@ -99,56 +164,12 @@ namespace otitemeditor
 
 			while (bytes < size)
 			{
-				try {
-					chunkSize = dump[bytes] | dump[bytes + 1] << 8;
-					bytes += 2;
+				chunkSize = dump[bytes] | dump[bytes + 1] << 8;
+				bytes += 2;
 
-					for (int i = 0; i < chunkSize; ++i)
-					{
-						// Transparent pixel
-						rgb32x32x3[96 * y + x * 3 + 0] = transparentColor;
-						rgb32x32x3[96 * y + x * 3 + 1] = transparentColor;
-						rgb32x32x3[96 * y + x * 3 + 2] = transparentColor;
-						x++;
-						if (x >= 32)
-						{
-							x = 0;
-							++y;
-						}
-					}
-				} catch(Exception) {}
-
-				if (bytes >= size) break; // We're done
-				// Now comes a pixel chunk, read it!
-
-				try {
-					chunkSize = dump[bytes] | dump[bytes + 1] << 8;
-					bytes += 2;
-					for (int i = 0; i < chunkSize; ++i)
-					{
-						byte red = dump[bytes + 0];
-						byte green = dump[bytes + 1];
-						byte blue = dump[bytes + 2];
-						rgb32x32x3[96 * y + x * 3 + 0] = red;
-						rgb32x32x3[96 * y + x * 3 + 1] = green;
-						rgb32x32x3[96 * y + x * 3 + 2] = blue;
-
-						bytes += 3;
-
-						x++;
-						if (x >= 32)
-						{
-							x = 0;
-							++y;
-						}
-					}
-				} catch(Exception) {}
-			}
-
-			// Fill up any trailing pixels
-			while (y < 32 && x < 32)
-			{
-				try {
+				for (int i = 0; i < chunkSize; ++i)
+				{
+					// Transparent pixel
 					rgb32x32x3[96 * y + x * 3 + 0] = transparentColor;
 					rgb32x32x3[96 * y + x * 3 + 1] = transparentColor;
 					rgb32x32x3[96 * y + x * 3 + 2] = transparentColor;
@@ -158,7 +179,44 @@ namespace otitemeditor
 						x = 0;
 						++y;
 					}
-				} catch(Exception) {}
+				}
+
+				if (bytes >= size) break; // We're done
+				// Now comes a pixel chunk, read it!
+				chunkSize = dump[bytes] | dump[bytes + 1] << 8;
+				bytes += 2;
+				for (int i = 0; i < chunkSize; ++i)
+				{
+					byte red = dump[bytes + 0];
+					byte green = dump[bytes + 1];
+					byte blue = dump[bytes + 2];
+					rgb32x32x3[96 * y + x * 3 + 0] = red;
+					rgb32x32x3[96 * y + x * 3 + 1] = green;
+					rgb32x32x3[96 * y + x * 3 + 2] = blue;
+
+					bytes += 3;
+
+					x++;
+					if (x >= 32)
+					{
+						x = 0;
+						++y;
+					}
+				}
+			}
+
+			// Fill up any trailing pixels
+			while (y < 32 && x < 32)
+			{
+				rgb32x32x3[96 * y + x * 3 + 0] = transparentColor;
+				rgb32x32x3[96 * y + x * 3 + 1] = transparentColor;
+				rgb32x32x3[96 * y + x * 3 + 2] = transparentColor;
+				x++;
+				if (x >= 32)
+				{
+					x = 0;
+					++y;
+				}
 			}
 
 			return rgb32x32x3;
