@@ -1,0 +1,6 @@
+
+# Visual studio intermediate directories
+bin/
+obj/
+*.suo
+*.csproj.user
