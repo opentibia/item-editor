@@ -10,7 +10,7 @@ using System.Drawing;
 using ImageSimilarity;
 using System.Drawing.Imaging;
 
-namespace Tibia1000
+namespace Tibia1021
 {
     public class Plugin : IPlugin
     {
@@ -44,7 +44,7 @@ namespace Tibia1000
 
         public void Initialize()
         {
-            settings.Load("plugin1000.xml");
+            settings.Load("plugin1021.xml");
             supportedClients = settings.GetSupportedClientList();
         }
 
@@ -292,6 +292,15 @@ namespace Tibia1000
                                         reader.ReadUInt16(); // level
                                     }
                                     break;
+
+                                case 0x23: //Default Action
+                                    {
+                                        reader.ReadUInt16();
+                                    } break;
+
+                                case 0xFE: //Usable
+                                    {
+                                    } break;
 
                                 case 0xFF: //end of attributes
                                     {

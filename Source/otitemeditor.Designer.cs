@@ -73,6 +73,7 @@
             this.moveableCheck = new System.Windows.Forms.CheckBox();
             this.blockPathFindCheck = new System.Windows.Forms.CheckBox();
             this.verticalCheck = new System.Windows.Forms.CheckBox();
+            this.walkStackCheck = new System.Windows.Forms.CheckBox();
             this.pickupableCheck = new System.Windows.Forms.CheckBox();
             this.blockProjectileCheck = new System.Windows.Forms.CheckBox();
             this.blockObjectCheck = new System.Windows.Forms.CheckBox();
@@ -380,6 +381,7 @@
             this.optionGroupBox.Controls.Add(this.moveableCheck);
             this.optionGroupBox.Controls.Add(this.blockPathFindCheck);
             this.optionGroupBox.Controls.Add(this.verticalCheck);
+            this.optionGroupBox.Controls.Add(this.walkStackCheck);
             this.optionGroupBox.Controls.Add(this.pickupableCheck);
             this.optionGroupBox.Controls.Add(this.blockProjectileCheck);
             this.optionGroupBox.Controls.Add(this.blockObjectCheck);
@@ -621,6 +623,16 @@
             this.verticalCheck.TabIndex = 14;
             this.verticalCheck.Text = "Vertical";
             this.verticalCheck.UseVisualStyleBackColor = true;
+            // 
+            // walkStackCheck
+            // 
+            this.walkStackCheck.AutoSize = true;
+            this.walkStackCheck.Location = new System.Drawing.Point(323, 19);
+            this.walkStackCheck.Name = "walkStackCheck";
+            this.walkStackCheck.Size = new System.Drawing.Size(76, 17);
+            this.walkStackCheck.TabIndex = 14;
+            this.walkStackCheck.Text = "walkStack";
+            this.walkStackCheck.UseVisualStyleBackColor = true;
             // 
             // pickupableCheck
             // 
@@ -985,6 +997,7 @@
 		private System.Windows.Forms.CheckBox moveableCheck;
 		private System.Windows.Forms.CheckBox blockPathFindCheck;
 		private System.Windows.Forms.CheckBox verticalCheck;
+		private System.Windows.Forms.CheckBox walkStackCheck;
 		private System.Windows.Forms.CheckBox pickupableCheck;
 		private System.Windows.Forms.CheckBox blockProjectileCheck;
 		private System.Windows.Forms.CheckBox blockObjectCheck;

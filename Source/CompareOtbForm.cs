@@ -179,6 +179,11 @@ namespace otitemeditor
 					{
 						resultTextBox.AppendText(string.Format("id: {0} minimapColor [{1}]/[{2}]" + Environment.NewLine, item1.id, item1.minimapColor, item2.minimapColor));
 					}
+
+                    if (item1.name != item2.name)
+                    {
+                        resultTextBox.AppendText(string.Format("id: {0} name [{1}]/[{2}]" + Environment.NewLine, item1.id, item1.name, item2.name));
+                    }
 				}
 
 				if (resultTextBox.Text.Length == 0)

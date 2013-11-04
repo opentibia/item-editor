@@ -8,8 +8,8 @@
     <ProjectGuid>{D0473665-569C-4205-89DE-23074EBD0DC1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>plugin1000</RootNamespace>
-    <AssemblyName>plugin1000</AssemblyName>
+    <RootNamespace>plugin1010</RootNamespace>
+    <AssemblyName>plugin1010</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
