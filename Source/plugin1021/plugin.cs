@@ -298,7 +298,7 @@ namespace Tibia1021
                                         reader.ReadUInt16();
                                     } break;
 
-                                case 0xFE: //http://tpforums.org/forum/threads/5030-Tibia-Data-File-Structure?p=52506&viewfull=1#post52506
+                                case 0xFE: //Usable
                                     {
                                     } break;
 
