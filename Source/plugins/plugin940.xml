@@ -1,6 +1,6 @@
 <settings>
   <clients>
-	<!-- missing 9.40 -->
+	<client version="940" description="Tibia 9.40" otbversion="30" datsignature="4EE71DE5" sprsignature="4EE71E06"/>
 	<client version="944" description="Tibia 9.44 (old)" otbversion="31" datsignature="4F0EEFBB" sprsignature="4F0EEFEF"/>
 	<client version="9441" description="Tibia 9.44 v1" otbversion="32" datsignature="4F105168" sprsignature="4F1051D7"/>
 	<client version="9442" description="Tibia 9.44 v2" otbversion="33" datsignature="4F16C0D7" sprsignature="4F1051D7"/>

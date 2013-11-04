@@ -333,6 +333,9 @@ namespace otitemeditor
 			verticalCheck.DataBindings.Add("Checked", item, "isVertical");
 			verticalCheck.ForeColor = (item.isVertical == spriteItem.isVertical ? Color.Black : Color.Red);
 
+            walkStackCheck.DataBindings.Add("Checked", item, "walkStack");
+            walkStackCheck.ForeColor = (item.walkStack == spriteItem.walkStack ? Color.Black : Color.Red);
+
 			horizontalCheck.DataBindings.Add("Checked", item, "isHorizontal");
 			horizontalCheck.ForeColor = (item.isHorizontal == spriteItem.isHorizontal ? Color.Black : Color.Red);
 
