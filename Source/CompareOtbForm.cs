@@ -180,10 +180,20 @@ namespace otitemeditor
 						resultTextBox.AppendText(string.Format("id: {0} minimapColor [{1}]/[{2}]" + Environment.NewLine, item1.id, item1.minimapColor, item2.minimapColor));
 					}
 
-                    if (item1.name != item2.name)
-                    {
-                        resultTextBox.AppendText(string.Format("id: {0} name [{1}]/[{2}]" + Environment.NewLine, item1.id, item1.name, item2.name));
-                    }
+					if (item1.name != item2.name)
+					{
+						resultTextBox.AppendText(string.Format("id: {0} name [{1}]/[{2}]" + Environment.NewLine, item1.id, item1.name, item2.name));
+					}
+
+					if (item1.walkStack != item2.walkStack)
+					{
+						resultTextBox.AppendText(string.Format("id: {0} walkstack [{1}]/[{2}]" + Environment.NewLine, item1.id, item1.walkStack, item2.walkStack));
+					}
+
+					if (item1.wareId != item2.wareId)
+					{
+						resultTextBox.AppendText(string.Format("id: {0} wareid [{1}]/[{2}]" + Environment.NewLine, item1.id, item1.wareId, item2.wareId));
+					}
 				}
 
 				if (resultTextBox.Text.Length == 0)
