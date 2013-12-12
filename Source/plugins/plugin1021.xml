@@ -1,5 +1,6 @@
 <settings>
   <clients>
 	<client version="1021" description="Tibia 10.21" otbversion="52" datsignature="526A5068" sprsignature="526A5090"/>
+	<client version="1030" description="Tibia 10.30" otbversion="53" datsignature="52A59036" sprsignature="52A5905F"/>
   </clients>
 </settings>
