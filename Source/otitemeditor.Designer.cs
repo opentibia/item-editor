@@ -774,7 +774,7 @@
             // 
             this.duplicateItemToolStripMenuItem.Enabled = false;
             this.duplicateItemToolStripMenuItem.Name = "duplicateItemToolStripMenuItem";
-            this.duplicateItemToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
+            this.duplicateItemToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D)));
             this.duplicateItemToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
             this.duplicateItemToolStripMenuItem.Text = "&Duplicate item";
             this.duplicateItemToolStripMenuItem.Click += new System.EventHandler(this.duplicateItemToolStripMenuItem_Click);
