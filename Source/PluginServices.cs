@@ -34,7 +34,13 @@ namespace Host
 		/// </summary>
 		public void FindPlugins()
 		{
-			FindPlugins(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "plugins"));
+            string path = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "plugins");
+            if (Directory.Exists(path) == false)
+            {
+                Directory.CreateDirectory(path);
+            }
+
+            FindPlugins(path);
 		}
 
 		/// <summary>
