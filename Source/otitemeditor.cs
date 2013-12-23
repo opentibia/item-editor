@@ -490,33 +490,81 @@ namespace otitemeditor
 			}
 		}
 
-		public bool loadClient(Host.Types.Plugin plugin, UInt32 otbVersion)
-		{
-			SupportedClient client = plugin.Instance.SupportedClients.Find(
-				delegate(SupportedClient sc)
-				{
-					return sc.otbVersion == otbVersion;
-				});
+        public bool loadClient(Host.Types.Plugin plugin, UInt32 otbVersion)
+        {
+            SupportedClient client = plugin.Instance.SupportedClients.Find(
+                delegate(SupportedClient sc)
+                {
+                    return sc.otbVersion == otbVersion;
+                });
 
-			if (client == null)
-			{
-				MessageBox.Show("The selected plugin does not support this version.");
-				return false;
-			}
+            if (client == null)
+            {
+                MessageBox.Show("The selected plugin does not support this version.");
+                return false;
+            }
 
-			string baseFolder = System.IO.Directory.GetCurrentDirectory();
-			string datPath = System.IO.Path.Combine("data", String.Format("tibia{0}.dat", client.version));
-			string sprPath = System.IO.Path.Combine("data", String.Format("tibia{0}.spr", client.version));
+            string dataFolder = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "data");
 
-			bool result = plugin.Instance.LoadClient(client, System.IO.Path.Combine(baseFolder, datPath), System.IO.Path.Combine(baseFolder, sprPath));
-			if (!result)
-			{
-				MessageBox.Show(String.Format("The plugin could not load tibia{0}.dat or tibia{1}.spr", client.version, client.version));
-			}
+            if (Directory.Exists(dataFolder) == false)
+            {
+                Directory.CreateDirectory(dataFolder);
+            }
 
-			items.clientVersion = client.version;
-			return result;
-		}
+            string datPath = FindClientFile(Path.Combine(dataFolder, client.version.ToString()), ".dat");
+            string sprPath = FindClientFile(Path.Combine(dataFolder, client.version.ToString()), ".spr");
+
+            if (File.Exists(datPath) == false || File.Exists(sprPath) == false)
+            {
+                string text = String.Empty;
+
+                if (File.Exists(datPath) == false)
+                {
+                    text = String.Format("Unable to load dat file, please place a valid dat in 'data\\{0}\\'.", client.version);
+                }
+
+                if (File.Exists(sprPath) == false)
+                {
+                    if (text != String.Empty)
+                    {
+                        text += "\n";
+                    }
+                    text += String.Format("Unable to load spr file, please place a valid spr in 'data\\{0}\\'.", client.version);
+                }
+
+                MessageBox.Show(text);
+                return false;
+            }
+
+            bool result = plugin.Instance.LoadClient(client, datPath, sprPath);
+            if (!result)
+            {
+                MessageBox.Show(String.Format("The plugin could not load dat or spr."));
+            }
+
+            items.clientVersion = client.version;
+            return result;
+        }
+
+        private string FindClientFile(string Path, string extension)
+        {
+            try
+            {
+                foreach (string fileOn in Directory.GetFiles(Path))
+                {
+                    FileInfo file = new FileInfo(fileOn);
+                    if (file.Extension.Equals(extension))
+                    {
+                        return file.FullName;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                return String.Empty;
+            }
+            return String.Empty;
+        }
 
 		private bool generateSpriteSignatures(ref SpriteItems items)
 		{
