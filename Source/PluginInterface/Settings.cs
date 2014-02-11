@@ -19,7 +19,8 @@ namespace PluginInterface
 			string path = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "plugins");
 			try
 			{
-				xmlDocument.Load(System.IO.Path.Combine(path, filename));
+				SettingFilename = System.IO.Path.Combine(path, filename);
+				xmlDocument.Load(SettingFilename);
 				return true;
 			}
 			catch
@@ -51,7 +52,7 @@ namespace PluginInterface
 					}
 					catch
 					{
-						System.Windows.Forms.MessageBox.Show("Error");
+						System.Windows.Forms.MessageBox.Show(String.Format("Error loading file {0}", SettingFilename));
 					}
 				}
 			}

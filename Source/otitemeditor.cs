@@ -285,7 +285,7 @@ namespace otitemeditor
 			duplicateItemToolStripMenuItem.Enabled = true;
 
 			drawSprite(pictureBox, spriteItem);
-			if (!item.isCustomCreated)
+			if (!item.isCustomCreated && item.spriteHash != null && spriteItem.spriteHash != null)
 			{
 				pictureBox.BackColor = ((Utils.ByteArrayCompare(item.spriteHash, spriteItem.spriteHash) ? Color.White : Color.Red));
 			}

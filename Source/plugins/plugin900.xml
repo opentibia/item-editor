@@ -1,7 +1,0 @@
-<settings>
-  <clients>
-	<client version="900" description="Tibia 9.00" otbversion="27" datsignature="4DBAA20B" sprsignature="4DAD1A32"/>
-	<client version="910" description="Tibia 9.10" otbversion="28" datsignature="4E12DAFF" sprsignature="4E12DB27"/>
-	<client version="920" description="Tibia 9.20" otbversion="29" datsignature="4E807C08" sprsignature="4E807C23"/>
-  </clients>
-</settings>

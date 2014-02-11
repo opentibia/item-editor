@@ -1,3 +1,6 @@
+# Scripts
+release/
+debug/
 
 # Visual studio intermediate directories
 bin/
