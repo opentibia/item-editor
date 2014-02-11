@@ -140,6 +140,10 @@
       <Project>{2FBAC16E-457D-472B-880D-8D393F8A7827}</Project>
       <Name>ImageSimilarity</Name>
     </ProjectReference>
+    <ProjectReference Include="PluginCustom\plugincustom.csproj">
+      <Project>{8624E915-FB86-4DDB-ACA6-A2313F70BA9C}</Project>
+      <Name>plugincustom</Name>
+    </ProjectReference>
     <ProjectReference Include="Plugin850\plugin850.csproj">
       <Project>{4624E915-FB86-4DDB-ACA6-A2313F70BA9C}</Project>
       <Name>plugin850</Name>
@@ -147,6 +151,30 @@
     <ProjectReference Include="Plugin860\plugin860.csproj">
       <Project>{3624E915-FB86-4DDB-ACA6-A2313F70BA9C}</Project>
       <Name>plugin860</Name>
+    </ProjectReference>
+    <ProjectReference Include="Plugin872\plugin872.csproj">
+      <Project>{F1A9A849-66BA-4B7D-AE69-A896B5893418}</Project>
+      <Name>plugin872</Name>
+    </ProjectReference>
+    <ProjectReference Include="Plugin900\plugin900.csproj">
+      <Project>{F1A9A849-66BA-4B7D-AE69-A896B5893419}</Project>
+      <Name>plugin900</Name>
+    </ProjectReference>
+    <ProjectReference Include="Plugin940\plugin940.csproj">
+      <Project>{06A3993C-A9DA-44BE-AE47-13F6503E7A01}</Project>
+      <Name>plugin940</Name>
+    </ProjectReference>
+    <ProjectReference Include="Plugin960\plugin960.csproj">
+      <Project>{D0473665-569C-4205-89DE-23074EBD0DC0}</Project>
+      <Name>plugin960</Name>
+    </ProjectReference>
+    <ProjectReference Include="Plugin1010\plugin1010.csproj">
+      <Project>{D0473665-569C-4205-89DE-23074EBD0DC1}</Project>
+      <Name>plugin1010</Name>
+    </ProjectReference>
+    <ProjectReference Include="Plugin1021\plugin1021.csproj">
+      <Project>{D2C9DCC5-05F8-4204-96F9-3231DAE13525}</Project>
+      <Name>plugin1021</Name>
     </ProjectReference>
     <ProjectReference Include="PluginInterface\PluginInterface.csproj">
       <Project>{CEF21172-258C-4D0D-B024-ED7EF99612A2}</Project>

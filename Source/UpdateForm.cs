@@ -60,7 +60,7 @@ namespace otitemeditor
 		{
 			if (pluginsListBox.SelectedItem != null && mainForm.currentPlugin != null)
 			{
-				selectBtn.Enabled = (pluginsListBox.SelectedIndex != currentClientIndex);
+				selectBtn.Enabled = true;
 			}
 		}
 

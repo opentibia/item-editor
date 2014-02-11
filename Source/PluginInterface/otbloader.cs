@@ -326,9 +326,9 @@ namespace otitemeditor
 			CLIENT_VERSION_910 = 28,
 			CLIENT_VERSION_920 = 29,
 			CLIENT_VERSION_940 = 30,
-            CLIENT_VERSION_944_V1 = 31,
-            CLIENT_VERSION_944_V2 = 32,
-            CLIENT_VERSION_944_V3 = 33
+			CLIENT_VERSION_944_V1 = 31,
+			CLIENT_VERSION_944_V2 = 32,
+			CLIENT_VERSION_944_V3 = 33
 		};
 
 		public enum itemgroup_t

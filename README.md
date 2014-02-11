@@ -20,6 +20,8 @@ There are no builds of OTItemEditor available at the moment.
 You can build the project using the provided otitemeditor.sln in Visual
 Studio 2010 or later.
 
+Just run ./build-linux.sh to compile. It uses xbuild from Mono package.
+
 If somebody can contribute compiling instructions for other platforms, that'd be
 great.
 
