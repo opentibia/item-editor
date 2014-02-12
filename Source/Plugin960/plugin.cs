@@ -1,347 +1,373 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using System.Collections;
+﻿#region Licence
+/**
+* Copyright (C) 2005-2014 <https://github.com/opentibia/item-editor/>
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program; if not, write to the Free Software Foundation, Inc.,
+* 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
+#endregion
+
+using OTItemEditor;
 using PluginInterface;
-using otitemeditor;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
-using ImageSimilarity;
-using System.Drawing.Imaging;
+using System.IO;
 
-namespace Tibia960
+namespace Plugin960
 {
-    public class Plugin : IPlugin
-    {
-        Dictionary<UInt32, Sprite> sprites = new Dictionary<UInt32, Sprite>();
-        SpriteItems items = new SpriteItems();
-        List<SupportedClient> supportedClients = new List<SupportedClient>();
+	#region Enum
 
-        IPluginHost myHost = null;
+	enum ItemFlag : byte
+	{
+		Ground = 0x00,
+		GroundBorder = 0x01,
+		OnBottom = 0x02,
+		OnTop = 0x03,
+		Container = 0x04,
+		Stackable = 0x05,
+		ForceUse = 0x06,
+		MultiUse = 0x07,
+		Writable = 0x08,
+		WritableOnce = 0x09,
+		FluidContainer = 0x0A,
+		Fluid = 0x0B,
+		IsUnpassable = 0x0C,
+		IsUnmoveable = 0x0D,
+		BlockMissiles = 0x0E,
+		BlockPathfinder = 0x0F,
+		Pickupable = 0x10,
+		Hangable = 0x11,
+		IsHorizontal = 0x12,
+		IsVertical = 0x13,
+		Rotatable = 0x14,
+		HasLight = 0x15,
+		DontHide = 0x16,
+		Translucent = 0x17,
+		HasOffset = 0x18,
+		HasElevation = 0x19,
+		Lying = 0x1A,
+		AnimateAlways = 0x1B,
+		Minimap = 0x1C,
+		LensHelp = 0x1D,
+		FullGround = 0x1E,
+		IgnoreLook = 0x1F,
+		Cloth = 0x20,
+		Market = 0x21,
 
-        //IPlugin implementation
-        public IPluginHost Host { get { return myHost; } set { myHost = value; } }
+		LastFlag = 0xFF
+	}
 
-        public List<SupportedClient> SupportedClients { get { return supportedClients; } }
-        public SpriteItems Items { get { return items; } set { items = value; } }
+	#endregion
 
-        public bool LoadClient(SupportedClient client, string datFullPath, string sprFullPath)
-        {
-            if (!loadDat(datFullPath, client.datSignature))
-            {
-                Trace.WriteLine("Failed to load dat");
-                return false;
-            }
+	public class Plugin : IPlugin
+	{
+		#region Private Properties
 
-            if (!loadSprites(sprFullPath, client.sprSignature))
-            {
-                Trace.WriteLine("Failed to load spr");
-                return false;
-            }
-            return true;
-        }
+		private Dictionary<UInt32, Sprite> sprites = new Dictionary<UInt32, Sprite>();
+		private SpriteItems items = new SpriteItems();
+		private List<SupportedClient> supportedClients = new List<SupportedClient>();
+		private IPluginHost myHost = null;
 
-        public void Initialize()
-        {
-            settings.Load("plugin960.xml");
-            supportedClients = settings.GetSupportedClientList();
-        }
+		#endregion
 
-        public void Dispose()
-        {
-            sprites.Clear();
-            items.Clear();
-        }
+		#region Public Properties
 
-        //internal implementation
-        public Settings settings = new Settings();
+		//internal implementation
+		public Settings settings = new Settings();
 
-        public bool loadSprites(string filename, UInt32 signature) { return Sprite.loadSprites(filename, ref sprites, signature); }
+		//IPlugin implementation
+		public IPluginHost Host { get { return myHost; } set { myHost = value; } }
+		public List<SupportedClient> SupportedClients { get { return supportedClients; } }
+		public SpriteItems Items { get { return items; } set { items = value; } }
 
-        public bool loadDat(string filename, UInt32 signature)
-        {
-            FileStream fileStream = new FileStream(filename, FileMode.Open);
-            try
-            {
-                using (BinaryReader reader = new BinaryReader(fileStream))
-                {
-                    UInt32 datSignature = reader.ReadUInt32();
-                    if (signature != 0 && datSignature != signature)
-                    {
-                        Trace.WriteLine(String.Format("Plugin: Bad signature, dat signature is {0} and signature is {0}", datSignature, signature));
-                        return false;
-                    }
+		#endregion
 
-                    //get max id
-                    UInt16 itemCount = reader.ReadUInt16();
-                    UInt16 creatureCount = reader.ReadUInt16();
-                    UInt16 effectCount = reader.ReadUInt16();
-                    UInt16 distanceCount = reader.ReadUInt16();
+		#region General Methods
 
-                    UInt16 minclientID = 100; //items starts at 100
-                    UInt16 maxclientID = itemCount;
+		public bool LoadClient(SupportedClient client, string datFullPath, string sprFullPath)
+		{
+			if (!LoadDat(datFullPath, client.datSignature))
+			{
+				Trace.WriteLine("Failed to load dat.");
+				return false;
+			}
 
-                    UInt16 id = minclientID;
-                    while (id <= maxclientID)
-                    {
-                        SpriteItem item = new SpriteItem();
-                        item.id = id;
-                        items[id] = item;
+			if (!LoadSprites(sprFullPath, client.sprSignature))
+			{
+				Trace.WriteLine("Failed to load spr.");
+				return false;
+			}
+			return true;
+		}
 
-                        // read the options until we find 0xff
-                        byte optbyte;
-                        do
-                        {
-                            optbyte = reader.ReadByte();
-                            //Trace.WriteLine(String.Format("{0:X}", optbyte));
+		public void Initialize()
+		{
+			settings.Load("plugin960.xml");
+			supportedClients = settings.GetSupportedClientList();
+		}
 
-                            switch (optbyte)
-                            {
-                                case 0x00: //groundtile
-                                    {
-                                        item.groundSpeed = reader.ReadUInt16();
-                                        item.type = ItemType.Ground;
-                                    } break;
+		public void Dispose()
+		{
+			sprites.Clear();
+			items.Clear();
+		}
 
-                                case 0x01: //all OnTop
-                                    {
-                                        item.alwaysOnTop = true;
-                                        item.alwaysOnTopOrder = 1;
-                                    } break;
+		public bool LoadSprites(string filename, UInt32 signature)
+		{
+			return Sprite.LoadSprites(filename, ref sprites, signature);
+		}
 
-                                case 0x02: //can walk trough (open doors, arces, bug pen fence)
-                                    {
-                                        item.alwaysOnTop = true;
-                                        item.alwaysOnTopOrder = 2;
-                                    } break;
+		public bool LoadDat(string filename, UInt32 signature)
+		{
+			FileStream fileStream = new FileStream(filename, FileMode.Open);
+			try
+			{
+				using (BinaryReader reader = new BinaryReader(fileStream))
+				{
+					UInt32 datSignature = reader.ReadUInt32();
+					if (signature != 0 && datSignature != signature)
+					{
+						string message = "Plugin960: Bad dat signature. Expected signature is {0:X} and loaded signature is {1:X}.";
+						Trace.WriteLine(String.Format(message, datSignature, signature));
+						return false;
+					}
 
-                                case 0x03: //can walk trough (arces)
-                                    {
-                                        item.alwaysOnTop = true;
-                                        item.alwaysOnTopOrder = 3;
-                                    } break;
+					//get max id
+					UInt16 itemCount = reader.ReadUInt16();
+					UInt16 creatureCount = reader.ReadUInt16();
+					UInt16 effectCount = reader.ReadUInt16();
+					UInt16 distanceCount = reader.ReadUInt16();
 
-                                case 0x04: //container
-                                    {
-                                        item.type = ItemType.Container;
-                                    } break;
+					UInt16 minclientID = 100; //items starts at 100
+					UInt16 maxclientID = itemCount;
 
-                                case 0x05: //stackable
-                                    {
-                                        item.isStackable = true;
-                                        break;
-                                    }
+					UInt16 id = minclientID;
+					while (id <= maxclientID)
+					{
+						SpriteItem item = new SpriteItem();
+						item.id = id;
+						items[id] = item;
 
-                                case 0x06: //unknown
-                                    {
-                                    } break;
+						// read the options until we find 0xff
+						ItemFlag flag;
+						do
+						{
+							flag = (ItemFlag)reader.ReadByte();
 
-                                case 0x07: //useable
-                                    {
-                                        item.hasUseWith = true;
-                                    } break;
+							switch (flag)
+							{
+								case ItemFlag.Ground:
+									item.groundSpeed = reader.ReadUInt16();
+									item.type = ItemType.Ground;
+									break;
 
-                                case 0x08: //read/write-able
-                                    {
-                                        item.isReadable = true;
-                                        //item.isWriteable = true;
-                                        item.maxReadWriteChars = reader.ReadUInt16();
-                                    } break;
+								case ItemFlag.GroundBorder:
+									item.alwaysOnTop = true;
+									item.alwaysOnTopOrder = 1;
+									break;
 
-                                case 0x09: //readable
-                                    {
-                                        item.isReadable = true;
-                                        item.maxReadChars = reader.ReadUInt16();
-                                    } break;
+								case ItemFlag.OnBottom:
+									item.alwaysOnTop = true;
+									item.alwaysOnTopOrder = 2;
+									break;
 
-                                case 0x0A: //fluid containers
-                                    {
-                                        item.type = ItemType.Fluid;
-                                    } break;
+								case ItemFlag.OnTop:
+									item.alwaysOnTop = true;
+									item.alwaysOnTopOrder = 3;
+									break;
 
-                                case 0x0B: //splashes
-                                    {
-                                        item.type = ItemType.Splash;
-                                    } break;
+								case ItemFlag.Container:
+									item.type = ItemType.Container;
+									break;
 
-                                case 0x0C: //blocks solid objects (creatures, walls etc)
-                                    {
-                                        item.blockObject = true;
-                                    } break;
+								case ItemFlag.Stackable:
+									item.isStackable = true;
+									break;
 
-                                case 0x0D: //not moveable
-                                    {
-                                        item.isMoveable = false;
-                                    } break;
+								case ItemFlag.ForceUse:
+									break;
 
-                                case 0x0E: //blocks missiles (walls, magic wall etc)
-                                    {
-                                        item.blockProjectile = true;
-                                    } break;
+								case ItemFlag.MultiUse:
+									item.multiUse = true;
+									break;
 
-                                case 0x0F: //blocks pathfind algorithms (monsters)
-                                    {
-                                        item.blockPathFind = true;
-                                    } break;
+								case ItemFlag.Writable:
+									item.isReadable = true;
+									item.maxReadWriteChars = reader.ReadUInt16();
+									break;
 
-                                case 0x10: //blocks monster movement (flowers, parcels etc)
-                                    {
-                                        item.isPickupable = true;
-                                    } break;
+								case ItemFlag.WritableOnce:
+									item.isReadable = true;
+									item.maxReadChars = reader.ReadUInt16();
+									break;
 
-                                case 0x11: //hangable objects (wallpaper etc)
-                                    {
-                                        item.isHangable = true;
-                                    } break;
+								case ItemFlag.FluidContainer:
+									item.type = ItemType.Fluid;
+									break;
 
-                                case 0x12: //horizontal wall
-                                    {
-                                        item.isHorizontal = true;
-                                    } break;
+								case ItemFlag.Fluid:
+									item.type = ItemType.Splash;
+									break;
 
-                                case 0x13: //vertical wall
-                                    {
-                                        item.isVertical = true;
-                                    } break;
+								case ItemFlag.IsUnpassable:
+									item.isUnpassable = true;
+									break;
 
-                                case 0x14: //rotatable
-                                    {
-                                        item.isRotatable = true;
-                                    } break;
+								case ItemFlag.IsUnmoveable:
+									item.isMoveable = false;
+									break;
 
-                                case 0x15: //light info
-                                    {
-                                        item.lightLevel = reader.ReadUInt16();
-                                        item.lightColor = reader.ReadUInt16();
-                                    } break;
+								case ItemFlag.BlockMissiles:
+									item.blockMissiles = true;
+									break;
 
-                                case 0x16: //unknown
-                                    {
-                                    } break;
+								case ItemFlag.BlockPathfinder:
+									item.blockPathfinder = true;
+									break;
 
-                                case 0x17: //changes floor
-                                    {
-                                    } break;
+								case ItemFlag.Pickupable:
+									item.isPickupable = true;
+									break;
 
-                                case 0x18: //unknown
-                                    {
-                                        reader.BaseStream.Seek(4, SeekOrigin.Current);
-                                    } break;
+								case ItemFlag.Hangable:
+									item.isHangable = true;
+									break;
 
-                                case 0x19:
-                                    {
-                                        item.hasHeight = true;
-                                        UInt16 height = reader.ReadUInt16();
-                                    } break;
+								case ItemFlag.IsHorizontal:
+									item.isHorizontal = true;
+									break;
 
-                                case 0x1A: //unknown
-                                    {
-                                    } break;
+								case ItemFlag.IsVertical:
+									item.isVertical = true;
+									break;
 
+								case ItemFlag.Rotatable:
+									item.isRotatable = true;
+									break;
 
-                                case 0x1B: //unknown
-                                    {
-                                    } break;
+								case ItemFlag.HasLight:
+									item.lightLevel = reader.ReadUInt16();
+									item.lightColor = reader.ReadUInt16();
+									break;
 
-                                case 0x1C: //minimap color
-                                    {
-                                        item.minimapColor = reader.ReadUInt16();
-                                        break;
-                                    }
+								case ItemFlag.DontHide:
+									break;
 
-                                case 0x1D: //in-game help info
-                                    {
-                                        UInt16 opt = reader.ReadUInt16();
-                                        if (opt == 1112)
-                                        {
-                                            item.isReadable = true;
-                                        }
-                                    } break;
+								case ItemFlag.Translucent:
+									break;
 
-                                case 0x1E: //full tile
-                                    {
-                                        item.walkStack = true;
-                                    } break;
+								case ItemFlag.HasOffset:
+									reader.ReadUInt16(); // OffsetX
+									reader.ReadUInt16(); // OffsetY
+									break;
 
-                                case 0x1F: //look through (borders)
-                                    {
-                                        item.lookThrough = true;
-                                    } break;
+								case ItemFlag.HasElevation:
+									item.hasElevation = true;
+									reader.ReadUInt16(); // Height
+									break;
 
-                                case 0x20: //unknown
-                                    {
-                                        reader.ReadUInt16();
-                                    } break;
+								case ItemFlag.Lying:
+									break;
 
-                                case 0x21: //market
-                                    {
-                                        reader.ReadUInt16(); // category
-                                        item.wareId = reader.ReadUInt16(); // trade as
-                                        reader.ReadUInt16(); // show as
-                                        var size = reader.ReadUInt16();
-                                        item.name = new string(reader.ReadChars(size));
+								case ItemFlag.AnimateAlways:
+									break;
 
-                                        reader.ReadUInt16(); // profession
-                                        reader.ReadUInt16(); // level
-                                    }
-                                    break;
+								case ItemFlag.Minimap:
+									item.minimapColor = reader.ReadUInt16();
+									break;
 
-                                case 0xFF: //end of attributes
-                                    {
-                                    } break;
+								case ItemFlag.LensHelp:
+									UInt16 opt = reader.ReadUInt16();
+									if (opt == 1112)
+									{
+										item.isReadable = true;
+									}
+									break;
 
-                                default:
-                                    {
-                                        Trace.WriteLine(String.Format("Plugin: Error while parsing, unknown optbyte 0x{0:X} at id {1}", optbyte, id));
-                                        return false;
-                                    }
-                            }
-                        } while (optbyte != 0xFF);
+								case ItemFlag.FullGround:
+									item.fullGround = true;
+									break;
 
-                        item.width = reader.ReadByte();
-                        item.height = reader.ReadByte();
-                        if ((item.width > 1) || (item.height > 1))
-                        {
-                            reader.BaseStream.Position++;
-                        }
+								case ItemFlag.IgnoreLook:
+									item.ignoreLook = true;
+									break;
 
-                        item.frames = reader.ReadByte();
-                        item.xdiv = reader.ReadByte();
-                        item.ydiv = reader.ReadByte();
-                        item.zdiv = reader.ReadByte();
-                        item.animationLength = reader.ReadByte();
-                        item.isAnimation = item.animationLength > 1;
+								case ItemFlag.Cloth:
+									reader.ReadUInt16();
+									break;
 
-                        item.numSprites =
-                            (UInt32)item.width * (UInt32)item.height *
-                            (UInt32)item.frames *
-                            (UInt32)item.xdiv * (UInt32)item.ydiv * item.zdiv *
-                            (UInt32)item.animationLength;
+								case ItemFlag.Market:
+									reader.ReadUInt16(); // category
+									item.tradeAs = reader.ReadUInt16(); // trade as
+									reader.ReadUInt16(); // show as
+									var size = reader.ReadUInt16();
+									item.name = new string(reader.ReadChars(size));
+									reader.ReadUInt16(); // profession
+									reader.ReadUInt16(); // level
+									break;
 
-                        // Read the sprite ids
-                        for (UInt32 i = 0; i < item.numSprites; ++i)
-                        {
-                            var spriteId = reader.ReadUInt32();
-                            Sprite sprite;
-                            if (!sprites.TryGetValue(spriteId, out sprite))
-                            {
-                                sprite = new Sprite();
-                                sprite.id = spriteId;
-                                sprites[spriteId] = sprite;
-                            }
-                            item.spriteList.Add(sprite);
-                        }
-                        ++id;
-                    }
-                }
-            }
-            finally
-            {
-                fileStream.Close();
-            }
+								case ItemFlag.LastFlag:
+									break;
 
-            return true;
-        }
-    }
+								default:
+									Trace.WriteLine(String.Format("Plugin960: Error while parsing, unknown flag 0x{0:X} at id {1}.", flag, id));
+									return false;
+							}
+
+						} while (flag != ItemFlag.LastFlag);
+
+						item.width = reader.ReadByte();
+						item.height = reader.ReadByte();
+						if ((item.width > 1) || (item.height > 1))
+						{
+							reader.BaseStream.Position++;
+						}
+
+						item.layers = reader.ReadByte();
+						item.patternX = reader.ReadByte();
+						item.patternY = reader.ReadByte();
+						item.patternZ = reader.ReadByte();
+						item.frames = reader.ReadByte();
+						item.isAnimation = item.frames > 1;
+						item.numSprites = (UInt32)item.width * item.height * item.layers * item.patternX * item.patternY * item.patternZ * item.frames;
+
+						// Read the sprite ids
+						for (UInt32 i = 0; i < item.numSprites; ++i)
+						{
+							var spriteId = reader.ReadUInt32();
+							Sprite sprite;
+							if (!sprites.TryGetValue(spriteId, out sprite))
+							{
+								sprite = new Sprite();
+								sprite.id = spriteId;
+								sprites[spriteId] = sprite;
+							}
+							item.spriteList.Add(sprite);
+						}
+						++id;
+					}
+				}
+			}
+			finally
+			{
+				fileStream.Close();
+			}
+
+			return true;
+		}
+
+		#endregion
+	}
 }

@@ -1,4 +1,4 @@
-﻿namespace otitemeditor
+﻿namespace OTItemEditor
 {
 	partial class ProgressForm
 	{
@@ -34,25 +34,28 @@
 			// 
 			// bar
 			// 
-			this.bar.Location = new System.Drawing.Point(42, 49);
+			this.bar.Anchor = System.Windows.Forms.AnchorStyles.None;
+			this.bar.Location = new System.Drawing.Point(47, 59);
 			this.bar.Name = "bar";
 			this.bar.Size = new System.Drawing.Size(257, 23);
 			this.bar.TabIndex = 0;
+			this.bar.UseWaitCursor = true;
 			// 
 			// progressLbl
 			// 
 			this.progressLbl.AutoSize = true;
-			this.progressLbl.Location = new System.Drawing.Point(39, 33);
+			this.progressLbl.Location = new System.Drawing.Point(44, 41);
 			this.progressLbl.Name = "progressLbl";
 			this.progressLbl.Size = new System.Drawing.Size(51, 13);
 			this.progressLbl.TabIndex = 1;
 			this.progressLbl.Text = "Progress:";
+			this.progressLbl.UseWaitCursor = true;
 			// 
 			// ProgressForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(355, 127);
+			this.ClientSize = new System.Drawing.Size(351, 123);
 			this.ControlBox = false;
 			this.Controls.Add(this.progressLbl);
 			this.Controls.Add(this.bar);

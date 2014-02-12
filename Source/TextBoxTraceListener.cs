@@ -1,50 +1,84 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿#region Licence
+/**
+* Copyright (C) 2005-2014 <https://github.com/opentibia/item-editor/>
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program; if not, write to the Free Software Foundation, Inc.,
+* 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
+#endregion
+
+using System;
 using System.Diagnostics;
 using System.Windows.Forms;
 
-namespace otitemeditor
+namespace OTItemEditor
 {
-    public class TextBoxTraceListener : TraceListener
-    {
-        const UInt32 updateFrequency = 10;
-        UInt32 updateCounter = 0;
+	public class TextBoxTraceListener : TraceListener
+	{
+		#region Properties
 
-        private TextBox _target;
-        private StringSendDelegate _invokeWrite;
+		const UInt32 updateFrequency = 10;
+		UInt32 updateCounter = 0;
 
-        public TextBoxTraceListener(TextBox target)
-        {
-            _target = target;
-            _invokeWrite = new StringSendDelegate(SendString);
-        }
+		private TextBox _target;
+		private StringSendDelegate _invokeWrite;
 
-        public override void Write(string message)
-        {
-            _target.Invoke(_invokeWrite, new object[] { message });
-        }
+		#endregion
 
-        public override void WriteLine(string message)
-        {
-            _target.Invoke(_invokeWrite, new object[] { message + Environment.NewLine });
-        }
+		#region Constructor
 
-        private delegate void StringSendDelegate(string message);
-        private void SendString(string message)
-        {
-            // No need to lock text box as this function will only 
+		public TextBoxTraceListener(TextBox target)
+		{
+			_target = target;
+			_invokeWrite = new StringSendDelegate(SendString);
+		}
 
-            // ever be executed from the UI thread
+		#endregion
 
-            _target.AppendText(message);
+		#region General Methods
 
-            ++updateCounter;
-            if (updateCounter >= updateFrequency)
-            {
-                updateCounter = 0;
-                Application.DoEvents();
-            }
-        }
-    }
+		public void Clear()
+		{
+			_target.Clear();
+		}
+
+		public override void Write(string message)
+		{
+			_target.Invoke(_invokeWrite, new object[] { ">> " + message });
+		}
+
+		public override void WriteLine(string message)
+		{
+			_target.Invoke(_invokeWrite, new object[] { ">> " + message + Environment.NewLine });
+		}
+
+		private delegate void StringSendDelegate(string message);
+		private void SendString(string message)
+		{
+			// No need to lock text box as this function will only 
+			// ever be executed from the UI thread
+
+			_target.AppendText(message);
+
+			++updateCounter;
+			if (updateCounter >= updateFrequency)
+			{
+				updateCounter = 0;
+				Application.DoEvents();
+			}
+		}
+
+		#endregion
+	}
 }

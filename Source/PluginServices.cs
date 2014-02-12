@@ -1,8 +1,27 @@
-﻿using System;
+﻿#region Licence
+/**
+* Copyright (C) 2005-2014 <https://github.com/opentibia/item-editor/>
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program; if not, write to the Free Software Foundation, Inc.,
+* 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
+#endregion
+
+using PluginInterface;
+using System;
 using System.IO;
 using System.Reflection;
-using PluginInterface;
-using otitemeditor;
 
 namespace Host
 {
@@ -34,13 +53,13 @@ namespace Host
 		/// </summary>
 		public void FindPlugins()
 		{
-            string path = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "plugins");
-            if (Directory.Exists(path) == false)
-            {
-                Directory.CreateDirectory(path);
-            }
+			string path = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "plugins");
+			if (Directory.Exists(path) == false)
+			{
+				Directory.CreateDirectory(path);
+			}
 
-            FindPlugins(path);
+			FindPlugins(path);
 		}
 
 		/// <summary>
@@ -168,7 +187,7 @@ namespace Host
 			{
 				foreach (Types.Plugin plugin in this.List)
 				{
-					foreach(SupportedClient client in plugin.Instance.SupportedClients)
+					foreach (SupportedClient client in plugin.Instance.SupportedClients)
 					{
 						if (client.otbVersion == otbVersion)
 						{
@@ -204,4 +223,3 @@ namespace Host
 		}
 	}
 }
-

@@ -1,4 +1,4 @@
-﻿namespace otitemeditor
+﻿namespace OTItemEditor
 {
 	partial class UpdateForm
 	{

@@ -1,13 +1,32 @@
-﻿using System;
+﻿#region Licence
+/**
+* Copyright (C) 2005-2014 <https://github.com/opentibia/item-editor/>
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program; if not, write to the Free Software Foundation, Inc.,
+* 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
+#endregion
+
+using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
 
-namespace otitemeditor
+namespace OTItemEditor
 {
 	public class Sprite
 	{
-		public static bool loadSprites(string filename, ref Dictionary<UInt16, Sprite> sprites, UInt32 signature)
+		public static bool LoadSprites(string filename, ref Dictionary<UInt16, Sprite> sprites, UInt32 signature)
 		{
 			FileStream fileStream = new FileStream(filename, FileMode.Open);
 			try
@@ -72,70 +91,70 @@ namespace otitemeditor
 			return true;
 		}
 
-        public static bool loadSprites(string filename, ref Dictionary<UInt32, Sprite> sprites, UInt32 signature)
-        {
-            FileStream fileStream = new FileStream(filename, FileMode.Open);
-            try
-            {
-                using (BinaryReader reader = new BinaryReader(fileStream))
-                {
-                    UInt32 sprSignature = reader.ReadUInt32();
-                    if (signature != 0 && signature != sprSignature)
-                    {
-                        return false;
-                    }
+		public static bool LoadSprites(string filename, ref Dictionary<UInt32, Sprite> sprites, UInt32 signature)
+		{
+			FileStream fileStream = new FileStream(filename, FileMode.Open);
+			try
+			{
+				using (BinaryReader reader = new BinaryReader(fileStream))
+				{
+					UInt32 sprSignature = reader.ReadUInt32();
+					if (signature != 0 && signature != sprSignature)
+					{
+						return false;
+					}
 
-                    UInt32 totalPics = reader.ReadUInt32();
+					UInt32 totalPics = reader.ReadUInt32();
 
-                    List<UInt32> spriteIndexes = new List<UInt32>();
-                    for (uint i = 0; i < totalPics; ++i)
-                    {
-                        UInt32 index = reader.ReadUInt32();
-                        spriteIndexes.Add(index);
-                    }
+					List<UInt32> spriteIndexes = new List<UInt32>();
+					for (uint i = 0; i < totalPics; ++i)
+					{
+						UInt32 index = reader.ReadUInt32();
+						spriteIndexes.Add(index);
+					}
 
-                    UInt32 id = 1;
-                    foreach (UInt32 element in spriteIndexes)
-                    {
-                        UInt32 index = element + 3;
-                        reader.BaseStream.Seek(index, SeekOrigin.Begin);
-                        UInt16 size = reader.ReadUInt16();
+					UInt32 id = 1;
+					foreach (UInt32 element in spriteIndexes)
+					{
+						UInt32 index = element + 3;
+						reader.BaseStream.Seek(index, SeekOrigin.Begin);
+						UInt16 size = reader.ReadUInt16();
 
-                        Sprite sprite;
-                        if (sprites.TryGetValue(id, out sprite))
-                        {
-                            if (sprite != null && size > 0)
-                            {
-                                if (sprite.size > 0)
-                                {
-                                    //generate warning
-                                }
-                                else
-                                {
-                                    sprite.id = id;
-                                    sprite.size = size;
-                                    sprite.dump = reader.ReadBytes(size);
+						Sprite sprite;
+						if (sprites.TryGetValue(id, out sprite))
+						{
+							if (sprite != null && size > 0)
+							{
+								if (sprite.size > 0)
+								{
+									//generate warning
+								}
+								else
+								{
+									sprite.id = id;
+									sprite.size = size;
+									sprite.dump = reader.ReadBytes(size);
 
-                                    sprites[id] = sprite;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            reader.BaseStream.Seek(size, SeekOrigin.Current);
-                        }
+									sprites[id] = sprite;
+								}
+							}
+						}
+						else
+						{
+							reader.BaseStream.Seek(size, SeekOrigin.Current);
+						}
 
-                        ++id;
-                    }
-                }
-            }
-            finally
-            {
-                fileStream.Close();
-            }
+						++id;
+					}
+				}
+			}
+			finally
+			{
+				fileStream.Close();
+			}
 
-            return true;
-        }
+			return true;
+		}
 
 		public Sprite()
 		{
@@ -148,13 +167,13 @@ namespace otitemeditor
 		public UInt32 size;
 		public byte[] dump;
 
-		public byte[] getRGBData()
+		public byte[] GetRGBData()
 		{
 			const byte transparentColor = 0x11;
-			return getRGBData(transparentColor);
+			return GetRGBData(transparentColor);
 		}
 
-		public byte[] getRGBData(byte transparentColor)
+		public byte[] GetRGBData(byte transparentColor)
 		{
 			byte[] rgb32x32x3 = new byte[32 * 32 * 3];
 			UInt32 bytes = 0;
@@ -222,9 +241,9 @@ namespace otitemeditor
 			return rgb32x32x3;
 		}
 
-		public byte[] getRGBAData()
+		public byte[] GetRGBAData()
 		{
-			byte[] rgb32x32x3 = getRGBData();
+			byte[] rgb32x32x3 = GetRGBData();
 			byte[] rgbx32x32x4 = new byte[32 * 32 * 4];
 
 			//reverse rgb

@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("otitemeditor.Tibia860")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("OTItemEditor Plugin 850")]
+[assembly: AssemblyDescription("OTItemEditor Plugin.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("otitemeditor.Tibia860")]
-[assembly: AssemblyCopyright("Copyright ©  2010")]
+[assembly: AssemblyProduct("Plugin 850")]
+[assembly: AssemblyCopyright("Copyright ©  2005-2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -1,4 +1,4 @@
-﻿namespace otitemeditor
+﻿namespace OTItemEditor
 {
 	partial class UpdateSettingsForm
 	{
@@ -57,9 +57,9 @@
 			this.createNewItemsCheck.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.createNewItemsCheck.Location = new System.Drawing.Point(6, 65);
 			this.createNewItemsCheck.Name = "createNewItemsCheck";
-			this.createNewItemsCheck.Size = new System.Drawing.Size(218, 17);
+			this.createNewItemsCheck.Size = new System.Drawing.Size(228, 17);
 			this.createNewItemsCheck.TabIndex = 2;
-			this.createNewItemsCheck.Text = "Create new item(s) for unassigned sprites";
+			this.createNewItemsCheck.Text = "Create New Item(s) For Unassigned Sprites";
 			this.createNewItemsCheck.UseVisualStyleBackColor = true;
 			// 
 			// reloadItemAttributesCheck
@@ -69,9 +69,9 @@
 			this.reloadItemAttributesCheck.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.reloadItemAttributesCheck.Location = new System.Drawing.Point(6, 42);
 			this.reloadItemAttributesCheck.Name = "reloadItemAttributesCheck";
-			this.reloadItemAttributesCheck.Size = new System.Drawing.Size(128, 17);
+			this.reloadItemAttributesCheck.Size = new System.Drawing.Size(130, 17);
 			this.reloadItemAttributesCheck.TabIndex = 1;
-			this.reloadItemAttributesCheck.Text = "Reload item attributes";
+			this.reloadItemAttributesCheck.Text = "Reload Item Attributes";
 			this.reloadItemAttributesCheck.UseVisualStyleBackColor = true;
 			// 
 			// generateSignatureCheck
@@ -79,9 +79,9 @@
 			this.generateSignatureCheck.AutoSize = true;
 			this.generateSignatureCheck.Location = new System.Drawing.Point(6, 88);
 			this.generateSignatureCheck.Name = "generateSignatureCheck";
-			this.generateSignatureCheck.Size = new System.Drawing.Size(182, 17);
+			this.generateSignatureCheck.Size = new System.Drawing.Size(187, 17);
 			this.generateSignatureCheck.TabIndex = 3;
-			this.generateSignatureCheck.Text = "Generate image signatures (slow)";
+			this.generateSignatureCheck.Text = "Generate Image Signatures (Slow)";
 			this.generateSignatureCheck.UseVisualStyleBackColor = true;
 			// 
 			// reassignUnmatchedSpritesCheck
@@ -91,9 +91,9 @@
 			this.reassignUnmatchedSpritesCheck.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.reassignUnmatchedSpritesCheck.Location = new System.Drawing.Point(6, 19);
 			this.reassignUnmatchedSpritesCheck.Name = "reassignUnmatchedSpritesCheck";
-			this.reassignUnmatchedSpritesCheck.Size = new System.Drawing.Size(208, 17);
+			this.reassignUnmatchedSpritesCheck.Size = new System.Drawing.Size(216, 17);
 			this.reassignUnmatchedSpritesCheck.TabIndex = 0;
-			this.reassignUnmatchedSpritesCheck.Text = "Reassign items with unmatched sprites";
+			this.reassignUnmatchedSpritesCheck.Text = "Reassign Items With Unmatched Sprites";
 			this.reassignUnmatchedSpritesCheck.UseVisualStyleBackColor = true;
 			// 
 			// closeBtn

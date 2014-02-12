@@ -5,7 +5,7 @@ servers and tools to map the item IDs used by the client to a consistent set of
 IDs used by the server and tools. This is necessary since CIPSoft changes the
 client-side IDs every major version released and remapping of them is required.
 
-This tool can read the Tibia.dat / Tibia.spr files distrbuted with the client
+This tool can read the dat and spr files distributed with the client
 and either match them up with the server-side IDs via image recognition and also
 add new items to the data files.
 
@@ -41,3 +41,6 @@ The easiest way to contact the developers is to post to the forums at
 
 OTItemEditor is made available under the GPLv2 License, this means that forks
 of the project must be distributed with sources available.
+
+
+This project uses [famfamfam silk icons](http://www.famfamfam.com/lab/icons/silk/)
