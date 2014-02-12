@@ -1,19 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using System.Collections;
-using PluginInterface;
-using otitemeditor;
-using System.Diagnostics;
+﻿#region Licence
+/**
+* Copyright (C) 2005-2014 <https://github.com/opentibia/item-editor/>
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program; if not, write to the Free Software Foundation, Inc.,
+* 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
+#endregion
 
-namespace Tibia850
+using OTItemEditor;
+using PluginInterface;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+
+namespace Plugin850
 {
 	public class Item850 : SpriteItem
 	{
 		public bool hasCharges;
 
-		public override bool isEqual(Item item)
+		public override bool IsEqual(Item item)
 		{
 			if (item is Item850)
 			{
@@ -22,8 +40,7 @@ namespace Tibia850
 					return false;
 				}
 			}
-
-			return base.isEqual(item);
+			return base.IsEqual(item);
 		}
 	}
 
@@ -62,7 +79,7 @@ namespace Tibia850
 
 		public bool loadSprites(string filename, UInt32 signature)
 		{
-			return Sprite.loadSprites(filename, ref sprites, signature);
+			return Sprite.LoadSprites(filename, ref sprites, signature);
 		}
 
 		public bool loadDat(string filename, UInt32 signature)
@@ -75,6 +92,8 @@ namespace Tibia850
 					UInt32 datSignature = reader.ReadUInt32();
 					if (signature != 0 && datSignature != signature)
 					{
+						string message = "Plugin850: Bad dat signature. Expected signature is {0:X} and loaded signature is {1:X}.";
+						Trace.WriteLine(String.Format(message, datSignature, signature));
 						return false;
 					}
 
@@ -145,7 +164,7 @@ namespace Tibia850
 
 								case 0x07: //useable
 									{
-										item.hasUseWith = true;
+										item.multiUse = true;
 									} break;
 
 								case 0x08: //charges
@@ -178,7 +197,7 @@ namespace Tibia850
 
 								case 0x0D: //blocks solid objects (creatures, walls etc)
 									{
-										item.blockObject = true;
+										item.isUnpassable = true;
 									} break;
 
 								case 0x0E: //not moveable
@@ -188,12 +207,12 @@ namespace Tibia850
 
 								case 0x0F: //blocks missiles (walls, magic wall etc)
 									{
-										item.blockProjectile = true;
+										item.blockMissiles = true;
 									} break;
 
 								case 0x10: //blocks pathfind algorithms (monsters)
 									{
-										item.blockPathFind = true;
+										item.blockPathfinder = true;
 									} break;
 
 								case 0x11: //blocks monster movement (flowers, parcels etc)
@@ -242,13 +261,13 @@ namespace Tibia850
 
 								case 0x1A: //
 									{
-										item.hasHeight = true;
+										item.hasElevation = true;
 										UInt16 height = reader.ReadUInt16();
 									} break;
 
 								case 0x1B: //draw with height offset for all parts (2x2) of the sprite
 									{
-									} break;                                    
+									} break;
 
 								case 0x1C: //unknown
 									{
@@ -275,7 +294,7 @@ namespace Tibia850
 
 								case 0x20: //look through (borders)
 									{
-										item.lookThrough = true;
+										item.ignoreLook = true;
 									} break;
 
 								case 0xFF: //end of attributes
@@ -297,17 +316,13 @@ namespace Tibia850
 							reader.BaseStream.Position++;
 						}
 
+						item.layers = reader.ReadByte();
+						item.patternX = reader.ReadByte();
+						item.patternY = reader.ReadByte();
+						item.patternZ = reader.ReadByte();
 						item.frames = reader.ReadByte();
-						item.xdiv = reader.ReadByte();
-						item.ydiv = reader.ReadByte();
-						item.zdiv = reader.ReadByte();
-						item.animationLength = reader.ReadByte();
-
-						item.numSprites =
-							(UInt32)item.width * (UInt32)item.height *
-							(UInt32)item.frames *
-							(UInt32)item.xdiv * (UInt32)item.ydiv * item.zdiv *
-							(UInt32)item.animationLength;
+						item.isAnimation = item.frames > 1;
+						item.numSprites = (UInt32)item.width * item.height * item.layers * item.patternX * item.patternY * item.patternZ * item.frames;
 
 						// Read the sprite ids
 						for (UInt32 i = 0; i < item.numSprites; ++i)

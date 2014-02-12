@@ -1,14 +1,14 @@
 <settings>
   <clients>
-    <client version="940" description="Tibia 9.40" otbversion="30" datsignature="4EE71DE5" sprsignature="4EE71E06"/>
-    <client version="944" description="Tibia 9.44 (old)" otbversion="31" datsignature="4F0EEFBB" sprsignature="4F0EEFEF"/>
-    <client version="9441" description="Tibia 9.44 v1" otbversion="32" datsignature="4F105168" sprsignature="4F1051D7"/>
-    <client version="9442" description="Tibia 9.44 v2" otbversion="33" datsignature="4F16C0D7" sprsignature="4F1051D7"/>
-    <client version="9443" description="Tibia 9.44 v3" otbversion="34" datsignature="4F3131CF" sprsignature="4F3131F6"/>
-    <client version="946" description="Tibia 9.46" otbversion="35" datsignature="4F6B341F" sprsignature="4F5DCEF7"/>
-    <client version="950" description="Tibia 9.50" otbversion="36" datsignature="4F75B7AB" sprsignature="4F75B7CD"/>
-    <client version="952" description="Tibia 9.52" otbversion="37" datsignature="4F857F6C" sprsignature="4F857F8E"/>
-    <client version="953" description="Tibia 9.53" otbversion="38" datsignature="4FA11252" sprsignature="4FA11282"/>
-    <client version="954" description="Tibia 9.54" otbversion="39" datsignature="4FD5956B" sprsignature="4FD595B7"/>
+	<client version="940" description="Tibia 9.40" otbversion="30" datsignature="4EE71DE5" sprsignature="4EE71E06"/>
+	<client version="944" description="Tibia 9.44 (old)" otbversion="31" datsignature="4F0EEFBB" sprsignature="4F0EEFEF"/>
+	<client version="9441" description="Tibia 9.44 v1" otbversion="32" datsignature="4F105168" sprsignature="4F1051D7"/>
+	<client version="9442" description="Tibia 9.44 v2" otbversion="33" datsignature="4F16C0D7" sprsignature="4F1051D7"/>
+	<client version="9443" description="Tibia 9.44 v3" otbversion="34" datsignature="4F3131CF" sprsignature="4F3131F6"/>
+	<client version="946" description="Tibia 9.46" otbversion="35" datsignature="4F6B341F" sprsignature="4F5DCEF7"/>
+	<client version="950" description="Tibia 9.50" otbversion="36" datsignature="4F75B7AB" sprsignature="4F75B7CD"/>
+	<client version="952" description="Tibia 9.52" otbversion="37" datsignature="4F857F6C" sprsignature="4F857F8E"/>
+	<client version="953" description="Tibia 9.53" otbversion="38" datsignature="4FA11252" sprsignature="4FA11282"/>
+	<client version="954" description="Tibia 9.54" otbversion="39" datsignature="4FD5956B" sprsignature="4FD595B7"/>
   </clients>
 </settings>

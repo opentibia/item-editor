@@ -1,12 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using PluginInterface;
-using System.Runtime.InteropServices;
-using System.Diagnostics;
+﻿#region Licence
+/**
+* Copyright (C) 2005-2014 <https://github.com/opentibia/item-editor/>
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program; if not, write to the Free Software Foundation, Inc.,
+* 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
+#endregion
 
-namespace otitemeditor
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+
+namespace OTItemEditor
 {
 	class OtbLoader : BinaryReader
 	{
@@ -39,35 +56,44 @@ namespace otitemeditor
 			BaseStream.Seek(currentNodePos, SeekOrigin.Begin);
 
 			byte value = ReadByte();
-			if((SpecialChars)value != SpecialChars.NODE_START){
+			if ((SpecialChars)value != SpecialChars.NODE_START)
+			{
 				return null;
 			}
-			
+
 			value = ReadByte();
 
 			Int32 level = 1;
-			while(true){
-				value = ReadByte();		
-				if((SpecialChars)value == SpecialChars.NODE_END){
+			while (true)
+			{
+				value = ReadByte();
+				if ((SpecialChars)value == SpecialChars.NODE_END)
+				{
 					--level;
-					if(level == 0){
+					if (level == 0)
+					{
 						value = ReadByte();
-						if((SpecialChars)value == SpecialChars.NODE_END){
+						if ((SpecialChars)value == SpecialChars.NODE_END)
+						{
 							return null;
 						}
-						else if((SpecialChars)value != SpecialChars.NODE_START){
+						else if ((SpecialChars)value != SpecialChars.NODE_START)
+						{
 							return null;
 						}
-						else{
+						else
+						{
 							currentNodePos = BaseStream.Position - 1;
 							return getNodeData();
 						}
 					}
 				}
-				else if((SpecialChars)value == SpecialChars.NODE_START){
+				else if ((SpecialChars)value == SpecialChars.NODE_START)
+				{
 					++level;
 				}
-				else if((SpecialChars)value == SpecialChars.ESCAPE_CHAR){
+				else if ((SpecialChars)value == SpecialChars.ESCAPE_CHAR)
+				{
 					ReadByte();
 				}
 			}
@@ -80,7 +106,8 @@ namespace otitemeditor
 			//read node type
 			byte value = ReadByte();
 
-			if((SpecialChars)value != SpecialChars.NODE_START){
+			if ((SpecialChars)value != SpecialChars.NODE_START)
+			{
 				return null;
 			}
 
@@ -107,7 +134,8 @@ namespace otitemeditor
 
 		private bool advance()
 		{
-			try{
+			try
+			{
 				Int64 seekPos = 0;
 				if (currentNodePos == 0)
 				{
@@ -121,7 +149,8 @@ namespace otitemeditor
 				BaseStream.Seek(seekPos, SeekOrigin.Begin);
 
 				byte value = ReadByte();
-				if((SpecialChars)value != SpecialChars.NODE_START){
+				if ((SpecialChars)value != SpecialChars.NODE_START)
+				{
 					return false;
 				}
 
@@ -153,60 +182,60 @@ namespace otitemeditor
 					}
 				}
 			}
-			catch(Exception)
+			catch (Exception)
 			{
 				return false;
 			}
 		}
 
-		public void createNode(byte type)
+		public void CreateNode(byte type)
 		{
-			writeByte((byte)SpecialChars.NODE_START, false);
+			WriteByte((byte)SpecialChars.NODE_START, false);
 			writeByte(type);
 		}
 
-		public void closeNode()
+		public void CloseNode()
 		{
-			writeByte((byte)SpecialChars.NODE_END, false);
+			WriteByte((byte)SpecialChars.NODE_END, false);
 		}
 
 		public void writeByte(byte value)
 		{
-			byte[] bytes = new byte[1] {value};
-			writeBytes(bytes, true);
+			byte[] bytes = new byte[1] { value };
+			WriteBytes(bytes, true);
 		}
 
-		public void writeByte(byte value, bool unescape)
+		public void WriteByte(byte value, bool unescape)
 		{
 			byte[] bytes = new byte[1] { value };
-			writeBytes(bytes, unescape);
+			WriteBytes(bytes, unescape);
 		}
 
-		public void writeUInt16(UInt16 value)
+		public void WriteUInt16(UInt16 value)
 		{
 			byte[] bytes = BitConverter.GetBytes(value);
-			writeBytes(bytes, true);
+			WriteBytes(bytes, true);
 		}
 
-		public void writeUInt16(UInt16 value, bool unescape)
+		public void WriteUInt16(UInt16 value, bool unescape)
 		{
 			byte[] bytes = BitConverter.GetBytes(value);
-			writeBytes(bytes, unescape);
+			WriteBytes(bytes, unescape);
 		}
 
-		public void writeUInt32(UInt32 value)
+		public void WriteUInt32(UInt32 value)
 		{
 			byte[] bytes = BitConverter.GetBytes(value);
-			writeBytes(bytes, true);
+			WriteBytes(bytes, true);
 		}
 
-		public void writeUInt32(UInt32 value, bool unescape)
+		public void WriteUInt32(UInt32 value, bool unescape)
 		{
 			byte[] bytes = BitConverter.GetBytes(value);
-			writeBytes(bytes, unescape);
+			WriteBytes(bytes, unescape);
 		}
 
-		public void writeProp(otb.itemattrib_t attr, BinaryWriter writer)
+		public void WriteProp(Otb.itemattrib_t attr, BinaryWriter writer)
 		{
 			writer.BaseStream.Position = 0;
 			byte[] bytes = new byte[writer.BaseStream.Length];
@@ -214,10 +243,10 @@ namespace otitemeditor
 			writer.BaseStream.Position = 0;
 			writer.BaseStream.SetLength(0);
 
-			writeProp((byte)attr, bytes);
+			WriteProp((byte)attr, bytes);
 		}
 
-		public void writeProp(otb.rootattrib_t attr, BinaryWriter writer)
+		public void WriteProp(Otb.rootattrib_t attr, BinaryWriter writer)
 		{
 			writer.BaseStream.Position = 0;
 			byte[] bytes = new byte[writer.BaseStream.Length];
@@ -225,21 +254,21 @@ namespace otitemeditor
 			writer.BaseStream.Position = 0;
 			writer.BaseStream.SetLength(0);
 
-			writeProp((byte)attr, bytes);
+			WriteProp((byte)attr, bytes);
 		}
 
-		private void writeProp(byte attr, byte[] bytes)
+		private void WriteProp(byte attr, byte[] bytes)
 		{
 			writeByte((byte)attr);
-			writeUInt16((UInt16)bytes.Length);
-			writeBytes(bytes, true);
+			WriteUInt16((UInt16)bytes.Length);
+			WriteBytes(bytes, true);
 		}
 
-		public void writeBytes(byte[] bytes, bool unescape)
+		public void WriteBytes(byte[] bytes, bool unescape)
 		{
-			foreach(byte b in bytes)
+			foreach (byte b in bytes)
 			{
-				if(unescape && (b == (byte)SpecialChars.NODE_START || b == (byte)SpecialChars.NODE_END || b == (byte)SpecialChars.ESCAPE_CHAR))
+				if (unescape && (b == (byte)SpecialChars.NODE_START || b == (byte)SpecialChars.NODE_END || b == (byte)SpecialChars.ESCAPE_CHAR))
 				{
 					BaseStream.WriteByte((byte)SpecialChars.ESCAPE_CHAR);
 				}
@@ -254,7 +283,8 @@ namespace otitemeditor
 
 	public class OtbItem : Item
 	{
-		public OtbItem() : base()
+		public OtbItem()
+			: base()
 		{
 			//
 		}
@@ -290,47 +320,8 @@ namespace otitemeditor
 		public UInt32 clientVersion;
 	}
 
-	public class otb
+	public class Otb
 	{
-		public enum clientversion_t
-		{
-			CLIENT_VERSION_UNKNOWN = 0,
-			CLIENT_VERSION_750 = 1,
-			CLIENT_VERSION_755 = 2,
-			CLIENT_VERSION_760 = 3,
-			CLIENT_VERSION_770 = 3,
-			CLIENT_VERSION_780 = 4,
-			CLIENT_VERSION_790 = 5,
-			CLIENT_VERSION_792 = 6,
-			CLIENT_VERSION_800 = 7,
-			CLIENT_VERSION_810 = 8,
-			CLIENT_VERSION_811 = 9,
-			CLIENT_VERSION_820 = 10,
-			CLIENT_VERSION_830 = 11,
-			CLIENT_VERSION_840 = 12,
-			CLIENT_VERSION_841 = 13,
-			CLIENT_VERSION_842 = 14,
-			CLIENT_VERSION_850 = 15,
-			CLIENT_VERSION_854_BAD = 16,
-			CLIENT_VERSION_854 = 17,
-			CLIENT_VERSION_855 = 18,
-			CLIENT_VERSION_860_OLD = 19,
-			CLIENT_VERSION_860 = 20,
-			CLIENT_VERSION_861 = 21,
-			CLIENT_VERSION_862 = 22,
-			CLIENT_VERSION_870 = 23,
-			CLIENT_VERSION_871 = 24,
-			CLIENT_VERSION_872 = 25,
-			CLIENT_VERSION_873 = 26,
-			CLIENT_VERSION_900 = 27,
-			CLIENT_VERSION_910 = 28,
-			CLIENT_VERSION_920 = 29,
-			CLIENT_VERSION_940 = 30,
-			CLIENT_VERSION_944_V1 = 31,
-			CLIENT_VERSION_944_V2 = 32,
-			CLIENT_VERSION_944_V3 = 33
-		};
-
 		public enum itemgroup_t
 		{
 			ITEM_GROUP_NONE = 0,
@@ -504,9 +495,9 @@ namespace otitemeditor
 							Trace.WriteLine(String.Format("Node:flags {0}", flags));
 						}
 
-						item.blockObject = ((flags & itemflags_t.FLAG_BLOCK_SOLID) == itemflags_t.FLAG_BLOCK_SOLID);
-						item.blockProjectile = ((flags & itemflags_t.FLAG_BLOCK_PROJECTILE) == itemflags_t.FLAG_BLOCK_PROJECTILE);
-						item.blockPathFind = ((flags & itemflags_t.FLAG_BLOCK_PATHFIND) == itemflags_t.FLAG_BLOCK_PATHFIND);
+						item.isUnpassable = ((flags & itemflags_t.FLAG_BLOCK_SOLID) == itemflags_t.FLAG_BLOCK_SOLID);
+						item.blockMissiles = ((flags & itemflags_t.FLAG_BLOCK_PROJECTILE) == itemflags_t.FLAG_BLOCK_PROJECTILE);
+						item.blockPathfinder = ((flags & itemflags_t.FLAG_BLOCK_PATHFIND) == itemflags_t.FLAG_BLOCK_PATHFIND);
 						item.isPickupable = ((flags & itemflags_t.FLAG_PICKUPABLE) == itemflags_t.FLAG_PICKUPABLE);
 						item.isMoveable = ((flags & itemflags_t.FLAG_MOVEABLE) == itemflags_t.FLAG_MOVEABLE);
 						item.isStackable = ((flags & itemflags_t.FLAG_STACKABLE) == itemflags_t.FLAG_STACKABLE);
@@ -516,12 +507,12 @@ namespace otitemeditor
 						item.isHangable = ((flags & itemflags_t.FLAG_HANGABLE) == itemflags_t.FLAG_HANGABLE);
 						item.isRotatable = ((flags & itemflags_t.FLAG_ROTABLE) == itemflags_t.FLAG_ROTABLE);
 						item.isReadable = ((flags & itemflags_t.FLAG_READABLE) == itemflags_t.FLAG_READABLE);
-						item.hasUseWith = ((flags & itemflags_t.FLAG_USEABLE) == itemflags_t.FLAG_USEABLE);
-						item.hasHeight = ((flags & itemflags_t.FLAG_HAS_HEIGHT) == itemflags_t.FLAG_HAS_HEIGHT);
-						item.lookThrough = ((flags & itemflags_t.FLAG_LOOKTHROUGH) == itemflags_t.FLAG_LOOKTHROUGH);
+						item.multiUse = ((flags & itemflags_t.FLAG_USEABLE) == itemflags_t.FLAG_USEABLE);
+						item.hasElevation = ((flags & itemflags_t.FLAG_HAS_HEIGHT) == itemflags_t.FLAG_HAS_HEIGHT);
+						item.ignoreLook = ((flags & itemflags_t.FLAG_LOOKTHROUGH) == itemflags_t.FLAG_LOOKTHROUGH);
 						item.allowDistRead = ((flags & itemflags_t.FLAG_ALLOWDISTREAD) == itemflags_t.FLAG_ALLOWDISTREAD);
 						item.isAnimation = ((flags & itemflags_t.FLAG_ANIMATION) == itemflags_t.FLAG_ANIMATION);
-						item.walkStack = ((flags & itemflags_t.FLAG_WALKSTACK) == itemflags_t.FLAG_WALKSTACK);
+						item.fullGround = ((flags & itemflags_t.FLAG_WALKSTACK) == itemflags_t.FLAG_WALKSTACK);
 
 						while (nodeReader.PeekChar() != -1)
 						{
@@ -537,115 +528,115 @@ namespace otitemeditor
 							switch ((itemattrib_t)attribute)
 							{
 								case itemattrib_t.ITEM_ATTR_SERVERID:
-								{
-									if (datalen != sizeof(UInt16))
 									{
+										if (datalen != sizeof(UInt16))
+										{
+											if (outputDebug)
+											{
+												Trace.WriteLine(String.Format("Unexpected data length of server id block (Should be 2 bytes)"));
+											}
+											return false;
+										}
+
+										item.id = nodeReader.ReadUInt16();
 										if (outputDebug)
 										{
-											Trace.WriteLine(String.Format("Unexpected data length of server id block (Should be 2 bytes)"));
+											System.Diagnostics.Debug.WriteLine(String.Format("Node:attribute:data {0}", item.id));
 										}
-										return false;
-									}
 
-									item.id = nodeReader.ReadUInt16();
-									if (outputDebug)
-									{
-										System.Diagnostics.Debug.WriteLine(String.Format("Node:attribute:data {0}", item.id));
-									}
-
-								} break;
+									} break;
 
 								case itemattrib_t.ITEM_ATTR_CLIENTID:
-								{
-									if (datalen != sizeof(UInt16))
 									{
+										if (datalen != sizeof(UInt16))
+										{
+											if (outputDebug)
+											{
+												Trace.WriteLine(String.Format("Unexpected data length of client id block (Should be 2 bytes)"));
+											}
+											return false;
+										}
+
+										item.spriteId = nodeReader.ReadUInt16();
 										if (outputDebug)
 										{
-											Trace.WriteLine(String.Format("Unexpected data length of client id block (Should be 2 bytes)"));
+											Trace.WriteLine(String.Format("Node:attribute:data {0}", item.spriteId));
 										}
-										return false;
-									}
-
-									item.spriteId = nodeReader.ReadUInt16();
-									if (outputDebug)
-									{
-										Trace.WriteLine(String.Format("Node:attribute:data {0}", item.spriteId));
-									}
-								} break;
+									} break;
 
 								case itemattrib_t.ITEM_ATTR_WAREID:
-								{
-									if (datalen != sizeof(UInt16))
 									{
+										if (datalen != sizeof(UInt16))
+										{
+											if (outputDebug)
+											{
+												Trace.WriteLine(String.Format("Unexpected data length of ware id block (Should be 2 bytes)"));
+											}
+											return false;
+										}
+
+										item.tradeAs = nodeReader.ReadUInt16();
 										if (outputDebug)
 										{
-											Trace.WriteLine(String.Format("Unexpected data length of ware id block (Should be 2 bytes)"));
+											Trace.WriteLine(String.Format("Node:attribute:data {0}", item.tradeAs));
 										}
-										return false;
-									}
-
-									item.wareId = nodeReader.ReadUInt16();
-									if (outputDebug)
-									{
-										Trace.WriteLine(String.Format("Node:attribute:data {0}", item.wareId));
-									}
-								} break;
+									} break;
 
 								case itemattrib_t.ITEM_ATTR_SPEED:
-								{
-									if (datalen != sizeof(UInt16))
 									{
+										if (datalen != sizeof(UInt16))
+										{
+											if (outputDebug)
+											{
+												Trace.WriteLine(String.Format("Unexpected data length of speed block (Should be 2 bytes)"));
+											}
+											return false;
+										}
+
+										item.groundSpeed = nodeReader.ReadUInt16();
 										if (outputDebug)
 										{
-											Trace.WriteLine(String.Format("Unexpected data length of speed block (Should be 2 bytes)"));
+											Trace.WriteLine(String.Format("Node:attribute:data {0}", item.groundSpeed));
 										}
-										return false;
-									}
-
-									item.groundSpeed = nodeReader.ReadUInt16();
-									if (outputDebug)
-									{
-										Trace.WriteLine(String.Format("Node:attribute:data {0}", item.groundSpeed));
-									}
-								} break;
+									} break;
 
 								case itemattrib_t.ITEM_ATTR_NAME:
-								{
-									item.name = new string(nodeReader.ReadChars(datalen));
-									if (outputDebug)
 									{
-										Trace.WriteLine(String.Format("Node:attribute:data {0}", item.name));
-									}
-								} break;
+										item.name = new string(nodeReader.ReadChars(datalen));
+										if (outputDebug)
+										{
+											Trace.WriteLine(String.Format("Node:attribute:data {0}", item.name));
+										}
+									} break;
 
 								case itemattrib_t.ITEM_ATTR_SPRITEHASH:
-								{
-									if (datalen != 16)
 									{
-										return false;
-									}
+										if (datalen != 16)
+										{
+											return false;
+										}
 
-									item.spriteHash = nodeReader.ReadBytes(16);
-									if (outputDebug)
-									{
-										Trace.WriteLine(String.Format("Node:attribute:data {0}", item.alwaysOnTopOrder));
-									}
-								} break;
-								
+										item.spriteHash = nodeReader.ReadBytes(16);
+										if (outputDebug)
+										{
+											Trace.WriteLine(String.Format("Node:attribute:data {0}", item.alwaysOnTopOrder));
+										}
+									} break;
+
 								case itemattrib_t.ITEM_ATTR_MINIMAPCOLOR:
-								{
-									if (datalen != 2)
 									{
-										return false;
-									}
+										if (datalen != 2)
+										{
+											return false;
+										}
 
-									item.minimapColor = nodeReader.ReadUInt16();
-									if (outputDebug)
-									{
-										Trace.WriteLine(String.Format("Node:attribute:data {0}", item.minimapColor));
-									}
+										item.minimapColor = nodeReader.ReadUInt16();
+										if (outputDebug)
+										{
+											Trace.WriteLine(String.Format("Node:attribute:data {0}", item.minimapColor));
+										}
 
-								} break;
+									} break;
 
 								case itemattrib_t.ITEM_ATTR_07:
 									{
@@ -659,15 +650,15 @@ namespace otitemeditor
 									} break;
 
 								case itemattrib_t.ITEM_ATTR_08:
-								{
-									//readable
-									if (datalen != 2)
 									{
-										return false;
-									}
+										//readable
+										if (datalen != 2)
+										{
+											return false;
+										}
 
-									item.maxReadChars = nodeReader.ReadUInt16();
-								} break;
+										item.maxReadChars = nodeReader.ReadUInt16();
+									} break;
 
 								case itemattrib_t.ITEM_ATTR_LIGHT2:
 									{
@@ -707,20 +698,21 @@ namespace otitemeditor
 									} break;
 
 								default:
-								{
-									//skip unknown attributes
-									nodeReader.BaseStream.Seek(datalen, SeekOrigin.Current);
-									if (outputDebug)
 									{
-										Trace.WriteLine(String.Format("Skipped unknown attribute"));
-									}
-								} break;
+										//skip unknown attributes
+										nodeReader.BaseStream.Seek(datalen, SeekOrigin.Current);
+										if (outputDebug)
+										{
+											Trace.WriteLine(String.Format("Skipped unknown attribute"));
+										}
+									} break;
 							}
 						}
 
 						items.Add(item);
 
 						nodeReader = reader.getNextNode();
+
 					} while (nodeReader != null);
 				}
 			}
@@ -739,10 +731,10 @@ namespace otitemeditor
 			{
 				using (OtbLoader writer = new OtbLoader(fileStream))
 				{
-					writer.writeUInt32(0, false); //version, always 0
+					writer.WriteUInt32(0, false); //version, always 0
 
-					writer.createNode(0); //root node
-					writer.writeUInt32(0, true); //flags, unused for root node
+					writer.CreateNode(0); //root node
+					writer.WriteUInt32(0, true); //flags, unused for root node
 
 					VERSIONINFO vi = new VERSIONINFO();
 
@@ -760,7 +752,7 @@ namespace otitemeditor
 					Array.Resize(ref CSDVersion, 128);
 					property.Write(CSDVersion);
 
-					writer.writeProp(rootattrib_t.ROOT_ATTR_VERSION, property);
+					writer.WriteProp(rootattrib_t.ROOT_ATTR_VERSION, property);
 
 					foreach (OtbItem item in items)
 					{
@@ -807,7 +799,7 @@ namespace otitemeditor
 								saveAttributeList.Add(itemattrib_t.ITEM_ATTR_TOPORDER);
 							}
 
-							if (item.wareId != 0)
+							if (item.tradeAs != 0)
 							{
 								saveAttributeList.Add(itemattrib_t.ITEM_ATTR_WAREID);
 							}
@@ -818,30 +810,30 @@ namespace otitemeditor
 							}
 						}
 
-						switch(item.type)
+						switch (item.type)
 						{
-							case ItemType.Container: writer.createNode((byte)itemgroup_t.ITEM_GROUP_CONTAINER); break;
-							case ItemType.Fluid: writer.createNode((byte)itemgroup_t.ITEM_GROUP_FLUID); break;
-							case ItemType.Ground: writer.createNode((byte)itemgroup_t.ITEM_GROUP_GROUND); break;
-							case ItemType.Splash: writer.createNode((byte)itemgroup_t.ITEM_GROUP_SPLASH); break;
-							case ItemType.Deprecated: writer.createNode((byte)itemgroup_t.ITEM_GROUP_DEPRECATED); break;
-							default: writer.createNode((byte)itemgroup_t.ITEM_GROUP_NONE); break;
+							case ItemType.Container: writer.CreateNode((byte)itemgroup_t.ITEM_GROUP_CONTAINER); break;
+							case ItemType.Fluid: writer.CreateNode((byte)itemgroup_t.ITEM_GROUP_FLUID); break;
+							case ItemType.Ground: writer.CreateNode((byte)itemgroup_t.ITEM_GROUP_GROUND); break;
+							case ItemType.Splash: writer.CreateNode((byte)itemgroup_t.ITEM_GROUP_SPLASH); break;
+							case ItemType.Deprecated: writer.CreateNode((byte)itemgroup_t.ITEM_GROUP_DEPRECATED); break;
+							default: writer.CreateNode((byte)itemgroup_t.ITEM_GROUP_NONE); break;
 						}
 
 						UInt32 flags = 0;
-						if (item.blockObject)
+						if (item.isUnpassable)
 							flags |= (UInt32)itemflags_t.FLAG_BLOCK_SOLID;
 
-						if (item.blockProjectile)
+						if (item.blockMissiles)
 							flags |= (UInt32)itemflags_t.FLAG_BLOCK_PROJECTILE;
 
-						if (item.blockPathFind)
+						if (item.blockPathfinder)
 							flags |= (UInt32)itemflags_t.FLAG_BLOCK_PATHFIND;
 
-						if (item.hasHeight)
+						if (item.hasElevation)
 							flags |= (UInt32)itemflags_t.FLAG_HAS_HEIGHT;
 
-						if (item.hasUseWith)
+						if (item.multiUse)
 							flags |= (UInt32)itemflags_t.FLAG_USEABLE;
 
 						if (item.isPickupable)
@@ -871,7 +863,7 @@ namespace otitemeditor
 						if (item.isHorizontal)
 							flags |= (UInt32)itemflags_t.FLAG_HORIZONTAL;
 
-						if (item.lookThrough)
+						if (item.ignoreLook)
 							flags |= (UInt32)itemflags_t.FLAG_LOOKTHROUGH;
 
 						if (item.allowDistRead)
@@ -880,10 +872,10 @@ namespace otitemeditor
 						if (item.isAnimation)
 							flags |= (UInt32)itemflags_t.FLAG_ANIMATION;
 
-						if (item.walkStack)
+						if (item.fullGround)
 							flags |= (UInt32)itemflags_t.FLAG_WALKSTACK;
 
-						writer.writeUInt32(flags, true);
+						writer.WriteUInt32(flags, true);
 
 						foreach (itemattrib_t attribute in saveAttributeList)
 						{
@@ -892,28 +884,28 @@ namespace otitemeditor
 								case itemattrib_t.ITEM_ATTR_SERVERID:
 									{
 										property.Write((UInt16)item.id);
-										writer.writeProp(itemattrib_t.ITEM_ATTR_SERVERID, property);
+										writer.WriteProp(itemattrib_t.ITEM_ATTR_SERVERID, property);
 										break;
 									}
 
 								case itemattrib_t.ITEM_ATTR_WAREID:
 									{
-										property.Write((UInt16)item.wareId);
-										writer.writeProp(itemattrib_t.ITEM_ATTR_WAREID, property);
+										property.Write((UInt16)item.tradeAs);
+										writer.WriteProp(itemattrib_t.ITEM_ATTR_WAREID, property);
 										break;
 									}
 
 								case itemattrib_t.ITEM_ATTR_CLIENTID:
 									{
 										property.Write((UInt16)item.spriteId);
-										writer.writeProp(itemattrib_t.ITEM_ATTR_CLIENTID, property);
+										writer.WriteProp(itemattrib_t.ITEM_ATTR_CLIENTID, property);
 										break;
 									}
 
 								case itemattrib_t.ITEM_ATTR_SPEED:
 									{
 										property.Write((UInt16)item.groundSpeed);
-										writer.writeProp(itemattrib_t.ITEM_ATTR_SPEED, property);
+										writer.WriteProp(itemattrib_t.ITEM_ATTR_SPEED, property);
 										break;
 									}
 
@@ -924,35 +916,35 @@ namespace otitemeditor
 											property.Write((char)item.name[i]);
 										}
 
-										writer.writeProp(itemattrib_t.ITEM_ATTR_NAME, property);
+										writer.WriteProp(itemattrib_t.ITEM_ATTR_NAME, property);
 										break;
 									}
 
 								case itemattrib_t.ITEM_ATTR_SPRITEHASH:
 									{
 										property.Write(item.spriteHash);
-										writer.writeProp(itemattrib_t.ITEM_ATTR_SPRITEHASH, property);
+										writer.WriteProp(itemattrib_t.ITEM_ATTR_SPRITEHASH, property);
 										break;
 									}
 
 								case itemattrib_t.ITEM_ATTR_MINIMAPCOLOR:
 									{
 										property.Write((UInt16)item.minimapColor);
-										writer.writeProp(itemattrib_t.ITEM_ATTR_MINIMAPCOLOR, property);
+										writer.WriteProp(itemattrib_t.ITEM_ATTR_MINIMAPCOLOR, property);
 										break;
 									}
 
 								case itemattrib_t.ITEM_ATTR_07:
 									{
 										property.Write((UInt16)item.maxReadWriteChars);
-										writer.writeProp(itemattrib_t.ITEM_ATTR_07, property);
+										writer.WriteProp(itemattrib_t.ITEM_ATTR_07, property);
 										break;
 									}
 
 								case itemattrib_t.ITEM_ATTR_08:
 									{
 										property.Write((UInt16)item.maxReadChars);
-										writer.writeProp(itemattrib_t.ITEM_ATTR_08, property);
+										writer.WriteProp(itemattrib_t.ITEM_ATTR_08, property);
 										break;
 									}
 
@@ -960,23 +952,23 @@ namespace otitemeditor
 									{
 										property.Write((UInt16)item.lightLevel);
 										property.Write((UInt16)item.lightColor);
-										writer.writeProp(itemattrib_t.ITEM_ATTR_LIGHT2, property);
+										writer.WriteProp(itemattrib_t.ITEM_ATTR_LIGHT2, property);
 										break;
 									}
 
 								case itemattrib_t.ITEM_ATTR_TOPORDER:
 									{
 										property.Write((byte)item.alwaysOnTopOrder);
-										writer.writeProp(itemattrib_t.ITEM_ATTR_TOPORDER, property);
+										writer.WriteProp(itemattrib_t.ITEM_ATTR_TOPORDER, property);
 										break;
 									}
 							}
 						}
 
-						writer.closeNode();
+						writer.CloseNode();
 					}
 
-					writer.closeNode();
+					writer.CloseNode();
 				}
 			}
 			finally
@@ -987,5 +979,4 @@ namespace otitemeditor
 			return true;
 		}
 	}
-
 }
