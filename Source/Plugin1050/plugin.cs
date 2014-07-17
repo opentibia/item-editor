@@ -329,7 +329,14 @@ namespace Tibia1050
                         if (item.animationLength > 1)
                         {
                             item.isAnimation = true;
-                            reader.ReadBytes(6 + 8 * item.animationLength);
+                            reader.ReadByte();
+                            reader.ReadInt32();
+                            reader.ReadByte();
+                            for (int i = 0; i < item.animationLength; i++)
+                            {
+                                reader.ReadUInt32();
+                                reader.ReadUInt32();
+                            }
                         }
 
                         item.numSprites =
